@@ -40,33 +40,30 @@ export const dataService = {
 
   // Generic create
   async create<T>(table: string, data: T): Promise<string> {
-    try {
-      const supabase = getSupabase();
-      const { data: inserted, error } = await supabase
-        .from(table)
-        .insert([data] as any)
-        .select();
-      
-      if (error) throw error;
-      return inserted?.[0]?.id || '';
-    } catch (error) {
+    const supabase = getSupabase();
+    const { data: inserted, error } = await supabase
+      .from(table)
+      .insert([data] as any)
+      .select();
+    
+    if (error) {
       console.error(`Supabase Create Error [${table}]: `, error);
-      return '';
+      throw error;
     }
+    return inserted?.[0]?.id || '';
   },
 
   // Generic update
   async update<T>(table: string, id: string, data: Partial<T>): Promise<void> {
-    try {
-      const supabase = getSupabase();
-      const { error } = await supabase
-        .from(table)
-        .update(data as any)
-        .eq('id', id);
-      
-      if (error) throw error;
-    } catch (error) {
+    const supabase = getSupabase();
+    const { error } = await supabase
+      .from(table)
+      .update(data as any)
+      .eq('id', id);
+    
+    if (error) {
       console.error(`Supabase Update Error [${table}/${id}]: `, error);
+      throw error;
     }
   },
 
