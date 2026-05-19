@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, Newspaper, Package, Briefcase, 
-  MapPin, LogOut, Plus, Trash2, Edit, Save, X, Image as ImageIcon
+  MapPin, LogOut, Plus, Trash2, Edit, Save, X, Image as ImageIcon, FileText
 } from 'lucide-react';
 import { auth, signInWithGoogle, logout } from '../lib/firebase';
 import { dataService } from '../services/dataService';
@@ -141,6 +141,7 @@ const AdminPage = () => {
             { id: 'products', icon: <Package size={20} />, label: 'Quản lý Sản phẩm' },
             { id: 'jobs', icon: <Briefcase size={20} />, label: 'Quản lý Tuyển dụng' },
             { id: 'distributors', icon: <MapPin size={20} />, label: 'Nhà phân phối' },
+            { id: 'pages', icon: <FileText size={20} />, label: 'Nội dung trang' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -181,6 +182,7 @@ const AdminPage = () => {
           {activeTab === 'products' && <ProductManager onSuccess={showSuccess} onError={showError} />}
           {activeTab === 'jobs' && <JobManager onSuccess={showSuccess} onError={showError} />}
           {activeTab === 'distributors' && <DistributorManager onSuccess={showSuccess} onError={showError} />}
+          {activeTab === 'pages' && <PageManager onSuccess={showSuccess} onError={showError} />}
         </div>
       </main>
 
@@ -773,6 +775,86 @@ const JobManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, on
                 <Trash2 size={18} />
               </button>
             </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const PageManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, onError: (m: string) => void }) => {
+  const [items, setItems] = useState<any[]>([]);
+  const [formData, setFormData] = useState({ title: '', content: '', show_on_home: false });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const load = () => dataService.list<any>('pages', 'slug').then(setItems);
+  useEffect(() => { load(); }, []);
+
+  const handleEdit = (item: any) => {
+    setFormData({
+      title: item.title,
+      content: item.content || '',
+      show_on_home: item.show_on_home || false
+    });
+    setEditingId(item.id);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingId) return;
+    setLoading(true);
+    try {
+      await dataService.update('pages', editingId, formData);
+      onSuccess("Đã cập nhật nội dung trang!");
+      setEditingId(null);
+      await load();
+    } catch (err: any) {
+      onError(err.message || "Lỗi khi lưu trang");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div>
+      <h2 className="text-3xl font-black text-blue-900 mb-8">Quản lý nội dung trang</h2>
+      
+      {editingId && (
+        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-[32px] shadow-xl mb-8 border border-blue-50">
+          <h3 className="text-xl font-black text-blue-900 mb-6 uppercase tracking-tight">Chỉnh sửa: {items.find(i => i.id === editingId)?.title}</h3>
+          <div className="space-y-6 mb-6">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Tiêu đề hiển thị</label>
+              <input required className="w-full p-4 bg-gray-50 border-2 border-transparent focus:border-blue-900 rounded-2xl outline-none transition-all" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Nội dung chi tiết</label>
+              <textarea rows={8} className="w-full p-4 bg-gray-50 border-2 border-transparent focus:border-blue-900 rounded-2xl outline-none transition-all" value={formData.content} onChange={e => setFormData({ ...formData, content: e.target.value })} />
+            </div>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" checked={formData.show_on_home} onChange={e => setFormData({ ...formData, show_on_home: e.target.checked })} className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+              <span className="font-bold text-gray-700">Hiển thị đoạn trích này ngoài Trang Chủ (Sứ mệnh)</span>
+            </label>
+          </div>
+          <div className="flex gap-3">
+            <button type="submit" disabled={loading} className="bg-blue-900 text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50">Lưu thay đổi</button>
+            <button type="button" onClick={() => setEditingId(null)} className="px-8 py-3 rounded-xl font-bold text-gray-500">Hủy</button>
+          </div>
+        </form>
+      )}
+
+      <div className="grid md:grid-cols-2 gap-6">
+        {items.map(item => (
+          <div key={item.id} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex justify-between items-center group">
+            <div>
+              <h4 className="font-black text-blue-900 uppercase tracking-tight">{item.title}</h4>
+              <p className="text-xs text-blue-500 font-bold uppercase mt-1">Slug: {item.slug}</p>
+              {item.show_on_home && <span className="inline-block mt-2 text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-bold uppercase">Công khai trang chủ</span>}
+            </div>
+            <button onClick={() => handleEdit(item)} className="p-3 text-blue-900 hover:bg-blue-50 rounded-2xl transition-all">
+              <Edit size={24} />
+            </button>
           </div>
         ))}
       </div>
