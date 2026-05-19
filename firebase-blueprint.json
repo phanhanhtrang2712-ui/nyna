@@ -1,0 +1,82 @@
+{
+  "entities": {
+    "NewsArticle": {
+      "title": "News Article",
+      "description": "An article for the news section",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Title of the article" },
+        "date": { "type": "string", "description": "Display date" },
+        "excerpt": { "type": "string", "description": "Short summary" },
+        "content": { "type": "string", "description": "Full HTML or markdown content" },
+        "image": { "type": "string", "description": "Featured image URL" },
+        "category": { "type": "string", "description": "Category name" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "date", "image", "excerpt"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "A product sold by NYNA",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Product name" },
+        "brand": { "type": "string", "description": "Brand like LYNA, SILA, NYNA, TONY" },
+        "category": { "type": "string", "description": "Category for display" },
+        "image": { "type": "string", "description": "Product image URL" },
+        "price": { "type": "number", "description": "Price in VND" },
+        "features": { 
+          "type": "array", 
+          "description": "List of feature objects {label, iconName}" 
+        },
+        "description": { "type": "string", "description": "Product details" },
+        "isActive": { "type": "boolean", "description": "Whether it is visible" }
+      },
+      "required": ["title", "brand", "image"]
+    },
+    "Job": {
+      "title": "Recruitment Job",
+      "description": "A job opening",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Job title" },
+        "location": { "type": "string", "description": "Work location" },
+        "salary": { "type": "string", "description": "Salary range" },
+        "deadline": { "type": "string", "description": "Application deadline" },
+        "description": { "type": "string", "description": "Job requirements" }
+      },
+      "required": ["title", "location"]
+    },
+    "Distributor": {
+      "title": "Distributor",
+      "description": "A distribution point",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Store or agency name" },
+        "address": { "type": "string", "description": "Physical address" },
+        "phone": { "type": "string", "description": "Contact number" },
+        "region": { "type": "string", "description": "North, South, Central" }
+      },
+      "required": ["name", "address"]
+    },
+    "GlobalSettings": {
+      "title": "Global Settings",
+      "description": "Site-wide configuration",
+      "type": "object",
+      "properties": {
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "address": { "type": "string" },
+        "facebook": { "type": "string" },
+        "youtube": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "news": { "schema": "NewsArticle", "description": "Collection of news articles" },
+    "products": { "schema": "Product", "description": "Collection of products" },
+    "jobs": { "schema": "Job", "description": "Collection of job postings" },
+    "distributors": { "schema": "Distributor", "description": "Collection of distributors" },
+    "settings": { "schema": "GlobalSettings", "description": "Global website settings" }
+  }
+}

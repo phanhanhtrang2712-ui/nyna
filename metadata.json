@@ -1,0 +1,6 @@
+{
+  "name": "NYNA - Chăm sóc gia đình Việt",
+  "description": "Website cung cấp các sản phẩm chăm sóc gia đình cao cấp: tã em bé, tã người lớn, sản phẩm cho phụ nữ.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
