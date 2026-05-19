@@ -329,12 +329,22 @@ const NewsManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, o
             </div>
 
             <div className="col-span-2">
-              <label className="block text-sm font-bold text-gray-700 mb-2">Tóm tắt nội dung</label>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Tóm tắt nội dung (Hiển thị ở danh sách ngoài trang chủ)</label>
               <textarea 
                 required
                 className="w-full p-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-blue-900 focus:bg-white outline-none transition-all h-24"
                 value={formData.excerpt} 
                 onChange={e => setFormData({...formData, excerpt: e.target.value})} 
+              />
+            </div>
+
+            <div className="col-span-2">
+              <label className="block text-sm font-bold text-gray-700 mb-2">Nội dung chi tiết bài viết (Toàn bộ bài viết)</label>
+              <textarea 
+                className="w-full p-4 bg-gray-50 rounded-xl border-2 border-transparent focus:border-blue-900 focus:bg-white outline-none transition-all h-64"
+                value={formData.content} 
+                onChange={e => setFormData({...formData, content: e.target.value})} 
+                placeholder="Nhập nội dung đầy đủ của bài viết tại đây..."
               />
             </div>
           </div>
