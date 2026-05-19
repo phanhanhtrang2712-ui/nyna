@@ -296,11 +296,23 @@ const NewsManager = () => {
 // --- MOCK PRODUCT MANAGER (Similar pattern) ---
 const ProductManager = () => {
   const [items, setItems] = useState<any[]>([]);
+  const [brands, setBrands] = useState<any[]>([]);
   const [isAdding, setIsAdding] = useState(false);
-  const [formData, setFormData] = useState({ title: '', brand: 'NYNA', image: '', price: '' });
+  const [isAddingBrand, setIsAddingBrand] = useState(false);
+  const [formData, setFormData] = useState({ title: '', brand: '', image: '', price: '' });
+  const [brandFormData, setBrandFormData] = useState({ name: '', desc: '', color: 'text-blue-600' });
   const [uploading, setUploading] = useState(false);
 
-  const load = () => dataService.list('products').then(setItems);
+  const load = () => {
+    dataService.list('products').then(setItems);
+    dataService.list('brands').then(res => {
+      setBrands(res);
+      if (res.length > 0 && !formData.brand) {
+        setFormData(prev => ({ ...prev, brand: res[0].name }));
+      }
+    });
+  };
+
   useEffect(() => { load(); }, []);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -327,50 +339,96 @@ const ProductManager = () => {
       features: [{label: 'Nổi bật', icon: 'zap'}] 
     });
     setIsAdding(false);
-    setFormData({ title: '', brand: 'NYNA', image: '', price: '' });
+    setFormData({ title: '', brand: brands[0]?.name || 'NYNA', image: '', price: '' });
+    load();
+  };
+
+  const handleAddBrand = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await dataService.create('brands', brandFormData);
+    setIsAddingBrand(false);
+    setBrandFormData({ name: '', desc: '', color: 'text-blue-600' });
     load();
   };
 
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-black text-blue-900">Quản lý sản phẩm</h2>
-        <button onClick={() => setIsAdding(true)} className="bg-blue-600 text-white px-6 py-2.5 rounded-full font-bold flex items-center gap-2 hover:bg-blue-700 transition-all">
-          <Plus size={20} /> Thêm sản phẩm
-        </button>
+        <h2 className="text-3xl font-black text-blue-900">Quản lý sản phẩm & Thương hiệu</h2>
+        <div className="flex gap-3">
+          <button onClick={() => setIsAddingBrand(true)} className="bg-pink-500 text-white px-6 py-2.5 rounded-full font-bold flex items-center gap-2 hover:bg-pink-600 transition-all shadow-lg shadow-pink-500/20">
+            <Plus size={20} /> Thêm Thương hiệu
+          </button>
+          <button onClick={() => setIsAdding(true)} className="bg-blue-600 text-white px-6 py-2.5 rounded-full font-bold flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20">
+            <Plus size={20} /> Thêm sản phẩm
+          </button>
+        </div>
       </div>
 
-      {isAdding && (
-        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-[32px] shadow-xl mb-8 border border-blue-50">
-           <div className="grid md:grid-cols-2 gap-6 mb-6">
+      {/* Brand Form */}
+      {isAddingBrand && (
+        <form onSubmit={handleAddBrand} className="bg-pink-50/50 p-8 rounded-[32px] shadow-xl mb-8 border border-pink-100">
+           <h3 className="text-xl font-black text-pink-600 mb-6 uppercase tracking-tight">Cấu hình thương hiệu</h3>
+           <div className="grid md:grid-cols-3 gap-6 mb-6">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Tên sản phẩm</label>
-                <input required className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none" value={formData.title} onChange={e=>setFormData({...formData, title: e.target.value})} />
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Tên thương hiệu</label>
+                <input required className="w-full p-3 bg-white border-2 border-transparent focus:border-pink-500 rounded-xl outline-none transition-all" value={brandFormData.name} onChange={e=>setBrandFormData({...brandFormData, name: e.target.value})} />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Thương hiệu</label>
-                <select className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none" value={formData.brand} onChange={e=>setFormData({...formData, brand: e.target.value})}>
-                  <option>NYNA</option>
-                  <option>LYNA</option>
-                  <option>SILA</option>
-                  <option>TONY</option>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Màu sắc nhận diện</label>
+                <select className="w-full p-3 bg-white border-2 border-transparent focus:border-pink-500 rounded-xl outline-none transition-all" value={brandFormData.color} onChange={e=>setBrandFormData({...brandFormData, color: e.target.value})}>
+                  <option value="text-blue-600">Xanh dương (Blue)</option>
+                  <option value="text-pink-600">Hồng (Pink)</option>
+                  <option value="text-emerald-600">Xanh lá (Emerald)</option>
+                  <option value="text-indigo-600">Tím xanh (Indigo)</option>
+                  <option value="text-orange-600">Cam (Orange)</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Giá bán (VND)</label>
-                <input type="number" required className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none" value={formData.price} onChange={e=>setFormData({...formData, price: e.target.value})} />
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Mô tả ngắn</label>
+                <input required className="w-full p-3 bg-white border-2 border-transparent focus:border-pink-500 rounded-xl outline-none transition-all" value={brandFormData.desc} onChange={e=>setBrandFormData({...brandFormData, desc: e.target.value})} />
+              </div>
+           </div>
+           <div className="flex gap-3">
+            <button type="submit" className="bg-pink-600 text-white px-8 py-3 rounded-xl font-bold">Lưu thương hiệu</button>
+            <button type="button" onClick={() => setIsAddingBrand(false)} className="px-8 py-3 rounded-xl font-bold text-gray-400">Hủy</button>
+           </div>
+        </form>
+      )}
+
+      {/* Product Form */}
+      {isAdding && (
+        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-[32px] shadow-xl mb-8 border border-blue-50">
+           <h3 className="text-xl font-black text-blue-900 mb-6 uppercase tracking-tight">Chi tiết sản phẩm</h3>
+           <div className="grid md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Tên sản phẩm</label>
+                <input required className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none transition-all" value={formData.title} onChange={e=>setFormData({...formData, title: e.target.value})} />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Hình ảnh sản phẩm</label>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Thuộc thương hiệu</label>
+                <select className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none transition-all font-bold" value={formData.brand} onChange={e=>setFormData({...formData, brand: e.target.value})}>
+                  {brands.map(b => (
+                    <option key={b.id} value={b.name}>{b.name}</option>
+                  ))}
+                  {brands.length === 0 && <option value="">Đang tải thương hiệu...</option>}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Giá bán dự kiến (VND)</label>
+                <input type="number" required className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none transition-all" value={formData.price} onChange={e=>setFormData({...formData, price: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Ảnh đại diện sản phẩm</label>
                 <div className="flex items-center gap-4">
                   <label className="flex-1 cursor-pointer">
-                    <div className="border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center justify-center gap-2 bg-gray-50 hover:border-blue-900">
+                    <div className="border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center justify-center gap-2 bg-gray-50 hover:border-blue-900 transition-all">
                       <ImageIcon className="text-gray-400 w-5 h-5" />
                       <span className="text-sm font-bold text-gray-400">{uploading ? 'Đang tải...' : 'Chọn từ máy'}</span>
                     </div>
                     <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
                   </label>
-                  {formData.image && <img src={formData.image} className="w-12 h-12 rounded-lg border object-cover" alt="p" />}
+                  {formData.image && <img src={formData.image} className="w-12 h-12 rounded-lg border object-cover shadow-sm" alt="p" />}
                 </div>
               </div>
            </div>
@@ -381,20 +439,53 @@ const ProductManager = () => {
         </form>
       )}
 
-      <div className="grid md:grid-cols-2 gap-4">
-        {items.map(item => (
-          <div key={item.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-            <img src={item.image} className="w-20 h-20 object-cover rounded-xl" alt="P" />
-            <div className="flex-1">
-              <h4 className="font-bold text-blue-900">{item.title}</h4>
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold text-blue-500 uppercase">{item.brand}</span>
-                <span className="text-[11px] font-bold text-emerald-600">{new Intl.NumberFormat('vi-VN').format(item.price || 0)}đ</span>
+      {/* Brands Summary List */}
+      <div className="mb-12">
+        <h3 className="text-sm font-black text-gray-400 mb-6 flex items-center gap-2 uppercase tracking-widest">
+          <div className="w-8 h-[2px] bg-pink-500 rounded-full"></div>
+          Thương hiệu hiện có
+        </h3>
+        <div className="flex flex-wrap gap-4">
+          {brands.map(brand => (
+            <div key={brand.id} className="bg-white px-6 py-4 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-6 group">
+              <div>
+                <div className={`font-black uppercase tracking-tight text-sm ${brand.color}`}>{brand.name}</div>
+                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{brand.desc}</div>
               </div>
+              <button 
+                onClick={async () => { if(confirm('Xóa thương hiệu này sẽ ảnh hưởng đến lọc sản phẩm. Tiếp tục?')) { await dataService.delete('brands', brand.id); load(); } }}
+                className="p-2 text-red-200 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"
+              >
+                <Trash2 size={16} />
+              </button>
             </div>
-            <button onClick={async () => { if(confirm('Xóa?')) { await dataService.delete('products', item.id); load(); } }} className="text-red-400 p-2 hover:bg-red-50 rounded-lg"><Trash2 size={18} /></button>
-          </div>
-        ))}
+          ))}
+          {brands.length === 0 && <p className="text-gray-400 text-xs font-bold italic">Chưa có thương hiệu được thiết lập.</p>}
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-black text-gray-400 mb-6 flex items-center gap-2 uppercase tracking-widest">
+          <div className="w-8 h-[2px] bg-blue-500 rounded-full"></div>
+          Kho hàng sản phẩm
+        </h3>
+        <div className="grid md:grid-cols-2 gap-4">
+          {items.map(item => (
+            <div key={item.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:border-blue-900 transition-all group">
+              <div className="w-20 h-20 bg-gray-50 rounded-xl overflow-hidden shrink-0 border border-gray-50">
+                <img src={item.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="P" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-bold text-blue-900 leading-tight mb-1">{item.title}</h4>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded-md">{item.brand}</span>
+                  <span className="text-[11px] font-bold text-emerald-600">{new Intl.NumberFormat('vi-VN').format(item.price || 0)}đ</span>
+                </div>
+              </div>
+              <button onClick={async () => { if(confirm('Xóa sản phẩm?')) { await dataService.delete('products', item.id); load(); } }} className="text-red-200 hover:text-red-500 p-2 hover:bg-red-50 rounded-lg transition-all"><Trash2 size={18} /></button>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

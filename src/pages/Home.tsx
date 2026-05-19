@@ -159,21 +159,40 @@ const Hero = () => (
   </section>
 );
 
-const BrandSection = () => (
-  <section className="py-20 bg-gray-50" id="brands">
-    <div className="max-w-7xl mx-auto px-4">
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-        {BRANDS.map((brand) => (
-          <div key={brand.name} className="text-center">
-            <h3 className={`text-4xl font-black mb-4 ${brand.color} tracking-tight`}>{brand.name}</h3>
-            <p className="text-gray-600 text-sm mb-6 px-4">{brand.desc}</p>
-            <a href="#" className="inline-flex items-center gap-1.5 text-blue-900 font-bold text-sm hover:underline">Xem ngay <ChevronRight className="w-3.5 h-3.5" /></a>
-          </div>
-        ))}
+const BrandSection = () => {
+  const [brands, setBrands] = useState<any[]>([]);
+
+  useEffect(() => {
+    dataService.list<any>('brands').then(res => {
+      if (res.length > 0) setBrands(res);
+      else {
+        // Fallback to static if empty
+        setBrands([
+          { name: 'LYNA', desc: 'Sản phẩm chăm sóc phụ nữ hiện đại', color: 'text-pink-600' },
+          { name: 'SILA', desc: 'Tã người lớn cao cấp', color: 'text-emerald-600' },
+          { name: 'NYNA', desc: 'Tã em bé êm mềm vượt trội', color: 'text-blue-600' },
+          { name: 'TONY', desc: 'Tấm lót / Miếng lót đa năng', color: 'text-indigo-600' },
+        ]);
+      }
+    });
+  }, []);
+
+  return (
+    <section className="py-20 bg-gray-50" id="brands">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {brands.map((brand) => (
+            <div key={brand.name} className="text-center group">
+              <h3 className={`text-4xl font-black mb-4 ${brand.color} tracking-tight group-hover:scale-110 transition-transform`}>{brand.name}</h3>
+              <p className="text-gray-600 text-sm mb-6 px-4">{brand.desc}</p>
+              <a href="#products" className="inline-flex items-center gap-1.5 text-blue-900 font-bold text-sm hover:underline">Xem ngay <ChevronRight className="w-3.5 h-3.5" /></a>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 const CatalogSection = () => {
   const [products, setProducts] = useState<ProductItem[]>([]);
