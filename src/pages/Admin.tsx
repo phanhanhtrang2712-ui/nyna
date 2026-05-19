@@ -168,9 +168,28 @@ const NewsManager = () => {
   const [items, setItems] = useState<any[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [formData, setFormData] = useState({ title: '', date: '', excerpt: '', image: '', content: '' });
+  const [uploading, setUploading] = useState(false);
 
   const load = () => dataService.list('news').then(setItems);
   useEffect(() => { load(); }, []);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 1024 * 1024) {
+      alert("Dung lượng ảnh quá lớn (Vui lòng chọn ảnh < 1MB)");
+      return;
+    }
+
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData({ ...formData, image: reader.result as string });
+      setUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -193,48 +212,58 @@ const NewsManager = () => {
       </div>
 
       {isAdding && (
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-3xl shadow-xl mb-8 border border-blue-50">
+        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-[32px] shadow-xl mb-8 border border-blue-50">
           <div className="grid md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Tiêu đề</label>
+            <div className="col-span-2 md:col-span-1">
+              <label className="block text-sm font-bold text-gray-700 mb-2">Tiêu đề bài viết</label>
               <input 
                 required
-                className="w-full p-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:outline-none"
+                className="w-full p-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-blue-900 focus:bg-white outline-none transition-all"
                 value={formData.title} 
                 onChange={e => setFormData({...formData, title: e.target.value})} 
               />
             </div>
-            <div>
+            <div className="col-span-2 md:col-span-1">
               <label className="block text-sm font-bold text-gray-700 mb-2">Ngày đăng</label>
               <input 
                 required
-                className="w-full p-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:outline-none"
+                className="w-full p-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-blue-900 focus:bg-white outline-none transition-all"
                 placeholder="20/05/2024"
                 value={formData.date} 
                 onChange={e => setFormData({...formData, date: e.target.value})} 
               />
             </div>
+            
             <div className="col-span-2">
-              <label className="block text-sm font-bold text-gray-700 mb-2">URL Hình ảnh</label>
-              <input 
-                required
-                className="w-full p-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:outline-none"
-                value={formData.image} 
-                onChange={e => setFormData({...formData, image: e.target.value})} 
-              />
+              <label className="block text-sm font-bold text-gray-700 mb-2">Hình ảnh bài viết</label>
+              <div className="flex items-center gap-4">
+                <label className="flex-1 cursor-pointer">
+                  <div className="border-2 border-dashed border-gray-200 rounded-2xl p-4 flex items-center justify-center gap-2 hover:border-blue-900 transition-all bg-gray-50">
+                    <ImageIcon className="text-gray-400" />
+                    <span className="text-sm font-bold text-gray-500">{uploading ? 'Đang tải...' : 'Chọn ảnh từ máy'}</span>
+                  </div>
+                  <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
+                </label>
+                {formData.image && (
+                  <div className="w-20 h-20 rounded-xl overflow-hidden border">
+                    <img src={formData.image} className="w-full h-full object-cover" alt="Preview" />
+                  </div>
+                )}
+              </div>
             </div>
+
             <div className="col-span-2">
-              <label className="block text-sm font-bold text-gray-700 mb-2">Tóm tắt</label>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Tóm tắt nội dung</label>
               <textarea 
                 required
-                className="w-full p-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:outline-none h-24"
+                className="w-full p-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-blue-900 focus:bg-white outline-none transition-all h-24"
                 value={formData.excerpt} 
                 onChange={e => setFormData({...formData, excerpt: e.target.value})} 
               />
             </div>
           </div>
           <div className="flex gap-3">
-            <button type="submit" className="bg-blue-900 text-white px-8 py-3 rounded-xl font-bold">Lưu bài viết</button>
+            <button type="submit" disabled={uploading} className="bg-blue-900 text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50">Lưu bài viết</button>
             <button type="button" onClick={() => setIsAdding(false)} className="px-8 py-3 rounded-xl font-bold text-gray-500">Hủy</button>
           </div>
         </form>
@@ -269,9 +298,26 @@ const ProductManager = () => {
   const [items, setItems] = useState<any[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [formData, setFormData] = useState({ title: '', brand: 'NYNA', image: '', price: '' });
+  const [uploading, setUploading] = useState(false);
 
   const load = () => dataService.list('products').then(setItems);
   useEffect(() => { load(); }, []);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 1024 * 1024) {
+      alert("Dung lượng ảnh quá lớn (Vui lòng chọn ảnh < 1MB)");
+      return;
+    }
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData({ ...formData, image: reader.result as string });
+      setUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -295,15 +341,15 @@ const ProductManager = () => {
       </div>
 
       {isAdding && (
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-3xl shadow-xl mb-8 border border-blue-50">
+        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-[32px] shadow-xl mb-8 border border-blue-50">
            <div className="grid md:grid-cols-2 gap-6 mb-6">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Tên sản phẩm</label>
-                <input required className="w-full p-3 border rounded-xl" value={formData.title} onChange={e=>setFormData({...formData, title: e.target.value})} />
+                <input required className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none" value={formData.title} onChange={e=>setFormData({...formData, title: e.target.value})} />
               </div>
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Thương hiệu</label>
-                <select className="w-full p-3 border rounded-xl" value={formData.brand} onChange={e=>setFormData({...formData, brand: e.target.value})}>
+                <select className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none" value={formData.brand} onChange={e=>setFormData({...formData, brand: e.target.value})}>
                   <option>NYNA</option>
                   <option>LYNA</option>
                   <option>SILA</option>
@@ -312,15 +358,24 @@ const ProductManager = () => {
               </div>
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">Giá bán (VND)</label>
-                <input type="number" required className="w-full p-3 border rounded-xl" value={formData.price} onChange={e=>setFormData({...formData, price: e.target.value})} />
+                <input type="number" required className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none" value={formData.price} onChange={e=>setFormData({...formData, price: e.target.value})} />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">URL Hình ảnh</label>
-                <input required className="w-full p-3 border rounded-xl" value={formData.image} onChange={e=>setFormData({...formData, image: e.target.value})} />
+                <label className="block text-sm font-bold text-gray-700 mb-2">Hình ảnh sản phẩm</label>
+                <div className="flex items-center gap-4">
+                  <label className="flex-1 cursor-pointer">
+                    <div className="border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center justify-center gap-2 bg-gray-50 hover:border-blue-900">
+                      <ImageIcon className="text-gray-400 w-5 h-5" />
+                      <span className="text-sm font-bold text-gray-400">{uploading ? 'Đang tải...' : 'Chọn từ máy'}</span>
+                    </div>
+                    <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
+                  </label>
+                  {formData.image && <img src={formData.image} className="w-12 h-12 rounded-lg border object-cover" alt="p" />}
+                </div>
               </div>
            </div>
            <div className="flex gap-3">
-            <button type="submit" className="bg-blue-900 text-white px-8 py-3 rounded-xl font-bold">Lưu sản phẩm</button>
+            <button type="submit" disabled={uploading} className="bg-blue-900 text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50">Lưu sản phẩm</button>
             <button type="button" onClick={() => setIsAdding(false)} className="px-8 py-3 rounded-xl font-bold text-gray-400">Hủy</button>
            </div>
         </form>
