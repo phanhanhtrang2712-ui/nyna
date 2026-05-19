@@ -74,8 +74,18 @@ const Header = () => {
             </div>
           </div>
           <div className="flex gap-4">
-            <Link to="/cms" className="bg-white/10 px-3 py-1 rounded-md hover:bg-white/20 transition-all font-bold text-emerald-400">Hệ thống phân phối</Link>
-            <span className="hover:underline cursor-pointer">Tuyển dụng</span>
+            <button 
+              onClick={() => document.getElementById('hệ thống phân phối')?.scrollIntoView({ behavior: 'smooth' })} 
+              className="bg-white/10 px-3 py-1 rounded-md hover:bg-white/20 transition-all font-bold text-emerald-400"
+            >
+              Hệ thống phân phối
+            </button>
+            <button 
+              onClick={() => document.getElementById('tuyển dụng')?.scrollIntoView({ behavior: 'smooth' })} 
+              className="hover:underline cursor-pointer"
+            >
+              Tuyển dụng
+            </button>
             <span className="hover:underline cursor-pointer">Tài liệu</span>
           </div>
         </div>
@@ -96,9 +106,21 @@ const Header = () => {
 
           <div className="hidden lg:flex items-center gap-10">
             {['TRANG CHỦ', 'GIỚI THIỆU', 'THƯƠNG HIỆU', 'SẢN PHẨM', 'TIN TỨC', 'VIDEO', 'LIÊN HỆ'].map(item => (
-              <a key={item} href={`#${item.toLowerCase()}`} className="text-[13px] font-black text-blue-900 hover:text-pink-500 transition-colors tracking-tight uppercase">
+              <button 
+                key={item} 
+                onClick={() => {
+                  const id = item.toLowerCase();
+                  const el = document.getElementById(id);
+                  if (el) {
+                    el.scrollIntoView({ behavior: 'smooth' });
+                  } else if (id === 'trang chủ') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
+                }}
+                className="text-[13px] font-black text-blue-900 hover:text-pink-500 transition-colors tracking-tight uppercase cursor-pointer"
+              >
                 {item}
-              </a>
+              </button>
             ))}
           </div>
 
@@ -119,6 +141,55 @@ const Header = () => {
           </div>
         </div>
       </nav>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0, x: '100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '100%' }}
+            className="fixed inset-0 z-[100] bg-white p-8 overflow-y-auto"
+          >
+            <div className="flex justify-between items-center mb-12">
+              <div className="text-3xl font-black text-blue-900 uppercase">NYNA</div>
+              <button className="p-2 bg-gray-100 rounded-full" onClick={() => setMobileMenuOpen(false)}>
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="flex flex-col gap-6">
+              {['TRANG CHỦ', 'GIỚI THIỆU', 'THƯƠNG HIỆU', 'SẢN PHẨM', 'TIN TỨC', 'VIDEO', 'LIÊN HỆ'].map(item => (
+                <button 
+                  key={item} 
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    const id = item.toLowerCase();
+                    const el = document.getElementById(id);
+                    if (el) {
+                      el.scrollIntoView({ behavior: 'smooth' });
+                    } else if (id === 'trang chủ') {
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                  }}
+                  className="text-2xl font-black text-blue-900 text-left uppercase tracking-tighter"
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+            <div className="mt-12 pt-12 border-t border-gray-100 flex flex-col gap-6">
+               <button className="bg-blue-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-sm">Liên hệ ngay</button>
+               <div className="flex gap-4 justify-center">
+                 {[Facebook, Youtube, Send].map((Icon, i) => (
+                   <div key={i} className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-blue-900">
+                     <Icon size={20} />
+                   </div>
+                 ))}
+               </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }
@@ -145,10 +216,16 @@ const Hero = () => (
             Sản phẩm chất lượng cao tự hào là thương hiệu Việt. Vì cuộc sống khỏe mạnh và hạnh phúc hơn mỗi ngày cho mẹ và bé.
           </p>
           <div className="flex flex-wrap gap-5">
-            <button className="bg-blue-900 text-white px-12 py-5 rounded-full font-black text-lg flex items-center gap-3 hover:translate-y-[-4px] hover:shadow-2xl transition-all shadow-xl shadow-blue-900/20 uppercase tracking-tight">
+            <button 
+              onClick={() => document.getElementById('sản phẩm')?.scrollIntoView({ behavior: 'smooth' })}
+              className="bg-blue-900 text-white px-12 py-5 rounded-full font-black text-lg flex items-center gap-3 hover:translate-y-[-4px] hover:shadow-2xl transition-all shadow-xl shadow-blue-900/20 uppercase tracking-tight"
+            >
               Xem sản phẩm <ArrowRight size={22} />
             </button>
-            <button className="bg-white text-blue-900 border-2 border-blue-100 px-12 py-5 rounded-full font-black text-lg hover:bg-gray-50 transition-all uppercase tracking-tight">
+            <button 
+              onClick={() => document.getElementById('liên hệ')?.scrollIntoView({ behavior: 'smooth' })}
+              className="bg-white text-blue-900 border-2 border-blue-100 px-12 py-5 rounded-full font-black text-lg hover:bg-gray-50 transition-all uppercase tracking-tight"
+            >
               Hợp tác đại lý
             </button>
           </div>
@@ -210,7 +287,7 @@ const BrandSection = () => {
   }, []);
 
   return (
-    <section className="py-24 container mx-auto px-6" id="brands">
+    <section className="py-24 container mx-auto px-6" id="thương hiệu">
       <div className="grid md:grid-cols-4 gap-10">
         {brands.map((brand, idx) => (
           <motion.div 
@@ -246,7 +323,7 @@ const MissionSection = () => {
   if (!mission) return null;
 
   return (
-    <section className="bg-blue-900 py-32 relative overflow-hidden">
+    <section className="bg-blue-900 py-32 relative overflow-hidden" id="giới thiệu">
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-800 rounded-full blur-[150px] -translate-y-1/2 translate-x-1/3 opacity-40"></div>
       <div className="container mx-auto px-6 relative z-10 text-center max-w-5xl">
         <motion.div
@@ -499,7 +576,7 @@ const Footer = () => {
   const partnerPages = pages.filter(p => p.category === 'partner');
 
   return (
-    <footer className="bg-blue-900 text-white pt-32 pb-16 relative overflow-hidden">
+    <footer className="bg-blue-900 text-white pt-32 pb-16 relative overflow-hidden" id="liên hệ">
       {/* Decorative blur */}
       <div className="absolute bottom-0 right-0 w-[40%] h-[40%] bg-blue-800 rounded-full blur-[100px] opacity-30"></div>
       
