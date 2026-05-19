@@ -13,27 +13,67 @@ const AdminPage = () => {
   const [activeTab, setActiveTab] = useState<'news' | 'products' | 'jobs' | 'distributors'>('news');
 
   useEffect(() => {
+    console.log("AdminPage: Initializing auth...");
     const unsub = onAuthStateChanged(auth, (u) => {
+      console.log("AdminPage: Auth state changed:", u ? "User logged in" : "No user");
       setUser(u);
       setLoading(false);
     });
-    return () => unsub();
+    
+    // Safety timeout: if auth takes more than 5 seconds, stop loading so user can try login or go back
+    const timer = setTimeout(() => {
+      if (loading) {
+        console.warn("AdminPage: Auth timeout reached");
+        setLoading(false);
+      }
+    }, 5000);
+
+    return () => {
+      unsub();
+      clearTimeout(timer);
+    };
   }, []);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white p-4">
+        <div className="w-12 h-12 border-4 border-blue-900 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <div className="text-blue-900 font-bold mb-4">Đang khởi tạo hệ thống...</div>
+        <a href="/" className="text-gray-400 text-sm hover:underline">Quay về trang chủ</a>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
         <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full text-center">
-          <h1 className="text-3xl font-black text-blue-900 mb-6">CMS NYNA</h1>
-          <p className="text-gray-500 mb-8">Vui lòng đăng nhập để quản trị nội dung website.</p>
-          <button 
-            onClick={signInWithGoogle}
-            className="w-full bg-blue-900 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 hover:bg-blue-800 transition-all"
-          >
-            Đăng nhập với Google
-          </button>
+          <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <LayoutDashboard className="text-blue-900 w-8 h-8" />
+          </div>
+          <h1 className="text-3xl font-black text-blue-900 mb-2">CMS Quản trị</h1>
+          <p className="text-gray-500 mb-8">Ứng dụng quản trị nội dung NYNA</p>
+          
+          <div className="space-y-4">
+            <button 
+              onClick={signInWithGoogle}
+              className="w-full bg-blue-900 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 hover:bg-blue-800 transition-all shadow-lg shadow-blue-900/20"
+            >
+              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5 bg-white p-0.5 rounded" alt="Google" />
+              Đăng nhập bằng Google
+            </button>
+            
+            <a 
+              href="/"
+              className="block w-full py-4 text-gray-500 font-bold hover:text-blue-900 transition-all border-2 border-transparent hover:border-gray-100 rounded-xl"
+            >
+              Quay lại trang chủ
+            </a>
+          </div>
+          
+          <div className="mt-8 pt-8 border-t border-gray-100 text-[11px] text-gray-400">
+            Hệ thống chỉ dành cho người quản trị được cấp quyền.
+          </div>
         </div>
       </div>
     );

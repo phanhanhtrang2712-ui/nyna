@@ -73,7 +73,7 @@ const Header = () => {
             </div>
           </div>
           <div className="flex gap-4">
-            <Link to="/cms" className="hover:underline cursor-pointer opacity-70">Quản trị (CMS)</Link>
+            <Link to="/cms" className="bg-white/10 px-3 py-1 rounded-md hover:bg-white/20 transition-all font-bold text-emerald-400">Quản trị (CMS)</Link>
             <span className="hover:underline cursor-pointer">Hệ thống phân phối</span>
             <span className="hover:underline cursor-pointer">Tuyển dụng</span>
             <span className="hover:underline cursor-pointer">Tài liệu</span>
@@ -100,7 +100,7 @@ const Header = () => {
             <a href="#brands" className="text-[13px] font-bold text-gray-800 hover:text-blue-900 uppercase">THƯƠNG HIỆU</a>
             <a href="#products" className="text-[13px] font-bold text-gray-800 hover:text-blue-900 uppercase">SẢN PHẨM</a>
             <a href="#news" className="text-[13px] font-bold text-gray-800 hover:text-blue-900 uppercase">TIN TỨC</a>
-            <a href="#" className="text-[13px] font-bold text-gray-800 hover:text-blue-900 uppercase">LIÊN HỆ</a>
+            <Link to="/cms" className="text-[13px] font-bold text-pink-600 hover:text-pink-700 uppercase">QUẢN TRỊ</Link>
           </div>
 
           <div className="flex items-center gap-4">
@@ -239,7 +239,16 @@ const Footer = () => (
       </div>
       <div>
         <h4 className="text-lg font-bold mb-8 uppercase text-white">Thông tin</h4>
-        <ul><li>Giới thiệu</li><li>Tuyển dụng</li><li>Liên hệ</li></ul>
+        <ul className="space-y-2">
+          <li>Giới thiệu</li>
+          <li>Tuyển dụng</li>
+          <li>Liên hệ</li>
+          <li className="pt-4">
+            <Link to="/cms" className="bg-emerald-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-emerald-600 transition-all inline-block">
+              Quản trị Website (CMS)
+            </Link>
+          </li>
+        </ul>
       </div>
     </div>
   </footer>
