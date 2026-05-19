@@ -355,8 +355,8 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
   const [uploading, setUploading] = useState(false);
 
   const load = () => {
-    dataService.list('products').then(setItems);
-    dataService.list('brands').then(res => {
+    dataService.list<any>('products').then(setItems);
+    dataService.list<any>('brands').then(res => {
       setBrands(res);
       if (res.length > 0 && !formData.brand) {
         setFormData(prev => ({ ...prev, brand: res[0].name }));

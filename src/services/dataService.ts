@@ -1,18 +1,4 @@
-import { 
-  collection, 
-  doc, 
-  getDocs, 
-  getDoc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  where, 
-  orderBy,
-  serverTimestamp,
-  type DocumentData
-} from 'firebase/firestore';
-import { db, auth } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 
 export enum OperationType {
   CREATE = 'create',
@@ -23,101 +9,112 @@ export enum OperationType {
   WRITE = 'write',
 }
 
-interface FirestoreErrorInfo {
-  error: string;
-  operationType: OperationType;
-  path: string | null;
-  authInfo: {
-    userId?: string | null;
-    email?: string | null;
-    emailVerified?: boolean | null;
-  }
-}
-
-function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
-  const errInfo: FirestoreErrorInfo = {
-    error: error instanceof Error ? error.message : String(error),
-    authInfo: {
-      userId: auth.currentUser?.uid,
-      email: auth.currentUser?.email,
-      emailVerified: auth.currentUser?.emailVerified,
-    },
-    operationType,
-    path
-  };
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
-}
-
 export const dataService = {
   // Generic list
-  async list<T>(collectionPath: string, orderField: string = 'createdAt'): Promise<T[]> {
+  async list<T>(table: string, orderField: string = 'created_at'): Promise<T[]> {
     try {
-      const q = query(collection(db, collectionPath), orderBy(orderField, 'desc'));
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as T);
+      const { data, error } = await supabase
+        .from(table)
+        .select('*')
+        .order(orderField, { ascending: false });
+      
+      if (error) {
+        // Fallback for tables that might still use camelCase from Firestore migration
+        if (error.message.includes('column "created_at" does not exist')) {
+          const { data: retryData, error: retryError } = await supabase
+            .from(table)
+            .select('*')
+            .order('createdAt', { ascending: false });
+          if (retryError) throw retryError;
+          return retryData as T[];
+        }
+        throw error;
+      }
+      return (data || []) as T[];
     } catch (error) {
-      handleFirestoreError(error, OperationType.LIST, collectionPath);
+      console.error(`Supabase List Error [${table}]: `, error);
       return [];
     }
   },
 
   // Generic create
-  async create<T extends DocumentData>(collectionPath: string, data: T): Promise<string> {
+  async create<T>(table: string, data: T): Promise<string> {
     try {
-      const docRef = await addDoc(collection(db, collectionPath), {
-        ...data,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-      return docRef.id;
+      const { data: inserted, error } = await supabase
+        .from(table)
+        .insert([data] as any)
+        .select();
+      
+      if (error) throw error;
+      return inserted?.[0]?.id || '';
     } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, collectionPath);
+      console.error(`Supabase Create Error [${table}]: `, error);
       return '';
     }
   },
 
   // Generic update
-  async update<T extends DocumentData>(collectionPath: string, id: string, data: Partial<T>): Promise<void> {
+  async update<T>(table: string, id: string, data: Partial<T>): Promise<void> {
     try {
-      const docRef = doc(db, collectionPath, id);
-      await updateDoc(docRef, {
-        ...data,
-        updatedAt: serverTimestamp(),
-      });
+      const { error } = await supabase
+        .from(table)
+        .update(data as any)
+        .eq('id', id);
+      
+      if (error) throw error;
     } catch (error) {
-      handleFirestoreError(error, OperationType.UPDATE, `${collectionPath}/${id}`);
+      console.error(`Supabase Update Error [${table}/${id}]: `, error);
     }
   },
 
   // Generic delete
-  async delete(collectionPath: string, id: string): Promise<void> {
+  async delete(table: string, id: string): Promise<void> {
     try {
-      const docRef = doc(db, collectionPath, id);
-      await deleteDoc(docRef);
+      const { error } = await supabase
+        .from(table)
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
     } catch (error) {
-      handleFirestoreError(error, OperationType.DELETE, `${collectionPath}/${id}`);
+      console.error(`Supabase Delete Error [${table}/${id}]: `, error);
     }
   },
 
   // Settings
   async getSettings(): Promise<any> {
     try {
-      const docRef = doc(db, 'settings', 'global');
-      const snapshot = await getDoc(docRef);
-      return snapshot.exists() ? snapshot.data() : null;
+      const { data, error } = await supabase
+        .from('settings')
+        .select('*')
+        .limit(1)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') throw error; 
+      return data;
     } catch (error) {
-      handleFirestoreError(error, OperationType.GET, 'settings/global');
+      console.error('Supabase Get Settings Error: ', error);
+      return null;
     }
   },
 
   async updateSettings(data: any): Promise<void> {
     try {
-      const docRef = doc(db, 'settings', 'global');
-      await updateDoc(docRef, data);
+      const current = await this.getSettings();
+      if (current) {
+        const { error } = await supabase
+          .from('settings')
+          .update(data)
+          .eq('id', current.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('settings')
+          .insert([data]);
+        if (error) throw error;
+      }
     } catch (error) {
-      // If it doesn't exist, we might need setDoc, but for now we'll assume update/init
-      handleFirestoreError(error, OperationType.UPDATE, 'settings/global');
+      console.error('Supabase Update Settings Error: ', error);
     }
   }
 };
