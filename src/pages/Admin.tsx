@@ -13,6 +13,17 @@ const AdminPage = () => {
   });
   const [loading, setLoading] = useState(false);
   const [dbStatus, setDbStatus] = useState<'checking' | 'connected' | 'error'>('checking');
+  const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => setNotification(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
+  const showSuccess = (msg: string) => setNotification({ message: msg, type: 'success' });
+  const showError = (msg: string) => setNotification({ message: msg, type: 'error' });
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -166,19 +177,29 @@ const AdminPage = () => {
       {/* Main Content */}
       <main className="flex-1 p-8 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
-          {activeTab === 'news' && <NewsManager />}
-          {activeTab === 'products' && <ProductManager />}
-          {activeTab === 'jobs' && <JobManager />}
-          {activeTab === 'distributors' && <DistributorManager />}
+          {activeTab === 'news' && <NewsManager onSuccess={showSuccess} onError={showError} />}
+          {activeTab === 'products' && <ProductManager onSuccess={showSuccess} onError={showError} />}
+          {activeTab === 'jobs' && <JobManager onSuccess={showSuccess} onError={showError} />}
+          {activeTab === 'distributors' && <DistributorManager onSuccess={showSuccess} onError={showError} />}
         </div>
       </main>
+
+      {/* Toast Notification */}
+      {notification && (
+        <div className={`fixed bottom-8 right-8 z-[100] px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-slide-up ${
+          notification.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'
+        }`}>
+          {notification.type === 'success' ? <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">✓</div> : <X size={20} />}
+          <span className="font-bold tracking-tight">{notification.message}</span>
+        </div>
+      )}
     </div>
   );
 };
 
 // --- SUB-COMPONENTS (MANAGERS) ---
 
-const NewsManager = () => {
+const NewsManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, onError: (m: string) => void }) => {
   const [items, setItems] = useState<any[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [formData, setFormData] = useState({ title: '', date: '', excerpt: '', image: '', content: '' });
@@ -191,8 +212,8 @@ const NewsManager = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 1024 * 1024) {
-      alert("Dung lượng ảnh quá lớn (Vui lòng chọn ảnh < 1MB)");
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Dung lượng ảnh quá lớn (Vui lòng chọn ảnh < 2MB)");
       return;
     }
 
@@ -212,10 +233,11 @@ const NewsManager = () => {
       await dataService.create('news', formData);
       setIsAdding(false);
       setFormData({ title: '', date: '', excerpt: '', image: '', content: '' });
-      load();
+      await load();
+      onSuccess("Đã đăng bài viết thành công!");
     } catch (err) {
       console.error(err);
-      alert("Có lỗi xảy ra khi lưu bài viết");
+      onError("Có lỗi khi lưu bài viết");
     } finally {
       setUploading(false);
     }
@@ -285,7 +307,14 @@ const NewsManager = () => {
             </div>
           </div>
           <div className="flex gap-3">
-            <button type="submit" disabled={uploading} className="bg-blue-900 text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50">Lưu bài viết</button>
+            <button type="submit" disabled={uploading} className="bg-blue-900 text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50 flex items-center gap-2">
+              {uploading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Đang lưu...
+                </>
+              ) : 'Lưu bài viết'}
+            </button>
             <button type="button" onClick={() => setIsAdding(false)} className="px-8 py-3 rounded-xl font-bold text-gray-500">Hủy</button>
           </div>
         </form>
@@ -316,7 +345,7 @@ const NewsManager = () => {
 };
 
 // --- MOCK PRODUCT MANAGER (Similar pattern) ---
-const ProductManager = () => {
+const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, onError: (m: string) => void }) => {
   const [items, setItems] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
   const [isAdding, setIsAdding] = useState(false);
@@ -340,8 +369,8 @@ const ProductManager = () => {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 1024 * 1024) {
-      alert("Dung lượng ảnh quá lớn (Vui lòng chọn ảnh < 1MB)");
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Dung lượng ảnh quá lớn (Vui lòng chọn ảnh < 2MB)");
       return;
     }
     setUploading(true);
@@ -368,10 +397,11 @@ const ProductManager = () => {
       });
       setIsAdding(false);
       setFormData({ title: '', brand: brands[0]?.name || '', image: '', price: '' });
-      load();
+      await load();
+      onSuccess("Đã thêm sản phẩm mới!");
     } catch (err) {
       console.error(err);
-      alert("Có lỗi xảy ra khi lưu sản phẩm");
+      onError("Lỗi khi lưu sản phẩm");
     } finally {
       setUploading(false);
     }
@@ -379,10 +409,18 @@ const ProductManager = () => {
 
   const handleAddBrand = async (e: React.FormEvent) => {
     e.preventDefault();
-    await dataService.create('brands', brandFormData);
-    setIsAddingBrand(false);
-    setBrandFormData({ name: '', desc: '', color: 'text-blue-600' });
-    load();
+    setUploading(true);
+    try {
+      await dataService.create('brands', brandFormData);
+      setIsAddingBrand(false);
+      setBrandFormData({ name: '', desc: '', color: 'text-blue-600' });
+      await load();
+      onSuccess("Đã thêm thương hiệu mới!");
+    } catch (err) {
+      onError("Lỗi khi tạo thương hiệu");
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -424,7 +462,14 @@ const ProductManager = () => {
               </div>
            </div>
            <div className="flex gap-3">
-            <button type="submit" className="bg-pink-600 text-white px-8 py-3 rounded-xl font-bold">Lưu thương hiệu</button>
+            <button type="submit" disabled={uploading} className="bg-pink-600 text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50 flex items-center gap-2">
+              {uploading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Đang lưu...
+                </>
+              ) : 'Lưu thương hiệu'}
+            </button>
             <button type="button" onClick={() => setIsAddingBrand(false)} className="px-8 py-3 rounded-xl font-bold text-gray-400">Hủy</button>
            </div>
         </form>
@@ -467,7 +512,14 @@ const ProductManager = () => {
               </div>
            </div>
            <div className="flex gap-3">
-            <button type="submit" disabled={uploading} className="bg-blue-900 text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50">Lưu sản phẩm</button>
+            <button type="submit" disabled={uploading} className="bg-blue-900 text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50 flex items-center gap-2">
+              {uploading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Đang lưu...
+                </>
+              ) : 'Lưu sản phẩm'}
+            </button>
             <button type="button" onClick={() => setIsAdding(false)} className="px-8 py-3 rounded-xl font-bold text-gray-400">Hủy</button>
            </div>
         </form>
@@ -525,7 +577,7 @@ const ProductManager = () => {
   );
 };
 
-const JobManager = () => {
+const JobManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, onError: (m: string) => void }) => {
   const [items, setItems] = useState<any[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -541,9 +593,10 @@ const JobManager = () => {
       await dataService.create('jobs', formData);
       setIsAdding(false);
       setFormData({ title: '', location: '', salary: '', deadline: '' });
-      load();
+      await load();
+      onSuccess("Đã đăng tin tuyển dụng mới!");
     } catch (err) {
-      alert("Lỗi khi lưu tin");
+      onError("Lỗi khi lưu tin tuyển dụng");
     } finally {
       setLoading(false);
     }
@@ -579,7 +632,14 @@ const JobManager = () => {
               </div>
            </div>
            <div className="flex gap-3">
-            <button type="submit" disabled={loading} className="bg-blue-900 text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50">Lưu tin tuyển dụng</button>
+            <button type="submit" disabled={loading} className="bg-blue-900 text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50 flex items-center gap-2">
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Đang lưu...
+                </>
+              ) : 'Lưu tin tuyển dụng'}
+            </button>
             <button type="button" onClick={() => setIsAdding(false)} className="px-8 py-3 rounded-xl font-bold text-gray-400">Hủy</button>
            </div>
         </form>
@@ -600,7 +660,7 @@ const JobManager = () => {
   );
 };
 
-const DistributorManager = () => {
+const DistributorManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, onError: (m: string) => void }) => {
   const [items, setItems] = useState<any[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -616,9 +676,10 @@ const DistributorManager = () => {
       await dataService.create('distributors', formData);
       setIsAdding(false);
       setFormData({ name: '', address: '', phone: '', region: 'Miền Nam' });
-      load();
+      await load();
+      onSuccess("Đã thêm nhà phân phối mới!");
     } catch (err) {
-      alert("Lỗi khi lưu NPP");
+      onError("Lỗi khi lưu nhà phân phối");
     } finally {
       setLoading(false);
     }
@@ -658,7 +719,14 @@ const DistributorManager = () => {
               </div>
            </div>
            <div className="flex gap-3">
-            <button type="submit" disabled={loading} className="bg-blue-900 text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50">Lưu nhà phân phối</button>
+            <button type="submit" disabled={loading} className="bg-blue-900 text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50 flex items-center gap-2">
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Đang lưu...
+                </>
+              ) : 'Lưu nhà phân phối'}
+            </button>
             <button type="button" onClick={() => setIsAdding(false)} className="px-8 py-3 rounded-xl font-bold text-gray-400">Hủy</button>
            </div>
         </form>
