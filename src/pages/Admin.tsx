@@ -396,7 +396,7 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingBrandId, setEditingBrandId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ title: '', brand: '', image: '', price: '' });
-  const [brandFormData, setBrandFormData] = useState({ name: '', desc: '', color: 'text-blue-600' });
+  const [brandFormData, setBrandFormData] = useState({ name: '', description: '', color: 'text-blue-600' });
   const [uploading, setUploading] = useState(false);
 
   const load = () => {
@@ -426,7 +426,7 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
   const handleEditBrand = (brand: any) => {
     setBrandFormData({
       name: brand.name,
-      desc: brand.desc,
+      description: brand.description || '',
       color: brand.color
     });
     setEditingBrandId(brand.id);
@@ -497,7 +497,7 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
       }
       setIsAddingBrand(false);
       setEditingBrandId(null);
-      setBrandFormData({ name: '', desc: '', color: 'text-blue-600' });
+      setBrandFormData({ name: '', description: '', color: 'text-blue-600' });
       await load();
     } catch (err) {
       onError("Lỗi khi tạo thương hiệu");
@@ -541,7 +541,7 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Mô tả ngắn</label>
-                <input required className="w-full p-3 bg-white border-2 border-transparent focus:border-pink-500 rounded-xl outline-none transition-all" value={brandFormData.desc} onChange={e=>setBrandFormData({...brandFormData, desc: e.target.value})} />
+                <input required className="w-full p-3 bg-white border-2 border-transparent focus:border-pink-500 rounded-xl outline-none transition-all" value={brandFormData.description} onChange={e=>setBrandFormData({...brandFormData, description: e.target.value})} />
               </div>
            </div>
            <div className="flex gap-3">
@@ -619,7 +619,7 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
             <div key={brand.id} className="bg-white px-6 py-4 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-6 group">
               <div>
                 <div className={`font-black uppercase tracking-tight text-sm ${brand.color}`}>{brand.name}</div>
-                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{brand.desc}</div>
+                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{brand.description}</div>
               </div>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
                 <button onClick={() => handleEditBrand(brand)} className="p-2 text-blue-400 hover:bg-blue-50 rounded-xl">
