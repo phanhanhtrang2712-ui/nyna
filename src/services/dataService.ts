@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { getSupabase } from '../lib/supabase';
 
 export enum OperationType {
   CREATE = 'create',
@@ -13,6 +13,7 @@ export const dataService = {
   // Generic list
   async list<T>(table: string, orderField: string = 'created_at'): Promise<T[]> {
     try {
+      const supabase = getSupabase();
       const { data, error } = await supabase
         .from(table)
         .select('*')
@@ -40,6 +41,7 @@ export const dataService = {
   // Generic create
   async create<T>(table: string, data: T): Promise<string> {
     try {
+      const supabase = getSupabase();
       const { data: inserted, error } = await supabase
         .from(table)
         .insert([data] as any)
@@ -56,6 +58,7 @@ export const dataService = {
   // Generic update
   async update<T>(table: string, id: string, data: Partial<T>): Promise<void> {
     try {
+      const supabase = getSupabase();
       const { error } = await supabase
         .from(table)
         .update(data as any)
@@ -70,6 +73,7 @@ export const dataService = {
   // Generic delete
   async delete(table: string, id: string): Promise<void> {
     try {
+      const supabase = getSupabase();
       const { error } = await supabase
         .from(table)
         .delete()
@@ -84,6 +88,7 @@ export const dataService = {
   // Settings
   async getSettings(): Promise<any> {
     try {
+      const supabase = getSupabase();
       const { data, error } = await supabase
         .from('settings')
         .select('*')
@@ -100,6 +105,7 @@ export const dataService = {
 
   async updateSettings(data: any): Promise<void> {
     try {
+      const supabase = getSupabase();
       const current = await this.getSettings();
       if (current) {
         const { error } = await supabase
