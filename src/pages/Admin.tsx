@@ -193,10 +193,18 @@ const NewsManager = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await dataService.create('news', formData);
-    setIsAdding(false);
-    setFormData({ title: '', date: '', excerpt: '', image: '', content: '' });
-    load();
+    setUploading(true);
+    try {
+      await dataService.create('news', formData);
+      setIsAdding(false);
+      setFormData({ title: '', date: '', excerpt: '', image: '', content: '' });
+      load();
+    } catch (err) {
+      console.error(err);
+      alert("Có lỗi xảy ra khi lưu bài viết");
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -226,9 +234,9 @@ const NewsManager = () => {
             <div className="col-span-2 md:col-span-1">
               <label className="block text-sm font-bold text-gray-700 mb-2">Ngày đăng</label>
               <input 
+                type="date"
                 required
                 className="w-full p-3 bg-gray-50 rounded-xl border-2 border-transparent focus:border-blue-900 focus:bg-white outline-none transition-all"
-                placeholder="20/05/2024"
                 value={formData.date} 
                 onChange={e => setFormData({...formData, date: e.target.value})} 
               />
@@ -333,14 +341,26 @@ const ProductManager = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await dataService.create('products', { 
-      ...formData, 
-      price: Number(formData.price),
-      features: [{label: 'Nổi bật', icon: 'zap'}] 
-    });
-    setIsAdding(false);
-    setFormData({ title: '', brand: brands[0]?.name || 'NYNA', image: '', price: '' });
-    load();
+    setUploading(true);
+    try {
+      if (!formData.brand && brands.length > 0) {
+        formData.brand = brands[0].name;
+      }
+      
+      await dataService.create('products', { 
+        ...formData, 
+        price: Number(formData.price),
+        features: [{label: 'Nổi bật', icon: 'zap'}] 
+      });
+      setIsAdding(false);
+      setFormData({ title: '', brand: brands[0]?.name || '', image: '', price: '' });
+      load();
+    } catch (err) {
+      console.error(err);
+      alert("Có lỗi xảy ra khi lưu sản phẩm");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleAddBrand = async (e: React.FormEvent) => {
@@ -494,6 +514,7 @@ const ProductManager = () => {
 const JobManager = () => {
   const [items, setItems] = useState<any[]>([]);
   const [isAdding, setIsAdding] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ title: '', location: '', salary: '', deadline: '' });
 
   const load = () => dataService.list('jobs').then(setItems);
@@ -501,31 +522,52 @@ const JobManager = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await dataService.create('jobs', formData);
-    setIsAdding(false);
-    setFormData({ title: '', location: '', salary: '', deadline: '' });
-    load();
+    setLoading(true);
+    try {
+      await dataService.create('jobs', formData);
+      setIsAdding(false);
+      setFormData({ title: '', location: '', salary: '', deadline: '' });
+      load();
+    } catch (err) {
+      alert("Lỗi khi lưu tin");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-3xl font-black text-blue-900">Quản lý tuyển dụng</h2>
-        <button onClick={() => setIsAdding(true)} className="bg-orange-500 text-white px-6 py-2.5 rounded-full font-bold flex items-center gap-2">
+        <button onClick={() => setIsAdding(true)} className="bg-orange-500 text-white px-6 py-2.5 rounded-full font-bold flex items-center gap-2 hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20">
           <Plus size={20} /> Thêm vị trí
         </button>
       </div>
 
       {isAdding && (
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-3xl shadow-xl mb-8 border border-blue-50">
+        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-[32px] shadow-xl mb-8 border border-orange-50">
            <div className="grid md:grid-cols-2 gap-6 mb-6">
-              <input placeholder="Vị trí tuyển dụng" className="p-3 border rounded-xl" value={formData.title} onChange={e=>setFormData({...formData, title: e.target.value})} />
-              <input placeholder="Địa điểm" className="p-3 border rounded-xl" value={formData.location} onChange={e=>setFormData({...formData, location: e.target.value})} />
-              <input placeholder="Mức lương" className="p-3 border rounded-xl" value={formData.salary} onChange={e=>setFormData({...formData, salary: e.target.value})} />
-              <input placeholder="Hạn nộp hồ sơ" className="p-3 border rounded-xl" value={formData.deadline} onChange={e=>setFormData({...formData, deadline: e.target.value})} />
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Vị trí tuyển dụng</label>
+                <input required className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-orange-500 rounded-xl outline-none transition-all" value={formData.title} onChange={e=>setFormData({...formData, title: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Địa điểm</label>
+                <input required className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-orange-500 rounded-xl outline-none transition-all" value={formData.location} onChange={e=>setFormData({...formData, location: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Mức lương</label>
+                <input required className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-orange-500 rounded-xl outline-none transition-all" value={formData.salary} onChange={e=>setFormData({...formData, salary: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Hạn nộp hồ sơ</label>
+                <input type="date" required className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-orange-500 rounded-xl outline-none transition-all" value={formData.deadline} onChange={e=>setFormData({...formData, deadline: e.target.value})} />
+              </div>
            </div>
-           <button type="submit" className="bg-blue-900 text-white px-8 py-3 rounded-xl font-bold">Lưu tin</button>
-           <button type="button" onClick={() => setIsAdding(false)} className="px-8 py-3 rounded-xl font-bold text-gray-400">Hủy</button>
+           <div className="flex gap-3">
+            <button type="submit" disabled={loading} className="bg-blue-900 text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50">Lưu tin tuyển dụng</button>
+            <button type="button" onClick={() => setIsAdding(false)} className="px-8 py-3 rounded-xl font-bold text-gray-400">Hủy</button>
+           </div>
         </form>
       )}
 
@@ -547,6 +589,7 @@ const JobManager = () => {
 const DistributorManager = () => {
   const [items, setItems] = useState<any[]>([]);
   const [isAdding, setIsAdding] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ name: '', address: '', phone: '', region: 'Miền Nam' });
 
   const load = () => dataService.list('distributors').then(setItems);
@@ -554,35 +597,56 @@ const DistributorManager = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await dataService.create('distributors', formData);
-    setIsAdding(false);
-    setFormData({ name: '', address: '', phone: '', region: 'Miền Nam' });
-    load();
+    setLoading(true);
+    try {
+      await dataService.create('distributors', formData);
+      setIsAdding(false);
+      setFormData({ name: '', address: '', phone: '', region: 'Miền Nam' });
+      load();
+    } catch (err) {
+      alert("Lỗi khi lưu NPP");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div>
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-3xl font-black text-blue-900">Nhà phân phối</h2>
-        <button onClick={() => setIsAdding(true)} className="bg-indigo-500 text-white px-6 py-2.5 rounded-full font-bold flex items-center gap-2">
+        <button onClick={() => setIsAdding(true)} className="bg-indigo-500 text-white px-6 py-2.5 rounded-full font-bold flex items-center gap-2 hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-500/20">
           <Plus size={20} /> Thêm NPP
         </button>
       </div>
 
       {isAdding && (
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-3xl shadow-xl mb-8 border border-blue-50">
+        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-[32px] shadow-xl mb-8 border border-indigo-50">
            <div className="grid md:grid-cols-2 gap-6 mb-6">
-              <input placeholder="Tên đại lý/NPP" className="p-3 border rounded-xl" value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value})} />
-              <input placeholder="Địa chỉ" className="p-3 border rounded-xl" value={formData.address} onChange={e=>setFormData({...formData, address: e.target.value})} />
-              <input placeholder="Số điện thoại" className="p-3 border rounded-xl" value={formData.phone} onChange={e=>setFormData({...formData, phone: e.target.value})} />
-              <select className="p-3 border rounded-xl" value={formData.region} onChange={e=>setFormData({...formData, region: e.target.value})}>
-                <option>Miền Bắc</option>
-                <option>Miền Trung</option>
-                <option>Miền Nam</option>
-              </select>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Tên đại lý/NPP</label>
+                <input required className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-indigo-500 rounded-xl outline-none transition-all" value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Địa chỉ</label>
+                <input required className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-indigo-500 rounded-xl outline-none transition-all" value={formData.address} onChange={e=>setFormData({...formData, address: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Số điện thoại</label>
+                <input required className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-indigo-500 rounded-xl outline-none transition-all" value={formData.phone} onChange={e=>setFormData({...formData, phone: e.target.value})} />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Khu vực</label>
+                <select className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-indigo-500 rounded-xl outline-none transition-all" value={formData.region} onChange={e=>setFormData({...formData, region: e.target.value})}>
+                  <option>Miền Bắc</option>
+                  <option>Miền Trung</option>
+                  <option>Miền Nam</option>
+                </select>
+              </div>
            </div>
-           <button type="submit" className="bg-blue-900 text-white px-8 py-3 rounded-xl font-bold">Lưu nhà phân phối</button>
-           <button type="button" onClick={() => setIsAdding(false)} className="px-8 py-3 rounded-xl font-bold text-gray-400">Hủy</button>
+           <div className="flex gap-3">
+            <button type="submit" disabled={loading} className="bg-blue-900 text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50">Lưu nhà phân phối</button>
+            <button type="button" onClick={() => setIsAdding(false)} className="px-8 py-3 rounded-xl font-bold text-gray-400">Hủy</button>
+           </div>
         </form>
       )}
 
