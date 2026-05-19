@@ -258,9 +258,9 @@ const NewsManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, o
       setEditingId(null);
       setFormData({ title: '', date: '', excerpt: '', image: '', content: '' });
       await load();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      onError("Có lỗi khi lưu bài viết");
+      onError(err.message || "Có lỗi khi lưu bài viết");
     } finally {
       setUploading(false);
     }
@@ -476,9 +476,9 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
       setEditingId(null);
       setFormData({ title: '', brand: brands[0]?.name || '', image: '', price: '' });
       await load();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      onError("Lỗi khi lưu sản phẩm");
+      onError(err.message || "Lỗi khi lưu sản phẩm");
     } finally {
       setUploading(false);
     }
@@ -499,8 +499,8 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
       setEditingBrandId(null);
       setBrandFormData({ name: '', description: '', color: 'text-blue-600' });
       await load();
-    } catch (err) {
-      onError("Lỗi khi tạo thương hiệu");
+    } catch (err: any) {
+      onError(err.message || "Lỗi khi tạo thương hiệu");
     } finally {
       setUploading(false);
     }
@@ -706,8 +706,8 @@ const JobManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, on
       setEditingId(null);
       setFormData({ title: '', location: '', salary: '', deadline: '' });
       await load();
-    } catch (err) {
-      onError("Lỗi khi lưu tin tuyển dụng");
+    } catch (err: any) {
+      onError(err.message || "Lỗi khi lưu tin tuyển dụng");
     } finally {
       setLoading(false);
     }
@@ -817,8 +817,8 @@ const DistributorManager = ({ onSuccess, onError }: { onSuccess: (m: string) => 
       setEditingId(null);
       setFormData({ name: '', address: '', phone: '', region: 'Miền Nam' });
       await load();
-    } catch (err) {
-      onError("Lỗi khi lưu nhà phân phối");
+    } catch (err: any) {
+      onError(err.message || "Lỗi khi lưu nhà phân phối");
     } finally {
       setLoading(false);
     }
