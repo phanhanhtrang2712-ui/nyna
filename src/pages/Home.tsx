@@ -487,86 +487,141 @@ const DistributorsSection = () => {
   );
 };
 
-const Footer = () => (
-  <footer className="bg-blue-900 text-white pt-32 pb-16 relative overflow-hidden">
-    {/* Decorative blur */}
-    <div className="absolute bottom-0 right-0 w-[40%] h-[40%] bg-blue-800 rounded-full blur-[100px] opacity-30"></div>
-    
-    <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 lg:grid-cols-4 gap-16 mb-32 relative z-10">
-      <div className="flex flex-col gap-8">
-        <div className="text-5xl font-black tracking-tighter uppercase">NYNA</div>
-        <p className="text-blue-100/70 font-medium leading-relaxed text-sm">
-          Tự hào là đơn vị tiên phong mang đến các giải pháp chăm sóc gia đình tiêu chuẩn quốc tế cho người Việt.
-        </p>
-        <div className="flex gap-4">
-           {[Facebook, Youtube, Send].map((Icon, i)=> (
-             <div key={i} className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center cursor-pointer hover:bg-pink-500 transition-all hover:-translate-y-1">
-                <Icon size={20} />
-             </div>
-           ))}
-        </div>
-      </div>
+const Footer = () => {
+  const [pages, setPages] = useState<any[]>([]);
+  const [activePage, setActivePage] = useState<any>(null);
+
+  useEffect(() => {
+    dataService.list<any>('pages').then(setPages);
+  }, []);
+
+  const policyPages = pages.filter(p => p.category === 'policy');
+  const partnerPages = pages.filter(p => p.category === 'partner');
+
+  return (
+    <footer className="bg-blue-900 text-white pt-32 pb-16 relative overflow-hidden">
+      {/* Decorative blur */}
+      <div className="absolute bottom-0 right-0 w-[40%] h-[40%] bg-blue-800 rounded-full blur-[100px] opacity-30"></div>
       
-      <div>
-        <h4 className="text-lg font-black mb-10 uppercase tracking-[0.2em] text-pink-400">CHÍNH SÁCH</h4>
-        <ul className="space-y-4 text-blue-100/60 font-bold text-sm uppercase tracking-wide">
-          <li className="hover:text-white cursor-pointer transition-colors">Chính sách bảo mật</li>
-          <li className="hover:text-white cursor-pointer transition-colors">Cửa hàng ủy quyền</li>
-          <li className="hover:text-white cursor-pointer transition-colors">Quy trình sản xuất</li>
-          <li className="hover:text-white cursor-pointer transition-colors">Tiêu chuẩn kiểm nghiệm</li>
-        </ul>
-      </div>
+      <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 lg:grid-cols-4 gap-16 mb-32 relative z-10">
+        <div className="flex flex-col gap-8">
+          <div className="text-5xl font-black tracking-tighter uppercase">NYNA</div>
+          <p className="text-blue-100/70 font-medium leading-relaxed text-sm">
+            Tự hào là đơn vị tiên phong mang đến các giải pháp chăm sóc gia đình tiêu chuẩn quốc tế cho người Việt.
+          </p>
+          <div className="flex gap-4">
+             {[Facebook, Youtube, Send].map((Icon, i)=> (
+               <div key={i} className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center cursor-pointer hover:bg-pink-500 transition-all hover:-translate-y-1">
+                  <Icon size={20} />
+               </div>
+             ))}
+          </div>
+        </div>
+        
+        <div>
+          <h4 className="text-lg font-black mb-10 uppercase tracking-[0.2em] text-pink-400">CHÍNH SÁCH</h4>
+          <ul className="space-y-4 text-blue-100/60 font-bold text-sm uppercase tracking-wide">
+            {policyPages.length > 0 ? policyPages.map(page => (
+              <li key={page.id} onClick={() => setActivePage(page)} className="hover:text-white cursor-pointer transition-colors">{page.title}</li>
+            )) : (
+              <>
+                <li className="hover:text-white cursor-pointer transition-colors opacity-40">Chính sách bảo mật</li>
+                <li className="hover:text-white cursor-pointer transition-colors opacity-40">Cửa hàng ủy quyền</li>
+              </>
+            )}
+          </ul>
+        </div>
 
-      <div>
-        <h4 className="text-lg font-black mb-10 uppercase tracking-[0.2em] text-pink-400">HỖ TRỢ ĐỐI TÁC</h4>
-        <ul className="space-y-4 text-blue-100/60 font-bold text-sm uppercase tracking-wide">
-          <li className="hover:text-white cursor-pointer transition-colors">Hợp tác đại lý</li>
-          <li className="hover:text-white cursor-pointer transition-colors">Quy trình nhập hàng</li>
-          <li className="hover:text-white cursor-pointer transition-colors">Hỗ trợ Marketing</li>
-          <li className="hover:text-white cursor-pointer transition-colors">Tài liệu kỹ thuật</li>
-        </ul>
-      </div>
+        <div>
+          <h4 className="text-lg font-black mb-10 uppercase tracking-[0.2em] text-pink-400">HỖ TRỢ ĐỐI TÁC</h4>
+          <ul className="space-y-4 text-blue-100/60 font-bold text-sm uppercase tracking-wide">
+            {partnerPages.length > 0 ? partnerPages.map(page => (
+              <li key={page.id} onClick={() => setActivePage(page)} className="hover:text-white cursor-pointer transition-colors">{page.title}</li>
+            )) : (
+              <>
+                <li className="hover:text-white cursor-pointer transition-colors opacity-40">Hợp tác đại lý</li>
+                <li className="hover:text-white cursor-pointer transition-colors opacity-40">Quy trình nhập hàng</li>
+              </>
+            )}
+          </ul>
+        </div>
 
-      <div>
-        <h4 className="text-lg font-black mb-10 uppercase tracking-[0.2em] text-pink-400">ĐĂNG KÝ NHẬN TIN</h4>
-        <p className="text-blue-100/60 text-sm mb-8 font-medium">Nhận thông tin ưu đãi sớm nhất từ NYNA.</p>
-        <div className="flex bg-white/5 border border-white/10 rounded-3xl p-1.5 focus-within:border-pink-500 transition-all">
-           <input type="text" placeholder="Email của bạn..." className="bg-transparent border-none outline-none flex-1 px-4 text-sm font-bold placeholder:text-blue-100/30" />
-           <button className="bg-pink-500 text-white p-4 rounded-2xl hover:bg-pink-600 transition-all">
-              <Send size={18} />
-           </button>
+        <div>
+          <h4 className="text-lg font-black mb-10 uppercase tracking-[0.2em] text-pink-400">ĐĂNG KÝ NHẬN TIN</h4>
+          <p className="text-blue-100/60 text-sm mb-8 font-medium">Nhận thông tin ưu đãi sớm nhất từ NYNA.</p>
+          <div className="flex bg-white/5 border border-white/10 rounded-3xl p-1.5 focus-within:border-pink-500 transition-all">
+             <input type="text" placeholder="Email của bạn..." className="bg-transparent border-none outline-none flex-1 px-4 text-sm font-bold placeholder:text-blue-100/30" />
+             <button className="bg-pink-500 text-white p-4 rounded-2xl hover:bg-pink-600 transition-all">
+                <Send size={18} />
+             </button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div className="max-w-7xl mx-auto px-6 pt-16 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 relative z-10">
-      <p className="text-[11px] font-black text-blue-100/30 uppercase tracking-[0.3em]">
-        © 2024 NYNA VIETNAM. ALL RIGHTS RESERVED.
-      </p>
-      <div className="flex items-center gap-10">
-         <Link to="/cms" className="text-[11px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-400/10 px-4 py-2 rounded-lg hover:bg-emerald-400 hover:text-blue-900 transition-all">ADMIN DASHBOARD</Link>
-         <div className="text-[11px] font-black text-blue-100/30 uppercase tracking-[0.3em]">THIẾT KẾ BỞI NYNA</div>
+      <div className="max-w-7xl mx-auto px-6 pt-16 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 relative z-10">
+        <p className="text-[11px] font-black text-blue-100/30 uppercase tracking-[0.3em]">
+          © 2024 NYNA VIETNAM. ALL RIGHTS RESERVED.
+        </p>
+        <div className="flex items-center gap-10">
+           <Link to="/cms" className="text-[11px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-400/10 px-4 py-2 rounded-lg hover:bg-emerald-400 hover:text-blue-900 transition-all">ADMIN DASHBOARD</Link>
+           <div className="text-[11px] font-black text-blue-100/30 uppercase tracking-[0.3em]">THIẾT KẾ BỞI NYNA</div>
+        </div>
       </div>
-    </div>
 
-    {/* Sticky actions matching image */}
-    <div className="fixed bottom-10 right-10 flex flex-col gap-4 z-[100]">
-      <motion.div whileHover={{ scale: 1.1 }} className="w-16 h-16 bg-blue-500 text-white rounded-full shadow-2xl flex items-center justify-center cursor-pointer border-4 border-white/20">
-        <PhoneCall size={28} />
-      </motion.div>
-      <motion.div whileHover={{ scale: 1.1 }} className="w-16 h-16 bg-emerald-500 text-white rounded-full shadow-2xl flex items-center justify-center cursor-pointer border-4 border-white/20">
-        <MessageCircle size={28} />
-      </motion.div>
-      <motion.div 
-        whileHover={{ scale: 1.1 }} 
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="w-16 h-16 bg-blue-900 text-white rounded-full shadow-2xl flex items-center justify-center cursor-pointer border-4 border-white/20"
-      >
-        <ArrowUpRight size={28} />
-      </motion.div>
-    </div>
-  </footer>
-);
+      {/* Page Content Modal */}
+      <AnimatePresence>
+        {activePage && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setActivePage(null)}
+              className="absolute inset-0 bg-blue-900/80 backdrop-blur-md"
+            ></motion.div>
+            <motion.div 
+              initial={{ opacity: 0, y: 100, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 100, scale: 0.9 }}
+              className="relative bg-white w-full max-w-4xl max-h-[80vh] overflow-y-auto rounded-[48px] p-12 shadow-2xl text-gray-900"
+            >
+              <button onClick={() => setActivePage(null)} className="absolute top-8 right-8 w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center hover:bg-pink-500 hover:text-white transition-all">
+                <X size={24} />
+              </button>
+              <div className="mb-8">
+                <span className="text-blue-500 font-black uppercase tracking-widest text-xs mb-2 block">{activePage.category === 'policy' ? 'Chính sách' : 'Đối tác'}</span>
+                <h2 className="text-4xl font-black text-blue-900 uppercase tracking-tighter">{activePage.title}</h2>
+              </div>
+              <div className="prose prose-lg max-w-none text-gray-600 font-medium leading-relaxed whitespace-pre-wrap">
+                {activePage.content}
+              </div>
+              <div className="mt-12 pt-8 border-t border-gray-100 flex justify-end">
+                <button onClick={() => setActivePage(null)} className="bg-blue-900 text-white px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-xs">Đóng lại</button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Sticky actions matching image */}
+      <div className="fixed bottom-10 right-10 flex flex-col gap-4 z-[100]">
+        <motion.div whileHover={{ scale: 1.1 }} className="w-16 h-16 bg-blue-500 text-white rounded-full shadow-2xl flex items-center justify-center cursor-pointer border-4 border-white/20">
+          <PhoneCall size={28} />
+        </motion.div>
+        <motion.div whileHover={{ scale: 1.1 }} className="w-16 h-16 bg-emerald-500 text-white rounded-full shadow-2xl flex items-center justify-center cursor-pointer border-4 border-white/20">
+          <MessageCircle size={28} />
+        </motion.div>
+        <motion.div 
+          whileHover={{ scale: 1.1 }} 
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="w-16 h-16 bg-blue-900 text-white rounded-full shadow-2xl flex items-center justify-center cursor-pointer border-4 border-white/20"
+        >
+          <ArrowUpRight size={28} />
+        </motion.div>
+      </div>
+    </footer>
+  );
+};
 
 export default function Home() {
   return (

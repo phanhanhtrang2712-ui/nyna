@@ -784,30 +784,43 @@ const JobManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, on
 
 const PageManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, onError: (m: string) => void }) => {
   const [items, setItems] = useState<any[]>([]);
-  const [formData, setFormData] = useState({ title: '', content: '', show_on_home: false });
+  const [formData, setFormData] = useState({ title: '', content: '', slug: '', category: 'policy', show_on_home: false });
+  const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const load = () => dataService.list<any>('pages', 'slug').then(setItems);
+  const load = () => dataService.list<any>('pages', 'category').then(setItems);
   useEffect(() => { load(); }, []);
 
   const handleEdit = (item: any) => {
     setFormData({
       title: item.title,
+      slug: item.slug || '',
+      category: item.category || 'policy',
       content: item.content || '',
       show_on_home: item.show_on_home || false
     });
     setEditingId(item.id);
+    setIsAdding(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingId) return;
     setLoading(true);
     try {
-      await dataService.update('pages', editingId, formData);
-      onSuccess("Đã cập nhật nội dung trang!");
+      const payload = { ...formData };
+      if (!payload.slug) payload.slug = payload.title.toLowerCase().replace(/ /g, '-');
+      
+      if (editingId) {
+        await dataService.update('pages', editingId, payload);
+        onSuccess("Đã cập nhật nội dung!");
+      } else {
+        await dataService.create('pages', payload);
+        onSuccess("Đã thêm trang mới!");
+      }
       setEditingId(null);
+      setIsAdding(false);
+      setFormData({ title: '', content: '', slug: '', category: 'policy', show_on_home: false });
       await load();
     } catch (err: any) {
       onError(err.message || "Lỗi khi lưu trang");
@@ -816,48 +829,88 @@ const PageManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, o
     }
   };
 
+  const categories = [
+    { id: 'policy', label: 'Chính sách' },
+    { id: 'partner', label: 'Hỗ trợ đối tác' },
+    { id: 'about', label: 'Giới thiệu / Khác' }
+  ];
+
   return (
     <div>
-      <h2 className="text-3xl font-black text-blue-900 mb-8">Quản lý nội dung trang</h2>
+      <div className="flex justify-between items-center mb-8">
+        <h2 className="text-3xl font-black text-blue-900">Quản lý nội dung trang & Footer</h2>
+        <button 
+          onClick={() => { setIsAdding(true); setEditingId(null); setFormData({ title: '', content: '', slug: '', category: 'policy', show_on_home: false }); }}
+          className="bg-blue-600 text-white px-6 py-2.5 rounded-full font-bold flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20"
+        >
+          <Plus size={20} /> Thêm trang mới
+        </button>
+      </div>
       
-      {editingId && (
+      {isAdding && (
         <form onSubmit={handleSubmit} className="bg-white p-8 rounded-[32px] shadow-xl mb-8 border border-blue-50">
-          <h3 className="text-xl font-black text-blue-900 mb-6 uppercase tracking-tight">Chỉnh sửa: {items.find(i => i.id === editingId)?.title}</h3>
-          <div className="space-y-6 mb-6">
+          <h3 className="text-xl font-black text-blue-900 mb-6 uppercase tracking-tight">{editingId ? 'Chỉnh sửa trang' : 'Thêm trang mới'}</h3>
+          <div className="grid md:grid-cols-2 gap-6 mb-6">
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">Tiêu đề hiển thị</label>
               <input required className="w-full p-4 bg-gray-50 border-2 border-transparent focus:border-blue-900 rounded-2xl outline-none transition-all" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} />
             </div>
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Nội dung chi tiết</label>
-              <textarea rows={8} className="w-full p-4 bg-gray-50 border-2 border-transparent focus:border-blue-900 rounded-2xl outline-none transition-all" value={formData.content} onChange={e => setFormData({ ...formData, content: e.target.value })} />
+              <label className="block text-sm font-bold text-gray-700 mb-2">Danh mục (Vị trí Footer)</label>
+              <select className="w-full p-4 bg-gray-50 border-2 border-transparent focus:border-blue-900 rounded-2xl outline-none transition-all font-bold" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}>
+                {categories.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+              </select>
             </div>
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" checked={formData.show_on_home} onChange={e => setFormData({ ...formData, show_on_home: e.target.checked })} className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-              <span className="font-bold text-gray-700">Hiển thị đoạn trích này ngoài Trang Chủ (Sứ mệnh)</span>
-            </label>
+            <div className="col-span-2">
+              <label className="block text-sm font-bold text-gray-700 mb-2">Nội dung chi tiết (Markdown / Text)</label>
+              <textarea rows={10} className="w-full p-4 bg-gray-50 border-2 border-transparent focus:border-blue-900 rounded-2xl outline-none transition-all" value={formData.content} onChange={e => setFormData({ ...formData, content: e.target.value })} />
+            </div>
+            <div className="flex items-center gap-6 col-span-2">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" checked={formData.show_on_home} onChange={e => setFormData({ ...formData, show_on_home: e.target.checked })} className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                <span className="font-bold text-gray-700">Hiển thị Sứ mệnh trên Trang chủ (Slug 'about')</span>
+              </label>
+            </div>
           </div>
           <div className="flex gap-3">
-            <button type="submit" disabled={loading} className="bg-blue-900 text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50">Lưu thay đổi</button>
-            <button type="button" onClick={() => setEditingId(null)} className="px-8 py-3 rounded-xl font-bold text-gray-500">Hủy</button>
+            <button type="submit" disabled={loading} className="bg-blue-900 text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50">
+              {loading ? 'Đang lưu...' : 'Lưu trang'}
+            </button>
+            <button type="button" onClick={() => setIsAdding(false)} className="px-8 py-3 rounded-xl font-bold text-gray-500">Hủy</button>
           </div>
         </form>
       )}
 
-      <div className="grid md:grid-cols-2 gap-6">
-        {items.map(item => (
-          <div key={item.id} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex justify-between items-center group">
-            <div>
-              <h4 className="font-black text-blue-900 uppercase tracking-tight">{item.title}</h4>
-              <p className="text-xs text-blue-500 font-bold uppercase mt-1">Slug: {item.slug}</p>
-              {item.show_on_home && <span className="inline-block mt-2 text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-bold uppercase">Công khai trang chủ</span>}
-            </div>
-            <button onClick={() => handleEdit(item)} className="p-3 text-blue-900 hover:bg-blue-50 rounded-2xl transition-all">
-              <Edit size={24} />
-            </button>
+      {categories.map(cat => (
+        <div key={cat.id} className="mb-12">
+          <h3 className="text-sm font-black text-gray-400 mb-6 flex items-center gap-2 uppercase tracking-widest">
+            <div className="w-8 h-[2px] bg-blue-500 rounded-full"></div>
+            {cat.label}
+          </h3>
+          <div className="grid md:grid-cols-2 gap-4">
+            {items.filter(i => i.category === cat.id || (!i.category && cat.id === 'about')).map(item => (
+              <div key={item.id} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex justify-between items-center group">
+                <div>
+                  <h4 className="font-black text-blue-900 uppercase tracking-tight">{item.title}</h4>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase mt-1">Slug: {item.slug}</p>
+                </div>
+                <div className="flex gap-1">
+                  <button onClick={() => handleEdit(item)} className="p-2 text-blue-400 hover:bg-blue-50 rounded-xl transition-all">
+                    <Edit size={20} />
+                  </button>
+                  <button 
+                    onClick={async () => { if(confirm('Xóa trang này?')) { await dataService.delete('pages', item.id); load(); onSuccess("Đã xóa trang!"); } }}
+                    className="p-2 text-red-400 hover:bg-red-50 rounded-xl transition-all"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                </div>
+              </div>
+            ))}
+            {items.filter(i => i.category === cat.id).length === 0 && <p className="text-gray-400 text-xs font-bold italic">Chưa có trang trong mục này.</p>}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 };
