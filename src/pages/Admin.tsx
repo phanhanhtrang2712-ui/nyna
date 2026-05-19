@@ -202,11 +202,28 @@ const AdminPage = () => {
 const NewsManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, onError: (m: string) => void }) => {
   const [items, setItems] = useState<any[]>([]);
   const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ title: '', date: '', excerpt: '', image: '', content: '' });
   const [uploading, setUploading] = useState(false);
 
-  const load = () => dataService.list('news').then(setItems);
+  const load = () => {
+    dataService.list<any>('news').then(setItems);
+  };
+  
   useEffect(() => { load(); }, []);
+
+  const handleEdit = (item: any) => {
+    setFormData({
+      title: item.title,
+      date: item.date,
+      excerpt: item.excerpt,
+      image: item.image,
+      content: item.content || ''
+    });
+    setEditingId(item.id);
+    setIsAdding(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -230,17 +247,29 @@ const NewsManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, o
     e.preventDefault();
     setUploading(true);
     try {
-      await dataService.create('news', formData);
+      if (editingId) {
+        await dataService.update('news', editingId, formData);
+        onSuccess("Đã cập nhật bài viết thành công!");
+      } else {
+        await dataService.create('news', formData);
+        onSuccess("Đã đăng bài viết thành công!");
+      }
       setIsAdding(false);
+      setEditingId(null);
       setFormData({ title: '', date: '', excerpt: '', image: '', content: '' });
       await load();
-      onSuccess("Đã đăng bài viết thành công!");
     } catch (err) {
       console.error(err);
       onError("Có lỗi khi lưu bài viết");
     } finally {
       setUploading(false);
     }
+  };
+
+  const cancelForm = () => {
+    setIsAdding(false);
+    setEditingId(null);
+    setFormData({ title: '', date: '', excerpt: '', image: '', content: '' });
   };
 
   return (
@@ -257,6 +286,7 @@ const NewsManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, o
 
       {isAdding && (
         <form onSubmit={handleSubmit} className="bg-white p-8 rounded-[32px] shadow-xl mb-8 border border-blue-50">
+          <h3 className="text-xl font-black text-blue-900 mb-6 uppercase tracking-tight">{editingId ? 'Chỉnh sửa bài viết' : 'Thêm bài viết mới'}</h3>
           <div className="grid md:grid-cols-2 gap-6 mb-6">
             <div className="col-span-2 md:col-span-1">
               <label className="block text-sm font-bold text-gray-700 mb-2">Tiêu đề bài viết</label>
@@ -313,14 +343,15 @@ const NewsManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, o
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   Đang lưu...
                 </>
-              ) : 'Lưu bài viết'}
+              ) : (editingId ? 'Cập nhật bài viết' : 'Lưu bài viết')}
             </button>
-            <button type="button" onClick={() => setIsAdding(false)} className="px-8 py-3 rounded-xl font-bold text-gray-500">Hủy</button>
+            <button type="button" onClick={cancelForm} className="px-8 py-3 rounded-xl font-bold text-gray-500">Hủy</button>
           </div>
         </form>
       )}
 
       <div className="grid gap-4">
+        {items.length === 0 && <div className="text-center py-12 text-gray-400 font-bold italic">Chưa có bài viết nào.</div>}
         {items.map(item => (
           <div key={item.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between group">
             <div className="flex items-center gap-4">
@@ -328,12 +359,24 @@ const NewsManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, o
                 <img src={item.image} className="w-full h-full object-cover" alt="Thumb" />
               </div>
               <div>
-                <h4 className="font-bold text-blue-900">{item.title}</h4>
+                <h4 className="font-bold text-blue-900 line-clamp-1">{item.title}</h4>
                 <p className="text-[12px] text-gray-400">{item.date}</p>
               </div>
             </div>
-            <div className="flex gap-2">
-              <button onClick={async () => { if(confirm('Xóa?')) { await dataService.delete('news', item.id); load(); } }} className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors">
+            <div className="flex gap-1">
+              <button onClick={() => handleEdit(item)} className="p-2 text-blue-400 hover:bg-blue-50 rounded-lg transition-colors">
+                <Edit size={18} />
+              </button>
+              <button 
+                onClick={async () => { 
+                  if(confirm('Bạn có chắc muốn xóa bài viết này?')) { 
+                    await dataService.delete('news', item.id); 
+                    load(); 
+                    onSuccess("Đã xóa bài viết!");
+                  } 
+                }} 
+                className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors"
+              >
                 <Trash2 size={18} />
               </button>
             </div>
@@ -350,6 +393,8 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
   const [brands, setBrands] = useState<any[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [isAddingBrand, setIsAddingBrand] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingBrandId, setEditingBrandId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ title: '', brand: '', image: '', price: '' });
   const [brandFormData, setBrandFormData] = useState({ name: '', desc: '', color: 'text-blue-600' });
   const [uploading, setUploading] = useState(false);
@@ -365,6 +410,29 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
   };
 
   useEffect(() => { load(); }, []);
+
+  const handleEditProduct = (item: any) => {
+    setFormData({
+      title: item.title,
+      brand: item.brand,
+      image: item.image,
+      price: item.price.toString()
+    });
+    setEditingId(item.id);
+    setIsAdding(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleEditBrand = (brand: any) => {
+    setBrandFormData({
+      name: brand.name,
+      desc: brand.desc,
+      color: brand.color
+    });
+    setEditingBrandId(brand.id);
+    setIsAddingBrand(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -390,15 +458,24 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
         formData.brand = brands[0].name;
       }
       
-      await dataService.create('products', { 
+      const payload = { 
         ...formData, 
         price: Number(formData.price),
         features: [{label: 'Nổi bật', icon: 'zap'}] 
-      });
+      };
+
+      if (editingId) {
+        await dataService.update('products', editingId, payload);
+        onSuccess("Đã cập nhật sản phẩm!");
+      } else {
+        await dataService.create('products', payload);
+        onSuccess("Đã thêm sản phẩm mới!");
+      }
+      
       setIsAdding(false);
+      setEditingId(null);
       setFormData({ title: '', brand: brands[0]?.name || '', image: '', price: '' });
       await load();
-      onSuccess("Đã thêm sản phẩm mới!");
     } catch (err) {
       console.error(err);
       onError("Lỗi khi lưu sản phẩm");
@@ -411,11 +488,17 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
     e.preventDefault();
     setUploading(true);
     try {
-      await dataService.create('brands', brandFormData);
+      if (editingBrandId) {
+        await dataService.update('brands', editingBrandId, brandFormData);
+        onSuccess("Đã cập nhật thương hiệu!");
+      } else {
+        await dataService.create('brands', brandFormData);
+        onSuccess("Đã thêm thương hiệu mới!");
+      }
       setIsAddingBrand(false);
+      setEditingBrandId(null);
       setBrandFormData({ name: '', desc: '', color: 'text-blue-600' });
       await load();
-      onSuccess("Đã thêm thương hiệu mới!");
     } catch (err) {
       onError("Lỗi khi tạo thương hiệu");
     } finally {
@@ -440,7 +523,7 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
       {/* Brand Form */}
       {isAddingBrand && (
         <form onSubmit={handleAddBrand} className="bg-pink-50/50 p-8 rounded-[32px] shadow-xl mb-8 border border-pink-100">
-           <h3 className="text-xl font-black text-pink-600 mb-6 uppercase tracking-tight">Cấu hình thương hiệu</h3>
+           <h3 className="text-xl font-black text-pink-600 mb-6 uppercase tracking-tight">{editingBrandId ? 'Chỉnh sửa thương hiệu' : 'Cấu hình thương hiệu mới'}</h3>
            <div className="grid md:grid-cols-3 gap-6 mb-6">
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Tên thương hiệu</label>
@@ -468,9 +551,9 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   Đang lưu...
                 </>
-              ) : 'Lưu thương hiệu'}
+              ) : (editingBrandId ? 'Cập nhật' : 'Lưu thương hiệu')}
             </button>
-            <button type="button" onClick={() => setIsAddingBrand(false)} className="px-8 py-3 rounded-xl font-bold text-gray-400">Hủy</button>
+            <button type="button" onClick={() => {setIsAddingBrand(false); setEditingBrandId(null);}} className="px-8 py-3 rounded-xl font-bold text-gray-400">Hủy</button>
            </div>
         </form>
       )}
@@ -478,7 +561,7 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
       {/* Product Form */}
       {isAdding && (
         <form onSubmit={handleSubmit} className="bg-white p-8 rounded-[32px] shadow-xl mb-8 border border-blue-50">
-           <h3 className="text-xl font-black text-blue-900 mb-6 uppercase tracking-tight">Chi tiết sản phẩm</h3>
+           <h3 className="text-xl font-black text-blue-900 mb-6 uppercase tracking-tight">{editingId ? 'Chỉnh sửa sản phẩm' : 'Chi tiết sản phẩm mới'}</h3>
            <div className="grid md:grid-cols-2 gap-6 mb-6">
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Tên sản phẩm</label>
@@ -518,9 +601,9 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   Đang lưu...
                 </>
-              ) : 'Lưu sản phẩm'}
+              ) : (editingId ? 'Cập nhật' : 'Lưu sản phẩm')}
             </button>
-            <button type="button" onClick={() => setIsAdding(false)} className="px-8 py-3 rounded-xl font-bold text-gray-400">Hủy</button>
+            <button type="button" onClick={() => {setIsAdding(false); setEditingId(null);}} className="px-8 py-3 rounded-xl font-bold text-gray-400">Hủy</button>
            </div>
         </form>
       )}
@@ -538,12 +621,17 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
                 <div className={`font-black uppercase tracking-tight text-sm ${brand.color}`}>{brand.name}</div>
                 <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{brand.desc}</div>
               </div>
-              <button 
-                onClick={async () => { if(confirm('Xóa thương hiệu này sẽ ảnh hưởng đến lọc sản phẩm. Tiếp tục?')) { await dataService.delete('brands', brand.id); load(); } }}
-                className="p-2 text-red-200 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"
-              >
-                <Trash2 size={16} />
-              </button>
+              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                <button onClick={() => handleEditBrand(brand)} className="p-2 text-blue-400 hover:bg-blue-50 rounded-xl">
+                  <Edit size={16} />
+                </button>
+                <button 
+                  onClick={async () => { if(confirm('Xóa thương hiệu này sẽ ảnh hưởng đến lọc sản phẩm. Tiếp tục?')) { await dataService.delete('brands', brand.id); load(); onSuccess("Đã xóa thương hiệu!"); } }}
+                  className="p-2 text-red-400 hover:bg-red-50 rounded-xl"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
             </div>
           ))}
           {brands.length === 0 && <p className="text-gray-400 text-xs font-bold italic">Chưa có thương hiệu được thiết lập.</p>}
@@ -556,19 +644,23 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
           Kho hàng sản phẩm
         </h3>
         <div className="grid md:grid-cols-2 gap-4">
+          {items.length === 0 && <p className="text-gray-400 text-xs font-bold italic">Chưa có sản phẩm nào.</p>}
           {items.map(item => (
             <div key={item.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:border-blue-900 transition-all group">
               <div className="w-20 h-20 bg-gray-50 rounded-xl overflow-hidden shrink-0 border border-gray-50">
                 <img src={item.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="P" />
               </div>
               <div className="flex-1">
-                <h4 className="font-bold text-blue-900 leading-tight mb-1">{item.title}</h4>
+                <h4 className="font-bold text-blue-900 leading-tight mb-1 line-clamp-1">{item.title}</h4>
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded-md">{item.brand}</span>
                   <span className="text-[11px] font-bold text-emerald-600">{new Intl.NumberFormat('vi-VN').format(item.price || 0)}đ</span>
                 </div>
               </div>
-              <button onClick={async () => { if(confirm('Xóa sản phẩm?')) { await dataService.delete('products', item.id); load(); } }} className="text-red-200 hover:text-red-500 p-2 hover:bg-red-50 rounded-lg transition-all"><Trash2 size={18} /></button>
+              <div className="flex gap-1">
+                <button onClick={() => handleEditProduct(item)} className="text-blue-400 p-2 hover:bg-blue-50 rounded-lg"><Edit size={18} /></button>
+                <button onClick={async () => { if(confirm('Xóa sản phẩm?')) { await dataService.delete('products', item.id); load(); onSuccess("Đã xóa sản phẩm!"); } }} className="text-red-400 p-2 hover:bg-red-50 rounded-lg"><Trash2 size={18} /></button>
+              </div>
             </div>
           ))}
         </div>
@@ -580,21 +672,40 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
 const JobManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, onError: (m: string) => void }) => {
   const [items, setItems] = useState<any[]>([]);
   const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ title: '', location: '', salary: '', deadline: '' });
 
-  const load = () => dataService.list('jobs').then(setItems);
+  const load = () => dataService.list<any>('jobs').then(setItems);
   useEffect(() => { load(); }, []);
+
+  const handleEdit = (item: any) => {
+    setFormData({
+      title: item.title,
+      location: item.location,
+      salary: item.salary,
+      deadline: item.deadline
+    });
+    setEditingId(item.id);
+    setIsAdding(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await dataService.create('jobs', formData);
+      if (editingId) {
+        await dataService.update('jobs', editingId, formData);
+        onSuccess("Đã cập nhật tin tuyển dụng!");
+      } else {
+        await dataService.create('jobs', formData);
+        onSuccess("Đã đăng tin tuyển dụng mới!");
+      }
       setIsAdding(false);
+      setEditingId(null);
       setFormData({ title: '', location: '', salary: '', deadline: '' });
       await load();
-      onSuccess("Đã đăng tin tuyển dụng mới!");
     } catch (err) {
       onError("Lỗi khi lưu tin tuyển dụng");
     } finally {
@@ -606,13 +717,14 @@ const JobManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, on
     <div>
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-3xl font-black text-blue-900">Quản lý tuyển dụng</h2>
-        <button onClick={() => setIsAdding(true)} className="bg-orange-500 text-white px-6 py-2.5 rounded-full font-bold flex items-center gap-2 hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20">
+        <button onClick={() => {setIsAdding(true); setEditingId(null);}} className="bg-orange-500 text-white px-6 py-2.5 rounded-full font-bold flex items-center gap-2 hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20">
           <Plus size={20} /> Thêm vị trí
         </button>
       </div>
 
       {isAdding && (
         <form onSubmit={handleSubmit} className="bg-white p-8 rounded-[32px] shadow-xl mb-8 border border-orange-50">
+           <h3 className="text-xl font-black text-orange-600 mb-6 uppercase tracking-tight">{editingId ? 'Chỉnh sửa tin tuyển dụng' : 'Tuyển dụng mới'}</h3>
            <div className="grid md:grid-cols-2 gap-6 mb-6">
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Vị trí tuyển dụng</label>
@@ -638,21 +750,29 @@ const JobManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, on
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   Đang lưu...
                 </>
-              ) : 'Lưu tin tuyển dụng'}
+              ) : (editingId ? 'Cập nhật' : 'Lưu tin')}
             </button>
-            <button type="button" onClick={() => setIsAdding(false)} className="px-8 py-3 rounded-xl font-bold text-gray-400">Hủy</button>
+            <button type="button" onClick={() => {setIsAdding(false); setEditingId(null);}} className="px-8 py-3 rounded-xl font-bold text-gray-400">Hủy</button>
            </div>
         </form>
       )}
 
       <div className="space-y-4">
+        {items.length === 0 && <p className="text-gray-400 text-xs font-bold italic text-center py-8">Chưa có tin tuyển dụng nào.</p>}
         {items.map(item => (
-          <div key={item.id} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center">
+          <div key={item.id} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center group">
             <div>
               <h4 className="font-bold text-blue-900 text-lg">{item.title}</h4>
               <p className="text-sm text-gray-500">{item.location} • {item.salary} • Hạn: {item.deadline}</p>
             </div>
-            <button onClick={async () => { if(confirm('Xóa?')) { await dataService.delete('jobs', item.id); load(); } }} className="text-red-400"><Trash2 size={18} /></button>
+            <div className="flex gap-1">
+              <button onClick={() => handleEdit(item)} className="p-2 text-blue-400 hover:bg-blue-50 rounded-lg transition-colors">
+                <Edit size={18} />
+              </button>
+              <button onClick={async () => { if(confirm('Xóa?')) { await dataService.delete('jobs', item.id); load(); onSuccess("Đã xóa tin!"); } }} className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors">
+                <Trash2 size={18} />
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -663,21 +783,40 @@ const JobManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, on
 const DistributorManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, onError: (m: string) => void }) => {
   const [items, setItems] = useState<any[]>([]);
   const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ name: '', address: '', phone: '', region: 'Miền Nam' });
 
-  const load = () => dataService.list('distributors').then(setItems);
+  const load = () => dataService.list<any>('distributors').then(setItems);
   useEffect(() => { load(); }, []);
+
+  const handleEdit = (item: any) => {
+    setFormData({
+      name: item.name,
+      address: item.address,
+      phone: item.phone,
+      region: item.region
+    });
+    setEditingId(item.id);
+    setIsAdding(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await dataService.create('distributors', formData);
+      if (editingId) {
+        await dataService.update('distributors', editingId, formData);
+        onSuccess("Đã cập nhật nhà phân phối!");
+      } else {
+        await dataService.create('distributors', formData);
+        onSuccess("Đã thêm nhà phân phối mới!");
+      }
       setIsAdding(false);
+      setEditingId(null);
       setFormData({ name: '', address: '', phone: '', region: 'Miền Nam' });
       await load();
-      onSuccess("Đã thêm nhà phân phối mới!");
     } catch (err) {
       onError("Lỗi khi lưu nhà phân phối");
     } finally {
@@ -689,13 +828,14 @@ const DistributorManager = ({ onSuccess, onError }: { onSuccess: (m: string) => 
     <div>
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-3xl font-black text-blue-900">Nhà phân phối</h2>
-        <button onClick={() => setIsAdding(true)} className="bg-indigo-500 text-white px-6 py-2.5 rounded-full font-bold flex items-center gap-2 hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-500/20">
+        <button onClick={() => {setIsAdding(true); setEditingId(null);}} className="bg-indigo-500 text-white px-6 py-2.5 rounded-full font-bold flex items-center gap-2 hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-500/20">
           <Plus size={20} /> Thêm NPP
         </button>
       </div>
 
       {isAdding && (
         <form onSubmit={handleSubmit} className="bg-white p-8 rounded-[32px] shadow-xl mb-8 border border-indigo-50">
+           <h3 className="text-xl font-black text-indigo-600 mb-6 uppercase tracking-tight">{editingId ? 'Chỉnh sửa NPP' : 'Nhà phân phối mới'}</h3>
            <div className="grid md:grid-cols-2 gap-6 mb-6">
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Tên đại lý/NPP</label>
@@ -725,24 +865,32 @@ const DistributorManager = ({ onSuccess, onError }: { onSuccess: (m: string) => 
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   Đang lưu...
                 </>
-              ) : 'Lưu nhà phân phối'}
+              ) : (editingId ? 'Cập nhật' : 'Lưu NPP')}
             </button>
-            <button type="button" onClick={() => setIsAdding(false)} className="px-8 py-3 rounded-xl font-bold text-gray-400">Hủy</button>
+            <button type="button" onClick={() => {setIsAdding(false); setEditingId(null);}} className="px-8 py-3 rounded-xl font-bold text-gray-400">Hủy</button>
            </div>
         </form>
       )}
 
       <div className="grid md:grid-cols-2 gap-4">
+        {items.length === 0 && <p className="text-gray-400 text-xs font-bold italic text-center py-8 col-span-2">Chưa có nhà phân phối nào.</p>}
         {items.map(item => (
-          <div key={item.id} className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+          <div key={item.id} className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 group">
             <div className="flex justify-between mb-2">
-              <h4 className="font-bold text-blue-900 uppercase">{item.name}</h4>
-              <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded-md font-bold">{item.region}</span>
+              <h4 className="font-bold text-blue-900 uppercase line-clamp-1">{item.name}</h4>
+              <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded-md font-bold shrink-0">{item.region}</span>
             </div>
-            <p className="text-sm text-gray-500 mb-4">{item.address}</p>
+            <p className="text-sm text-gray-500 mb-4 line-clamp-2 min-h-[40px]">{item.address}</p>
             <div className="flex justify-between items-center">
               <span className="text-sm font-bold text-blue-900">{item.phone}</span>
-              <button onClick={async () => { if(confirm('Xóa?')) { await dataService.delete('distributors', item.id); load(); } }} className="text-red-400"><Trash2 size={18} /></button>
+              <div className="flex gap-1">
+                <button onClick={() => handleEdit(item)} className="p-2 text-blue-400 hover:bg-blue-50 rounded-lg transition-colors">
+                  <Edit size={18} />
+                </button>
+                <button onClick={async () => { if(confirm('Xóa?')) { await dataService.delete('distributors', item.id); load(); onSuccess("Đã xóa NPP!"); } }} className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors">
+                  <Trash2 size={18} />
+                </button>
+              </div>
             </div>
           </div>
         ))}
