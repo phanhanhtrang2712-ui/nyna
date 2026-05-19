@@ -12,6 +12,14 @@ const AdminPage = () => {
     return sessionStorage.getItem('nyna_admin_auth') === 'true';
   });
   const [loading, setLoading] = useState(false);
+  const [dbStatus, setDbStatus] = useState<'checking' | 'connected' | 'error'>('checking');
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      dataService.list('news').then(() => setDbStatus('connected')).catch(() => setDbStatus('error'));
+    }
+  }, [isAuthenticated]);
+
   const [activeTab, setActiveTab] = useState<'news' | 'products' | 'jobs' | 'distributors'>('news');
   const [loginData, setLoginData] = useState({ username: '', password: '' });
   const [loginError, setLoginError] = useState('');
@@ -110,7 +118,13 @@ const AdminPage = () => {
       {/* Sidebar */}
       <aside className="w-72 bg-blue-900 text-white p-8 hidden md:flex flex-col border-r border-white/5">
         <h2 className="text-3xl font-black mb-12 tracking-tighter uppercase">NYNA</h2>
-        <nav className="flex-1 space-y-3">
+        <div className="mt-4 px-6 py-2 rounded-xl bg-white/5 flex items-center gap-2">
+          <div className={`w-2 h-2 rounded-full ${dbStatus === 'connected' ? 'bg-emerald-500 animate-pulse' : dbStatus === 'error' ? 'bg-red-500' : 'bg-yellow-500'}`}></div>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-blue-200">
+            {dbStatus === 'connected' ? 'Database Online' : dbStatus === 'error' ? 'Database Offline' : 'Connecting...'}
+          </span>
+        </div>
+        <nav className="flex-1 space-y-3 mt-10">
           {[
             { id: 'news', icon: <Newspaper size={20} />, label: 'Quản lý Tin tức' },
             { id: 'products', icon: <Package size={20} />, label: 'Quản lý Sản phẩm' },
