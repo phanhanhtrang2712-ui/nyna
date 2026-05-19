@@ -8,31 +8,29 @@ import { dataService } from '../services/dataService';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 
 const AdminPage = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return sessionStorage.getItem('nyna_admin_auth') === 'true';
+  });
+  const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'news' | 'products' | 'jobs' | 'distributors'>('news');
+  const [loginData, setLoginData] = useState({ username: '', password: '' });
+  const [loginError, setLoginError] = useState('');
 
-  useEffect(() => {
-    console.log("AdminPage: Initializing auth...");
-    const unsub = onAuthStateChanged(auth, (u) => {
-      console.log("AdminPage: Auth state changed:", u ? "User logged in" : "No user");
-      setUser(u);
-      setLoading(false);
-    });
-    
-    // Safety timeout: if auth takes more than 5 seconds, stop loading so user can try login or go back
-    const timer = setTimeout(() => {
-      if (loading) {
-        console.warn("AdminPage: Auth timeout reached");
-        setLoading(false);
-      }
-    }, 5000);
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (loginData.username === 'admin' && loginData.password === '123456123456') {
+      setIsAuthenticated(true);
+      sessionStorage.setItem('nyna_admin_auth', 'true');
+      setLoginError('');
+    } else {
+      setLoginError('Tài khoản hoặc mật khẩu không đúng');
+    }
+  };
 
-    return () => {
-      unsub();
-      clearTimeout(timer);
-    };
-  }, []);
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    sessionStorage.removeItem('nyna_admin_auth');
+  };
 
   if (loading) {
     return (
@@ -44,35 +42,63 @@ const AdminPage = () => {
     );
   }
 
-  if (!user) {
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
-        <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <LayoutDashboard className="text-blue-900 w-8 h-8" />
+        <div className="bg-white p-10 rounded-[40px] shadow-2xl max-w-md w-full border border-blue-50">
+          <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mx-auto mb-8">
+            <LayoutDashboard className="text-blue-900 w-10 h-10" />
           </div>
-          <h1 className="text-3xl font-black text-blue-900 mb-2">CMS Quản trị</h1>
-          <p className="text-gray-500 mb-8">Ứng dụng quản trị nội dung NYNA</p>
+          <h1 className="text-3xl font-black text-blue-900 mb-2 text-center uppercase tracking-tighter">NYNA CMS</h1>
+          <p className="text-gray-500 mb-8 text-center text-sm">Hệ thống quản trị nội dung website</p>
           
-          <div className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Tài khoản</label>
+              <input 
+                type="text"
+                required
+                className="w-full bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-2xl py-4 px-6 outline-none transition-all font-medium"
+                placeholder="Nhập tài khoản"
+                value={loginData.username}
+                onChange={e => setLoginData({...loginData, username: e.target.value})}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Mật khẩu</label>
+              <input 
+                type="password"
+                required
+                className="w-full bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-2xl py-4 px-6 outline-none transition-all font-medium"
+                placeholder="Nhập mật khẩu"
+                value={loginData.password}
+                onChange={e => setLoginData({...loginData, password: e.target.value})}
+              />
+            </div>
+
+            {loginError && (
+              <div className="text-red-500 text-xs font-bold bg-red-50 p-3 rounded-xl text-center">
+                {loginError}
+              </div>
+            )}
+
             <button 
-              onClick={signInWithGoogle}
-              className="w-full bg-blue-900 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 hover:bg-blue-800 transition-all shadow-lg shadow-blue-900/20"
+              type="submit"
+              className="w-full bg-blue-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center shadow-xl shadow-blue-900/20 hover:scale-[1.02] active:scale-[0.98] transition-all uppercase tracking-wider mt-4"
             >
-              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5 bg-white p-0.5 rounded" alt="Google" />
-              Đăng nhập bằng Google
+              Đăng nhập hệ thống
             </button>
             
             <a 
               href="/"
-              className="block w-full py-4 text-gray-500 font-bold hover:text-blue-900 transition-all border-2 border-transparent hover:border-gray-100 rounded-xl"
+              className="block w-full py-4 text-center text-gray-400 font-bold hover:text-blue-900 transition-all text-sm"
             >
               Quay lại trang chủ
             </a>
-          </div>
+          </form>
           
-          <div className="mt-8 pt-8 border-t border-gray-100 text-[11px] text-gray-400">
-            Hệ thống chỉ dành cho người quản trị được cấp quyền.
+          <div className="mt-8 pt-8 border-t border-gray-100 text-[10px] text-center text-gray-400 uppercase tracking-widest leading-relaxed">
+            Mặc định: admin / 123456123456
           </div>
         </div>
       </div>
@@ -82,43 +108,43 @@ const AdminPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <aside className="w-64 bg-blue-900 text-white p-6 hidden md:flex flex-col">
-        <h2 className="text-2xl font-black mb-10 tracking-tighter">NYNA CMS</h2>
-        <nav className="flex-1 space-y-2">
+      <aside className="w-72 bg-blue-900 text-white p-8 hidden md:flex flex-col border-r border-white/5">
+        <h2 className="text-3xl font-black mb-12 tracking-tighter uppercase">NYNA</h2>
+        <nav className="flex-1 space-y-3">
           {[
-            { id: 'news', icon: <Newspaper size={20} />, label: 'Tin tức' },
-            { id: 'products', icon: <Package size={20} />, label: 'Sản phẩm' },
-            { id: 'jobs', icon: <Briefcase size={20} />, label: 'Tuyển dụng' },
+            { id: 'news', icon: <Newspaper size={20} />, label: 'Quản lý Tin tức' },
+            { id: 'products', icon: <Package size={20} />, label: 'Quản lý Sản phẩm' },
+            { id: 'jobs', icon: <Briefcase size={20} />, label: 'Quản lý Tuyển dụng' },
             { id: 'distributors', icon: <MapPin size={20} />, label: 'Nhà phân phối' },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                activeTab === tab.id ? 'bg-white text-blue-900' : 'hover:bg-white/10'
+              className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl transition-all duration-300 ${
+                activeTab === tab.id ? 'bg-white text-blue-900 shadow-xl shadow-black/10' : 'hover:bg-white/10 text-blue-100'
               }`}
             >
               {tab.icon}
-              <span className="font-bold text-sm">{tab.label}</span>
+              <span className="font-bold text-sm tracking-wide">{tab.label}</span>
             </button>
           ))}
         </nav>
-        <div className="mt-auto pt-6 border-t border-white/10">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-full bg-white/20 overflow-hidden">
-               {user.photoURL && <img src={user.photoURL} alt="Avatar" />}
+        <div className="mt-auto pt-8 border-t border-white/10">
+          <div className="flex items-center gap-4 mb-8 bg-white/5 p-4 rounded-2xl">
+            <div className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center font-black text-white shadow-lg">
+              AD
             </div>
             <div className="overflow-hidden">
-              <div className="text-[12px] font-bold truncate">{user.displayName}</div>
-              <div className="text-[10px] text-blue-300 truncate">{user.email}</div>
+              <div className="text-[14px] font-black tracking-tight">Administrator</div>
+              <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">NYNA Manager</div>
             </div>
           </div>
           <button 
-            onClick={logout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-red-500/20 text-red-300 transition-all"
+            onClick={handleLogout}
+            className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl bg-red-500/10 hover:bg-red-500 text-red-300 hover:text-white transition-all duration-300 shadow-lg hover:shadow-red-500/20"
           >
             <LogOut size={20} />
-            <span className="font-bold text-sm">Đăng xuất</span>
+            <span className="font-bold text-sm uppercase tracking-wider">Đăng xuất</span>
           </button>
         </div>
       </aside>

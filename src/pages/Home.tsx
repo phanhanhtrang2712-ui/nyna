@@ -25,6 +25,23 @@ interface ProductItem {
   image: string;
   features: { label: string; icon: any }[];
   color?: string;
+  price?: number;
+}
+
+interface JobItem {
+  id?: string;
+  title: string;
+  location: string;
+  salary: string;
+  deadline: string;
+}
+
+interface DistributorItem {
+  id?: string;
+  name: string;
+  address: string;
+  phone: string;
+  region: string;
 }
 
 // --- CONSTANTS (Fallback) ---
@@ -263,10 +280,121 @@ export default function Home() {
       <CatalogSection />
       <WhyChooseSection />
       <NewsSection />
+      <JobsSection />
+      <DistributorsSection />
       <Footer />
     </div>
   );
 }
+
+const JobsSection = () => {
+  const [jobs, setJobs] = useState<JobItem[]>([]);
+
+  useEffect(() => {
+    dataService.list<JobItem>('jobs').then(setJobs);
+  }, []);
+
+  if (jobs.length === 0) return null;
+
+  return (
+    <section className="py-24 bg-gray-50" id="jobs">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex justify-between items-end mb-12">
+          <div>
+            <h2 className="text-4xl font-black text-blue-900 uppercase">Cơ hội nghề nghiệp</h2>
+            <p className="text-gray-500 mt-2">Gia nhập đội ngũ NYNA để cùng phát triển</p>
+          </div>
+        </div>
+        <div className="grid md:grid-cols-2 gap-6">
+          {jobs.map((job) => (
+            <div key={job.id} className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-xl font-bold text-blue-900 group-hover:text-blue-600 transition-colors uppercase tracking-tight">{job.title}</h3>
+                <span className="bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest leading-none flex items-center h-6">Mới</span>
+              </div>
+              <div className="grid grid-cols-2 gap-4 text-sm text-gray-500 mb-6">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-gray-400" />
+                  <span>{job.location}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Heart className="w-4 h-4 text-gray-400" />
+                  <span>{job.salary}</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between pt-6 border-t border-gray-50">
+                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Hạn: {job.deadline}</span>
+                <button className="bg-blue-900 text-white px-6 py-2 rounded-full font-bold text-sm hover:bg-blue-800 transition-all">Ứng tuyển</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const DistributorsSection = () => {
+  const [distributors, setDistributors] = useState<DistributorItem[]>([]);
+  const [activeRegion, setActiveRegion] = useState('Tất cả');
+
+  useEffect(() => {
+    dataService.list<DistributorItem>('distributors').then(setDistributors);
+  }, []);
+
+  const regions = ['Tất cả', ...Array.from(new Set(distributors.map(d => d.region)))];
+  const filtered = activeRegion === 'Tất cả' 
+    ? distributors 
+    : distributors.filter(d => d.region === activeRegion);
+
+  if (distributors.length === 0) return null;
+
+  return (
+    <section className="py-24 bg-white" id="distributors">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-black text-blue-900 mb-4 uppercase">Hệ thống phân phối</h2>
+          <p className="text-gray-500">Tìm kiếm đại lý và nhà phân phối NYNA gần bạn</p>
+        </div>
+
+        <div className="flex flex-wrap justify-center gap-4 mb-12">
+          {regions.map(r => (
+            <button 
+              key={r}
+              onClick={() => setActiveRegion(r)}
+              className={`px-8 py-2.5 rounded-full font-bold text-sm transition-all ${
+                activeRegion === r ? 'bg-blue-900 text-white shadow-xl shadow-blue-900/20' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+              }`}
+            >
+              {r}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {filtered.map((item) => (
+            <div key={item.id} className="p-8 rounded-[40px] border border-gray-100 hover:border-blue-900 transition-all group bg-white shadow-sm hover:shadow-2xl">
+              <div className="flex justify-between items-start mb-6">
+                <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center group-hover:bg-blue-900 group-hover:text-white transition-all">
+                  <MapPin className="w-6 h-6 outline-none" />
+                </div>
+                <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full">{item.region}</span>
+              </div>
+              <h3 className="text-lg font-black text-blue-900 mb-4 uppercase tracking-tighter leading-tight">{item.name}</h3>
+              <p className="text-sm text-gray-500 mb-6 leading-relaxed flex items-start gap-2">
+                 {item.address}
+              </p>
+              <div className="flex items-center gap-2 text-blue-600 font-bold">
+                <Phone className="w-4 h-4" />
+                <span>{item.phone}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
 
 const WhyChooseSection = () => (
   <section className="py-24 bg-gray-50">
