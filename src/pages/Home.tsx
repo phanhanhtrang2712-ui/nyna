@@ -2,15 +2,57 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Search, Heart, ShoppingCart, CheckCircle2, ChevronRight, 
+  Search, ChevronRight, 
   Filter, X, LayoutGrid, List, SlidersHorizontal, ArrowRight, Zap, ShieldCheck
 } from 'lucide-react';
+import ProductCard from '../components/ProductCard';
 import { dataService } from '../services/dataService';
 import { ProductItem } from '../types';
 
 interface HomeProps {
   onAddToCart?: (product: any) => void;
 }
+
+const CategorySection = ({ group, items, onAddToCart }: { group: string; items: ProductItem[]; onAddToCart?: (p: any) => void }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const displayItems = isExpanded ? items : items.slice(0, 4);
+
+  return (
+    <div className="space-y-8">
+      <div className="flex justify-between items-end border-b border-gray-100 pb-6">
+         <div>
+            <span className="text-pink-500 font-black uppercase tracking-widest text-[10px] mb-2 block">DASHBOARD</span>
+            <h4 className="text-2xl font-black text-blue-900 uppercase tracking-tighter">{group}</h4>
+         </div>
+         {items.length > 4 && !isExpanded && (
+           <button 
+            onClick={() => setIsExpanded(true)}
+            className="text-blue-900 font-black text-[11px] uppercase tracking-widest hover:text-pink-500 transition-colors flex items-center gap-2 group"
+           >
+             Xem tất cả ({items.length}) <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+           </button>
+         )}
+      </div>
+      
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {displayItems.map((item) => (
+          <ProductCard key={item.id} item={item} onAddToCart={onAddToCart} />
+        ))}
+      </div>
+      
+      {isExpanded && (
+        <div className="pt-4 text-center">
+           <button 
+            onClick={() => setIsExpanded(false)}
+            className="text-gray-400 font-black text-[10px] uppercase tracking-[0.3em] hover:text-blue-900 transition-colors"
+           >
+             Thu gọn "{group}"
+           </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Home = ({ onAddToCart }: HomeProps) => {
   const [products, setProducts] = useState<ProductItem[]>([]);
@@ -202,59 +244,27 @@ const Home = ({ onAddToCart }: HomeProps) => {
                </div>
             </div>
 
-            {/* Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {/* Grouped Product Sections */}
+            <div className="space-y-20">
                {loading ? (
-                 Array.from({ length: 6 }).map((_, i) => (
-                   <div key={i} className="bg-white rounded-[32px] h-[400px] animate-pulse border border-gray-100"></div>
-                 ))
+                 <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                      <div key={i} className="bg-white rounded-[32px] h-[400px] animate-pulse border border-gray-100"></div>
+                    ))}
+                 </div>
                ) : (
-                 filteredProducts.map((item) => (
-                   <motion.div 
-                    layout
-                    key={item.id} 
-                    className="bg-white rounded-[32px] border border-gray-100 shadow-sm p-5 group transition-all hover:shadow-2xl hover:-translate-y-2 flex flex-col"
-                   >
-                      <div className="relative mb-6 rounded-[24px] overflow-hidden bg-gray-50 aspect-square shrink-0">
-                         <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                         <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[9px] font-black text-blue-900 uppercase tracking-widest border border-white/50">
-                            {item.brand}
-                         </div>
-                         <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-gray-400 hover:text-pink-500 transition-colors shadow-lg">
-                           <Heart size={18} />
-                         </button>
-                      </div>
-
-                      <div className="flex-1 flex flex-col">
-                        <h3 className="text-lg font-black text-blue-900 mb-4 uppercase tracking-tight group-hover:text-pink-500 transition-colors line-clamp-2 min-h-[56px] leading-tight">
-                           {item.title}
-                        </h3>
-                        
-                        <div className="flex flex-wrap gap-2 mb-6">
-                           {item.features?.slice(0, 2).map((f, i) => (
-                             <div key={i} className="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-tighter">
-                                <CheckCircle2 size={10} /> {f.label}
-                             </div>
-                           ))}
-                        </div>
-
-                        <div className="mt-auto pt-6 border-t border-gray-50 flex items-center justify-between">
-                           <div className="text-xl font-black text-blue-900 italic">
-                             {new Intl.NumberFormat('vi-VN').format(item.price || 0)}đ
-                           </div>
-                           <button 
-                            onClick={() => onAddToCart && onAddToCart(item)}
-                            className="bg-blue-900 text-white p-4 rounded-[20px] hover:bg-pink-500 transition-all shadow-lg hover:shadow-pink-200"
-                           >
-                             <ShoppingCart size={20} />
-                           </button>
-                        </div>
-                      </div>
-                   </motion.div>
-                 ))
+                 (() => {
+                    const groupNames = Array.from(new Set(filteredProducts.map(p => p.category || 'Sản phẩm khác')));
+                    if (filteredProducts.length === 0) return null;
+                    
+                    return groupNames.map(group => {
+                      const groupItems = filteredProducts.filter(p => (p.category || 'Sản phẩm khác') === group);
+                      return <CategorySection key={group} group={group} items={groupItems} onAddToCart={onAddToCart} />;
+                    });
+                 })()
                )}
                {!loading && filteredProducts.length === 0 && (
-                 <div className="col-span-full py-32 text-center">
+                 <div className="py-32 text-center">
                     <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300">
                        <Search size={48} />
                     </div>
