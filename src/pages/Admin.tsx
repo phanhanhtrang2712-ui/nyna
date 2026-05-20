@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, Newspaper, Package, Briefcase, 
-  MapPin, LogOut, Plus, Trash2, Edit, Save, X, Image as ImageIcon, FileText, ShieldCheck
+  MapPin, LogOut, Plus, Trash2, Edit, Save, X, Image as ImageIcon, FileText, ShieldCheck,
+  PlayCircle
 } from 'lucide-react';
 import { auth, signInWithGoogle, logout } from '../lib/firebase';
 import { dataService } from '../services/dataService';
 import { onAuthStateChanged, type User } from 'firebase/auth';
+import { VideoItem } from '../types';
+import { motion, AnimatePresence } from 'motion/react';
 
 const AdminPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -31,7 +34,7 @@ const AdminPage = () => {
     }
   }, [isAuthenticated]);
 
-  const [activeTab, setActiveTab] = useState<'news' | 'products' | 'jobs' | 'distributors' | 'pages'>('news');
+  const [activeTab, setActiveTab] = useState<'news' | 'products' | 'jobs' | 'distributors' | 'pages' | 'videos'>('news');
   const [loginData, setLoginData] = useState({ username: '', password: '' });
   const [loginError, setLoginError] = useState('');
 
@@ -139,6 +142,7 @@ const AdminPage = () => {
           {[
             { id: 'news', icon: <Newspaper size={20} />, label: 'Quản lý Tin tức' },
             { id: 'products', icon: <Package size={20} />, label: 'Quản lý Sản phẩm' },
+            { id: 'videos', icon: <PlayCircle size={20} />, label: 'Thư viện Video' },
             { id: 'jobs', icon: <Briefcase size={20} />, label: 'Quản lý Tuyển dụng' },
             { id: 'distributors', icon: <MapPin size={20} />, label: 'Nhà phân phối' },
             { id: 'pages', icon: <FileText size={20} />, label: 'Nội dung trang' },
@@ -180,6 +184,7 @@ const AdminPage = () => {
         <div className="max-w-5xl mx-auto">
           {activeTab === 'news' && <NewsManager onSuccess={showSuccess} onError={showError} />}
           {activeTab === 'products' && <ProductManager onSuccess={showSuccess} onError={showError} />}
+          {activeTab === 'videos' && <VideoManager onSuccess={showSuccess} onError={showError} />}
           {activeTab === 'jobs' && <JobManager onSuccess={showSuccess} onError={showError} />}
           {activeTab === 'distributors' && <DistributorManager onSuccess={showSuccess} onError={showError} />}
           {activeTab === 'pages' && <PageManager onSuccess={showSuccess} onError={showError} />}
@@ -1073,6 +1078,130 @@ const DistributorManager = ({ onSuccess, onError }: { onSuccess: (m: string) => 
             </div>
           </div>
         ))}
+      </div>
+    </div>
+  );
+};
+
+const VideoManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, onError: (m: string) => void }) => {
+  const [items, setItems] = useState<VideoItem[]>([]);
+  const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [formData, setFormData] = useState({ title: '', youtube_url: '', tag: 'SỰ KIỆN' });
+  const [loading, setLoading] = useState(false);
+
+  const load = () => dataService.list<VideoItem>('videos').then(setItems);
+  useEffect(() => { load(); }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      if (editingId) {
+        await dataService.update('videos', editingId, formData);
+        onSuccess("Đã cập nhật video!");
+      } else {
+        await dataService.create('videos', formData);
+        onSuccess("Đã thêm video mới!");
+      }
+      setIsAdding(false);
+      setEditingId(null);
+      setFormData({ title: '', youtube_url: '', tag: 'SỰ KIỆN' });
+      await load();
+    } catch (err: any) {
+      onError(err.message || "Lỗi khi lưu video");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Xóa video này?")) {
+      try {
+        await dataService.delete('videos', id);
+        await load();
+        onSuccess("Đã xóa video!");
+      } catch (err: any) {
+        onError(err.message || "Lỗi khi xóa");
+      }
+    }
+  };
+
+  const getYoutubeThumbnail = (url: string) => {
+    let videoId = '';
+    if (url.includes('v=')) {
+      videoId = url.split('v=')[1].split('&')[0];
+    } else if (url.includes('youtu.be/')) {
+      videoId = url.split('youtu.be/')[1].split('?')[0];
+    } else {
+      videoId = url.split('/').pop() || '';
+    }
+    return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+  };
+
+  return (
+    <div className="space-y-12">
+      <div className="flex justify-between items-center">
+        <h2 className="text-3xl font-black text-blue-900 uppercase">Thư viện Video</h2>
+        <button onClick={() => { setIsAdding(true); setEditingId(null); setFormData({ title: '', youtube_url: '', tag: 'SỰ KIỆN' }); }} className="bg-blue-900 text-white px-8 py-3 rounded-full font-black uppercase text-xs tracking-widest flex items-center gap-2 hover:bg-pink-500 transition-all shadow-lg">
+          <Plus size={18} /> Thêm Video
+        </button>
+      </div>
+
+      {isAdding && (
+        <form onSubmit={handleSubmit} className="bg-white p-10 rounded-[40px] shadow-2xl border border-blue-50">
+          <h3 className="text-xl font-black text-blue-900 mb-8 uppercase tracking-tight">{editingId ? 'Cập nhật video' : 'Thêm video mới'}</h3>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="md:col-span-2">
+              <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Tiêu đề video</label>
+              <input required className="w-full p-4 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-2xl outline-none transition-all font-bold" value={formData.title} onChange={e=>setFormData({...formData, title: e.target.value})} placeholder="VD: QUY TRÌNH SẢN XUẤT TÃ NYNA" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Nhãn (Tag)</label>
+              <input required className="w-full p-4 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-2xl outline-none transition-all font-bold" value={formData.tag} onChange={e=>setFormData({...formData, tag: e.target.value})} placeholder="Phóng sự, TVC, Sự kiện..." />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Link YouTube</label>
+              <input required className="w-full p-4 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-2xl outline-none transition-all font-bold" value={formData.youtube_url} onChange={e=>setFormData({...formData, youtube_url: e.target.value})} placeholder="https://www.youtube.com/watch?v=..." />
+            </div>
+            <div className="md:col-span-2 flex gap-4 pt-4">
+              <button disabled={loading} type="submit" className="flex-1 bg-blue-900 text-white h-14 rounded-2xl font-black uppercase tracking-widest hover:bg-emerald-500 transition-all disabled:opacity-50">
+                {loading ? 'Đang lưu...' : (editingId ? 'Cập nhật' : 'Lưu Video')}
+              </button>
+              <button type="button" onClick={() => setIsAdding(false)} className="px-10 h-14 rounded-2xl font-black uppercase text-gray-400 tracking-widest hover:bg-gray-100 transition-all">Hủy</button>
+            </div>
+          </div>
+        </form>
+      )}
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {items.map(item => (
+          <div key={item.id} className="bg-white p-5 rounded-[40px] border border-gray-100 shadow-sm group hover:shadow-xl transition-all">
+            <div className="aspect-video bg-gray-100 rounded-3xl overflow-hidden mb-6 relative">
+               <img 
+                src={getYoutubeThumbnail(item.youtube_url)} 
+                alt="" 
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+               />
+               <div className="absolute inset-0 bg-blue-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <PlayCircle className="text-white" size={48} />
+               </div>
+               <div className="absolute top-4 left-4 bg-pink-500 text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest leading-none">
+                  {item.tag}
+               </div>
+            </div>
+            <h4 className="font-black text-blue-900 uppercase tracking-tight mb-4 line-clamp-1">{item.title}</h4>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => { setFormData(item); setEditingId(item.id); setIsAdding(true); }}
+                className="flex-1 h-12 bg-blue-50 text-blue-600 rounded-xl font-bold hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center gap-2"><Edit size={16} /> Sửa</button>
+              <button 
+                onClick={() => handleDelete(item.id)}
+                className="w-12 h-12 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all flex items-center justify-center"><Trash2 size={16} /></button>
+            </div>
+          </div>
+        ))}
+        {items.length === 0 && <div className="col-span-full py-20 text-center text-gray-300 font-bold italic uppercase tracking-widest">Chưa có video nào.</div>}
       </div>
     </div>
   );

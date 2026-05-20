@@ -88,3 +88,13 @@ ALTER TABLE public.jobs DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.distributors DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.settings DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.pages DISABLE ROW LEVEL SECURITY;
+
+-- 8. Bảng Video (videos)
+CREATE TABLE IF NOT EXISTS public.videos (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    title TEXT NOT NULL,
+    youtube_url TEXT NOT NULL,
+    tag TEXT DEFAULT 'SỰ KIỆN'
+);
+ALTER TABLE public.videos DISABLE ROW LEVEL SECURITY;

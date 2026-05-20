@@ -56,3 +56,10 @@ export interface PageItem {
   content: string;
   show_on_home?: boolean;
 }
+
+export interface VideoItem {
+  id: string;
+  title: string;
+  youtube_url: string;
+  tag: string;
+}
