@@ -18,10 +18,9 @@ const CategorySection = ({ group, items, onAddToCart }: { group: string; items: 
   const displayItems = isExpanded ? items : items.slice(0, 4);
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-end border-b border-gray-100 pb-6">
+    <div className="space-y-6">
+      <div className="flex justify-between items-end border-b border-gray-100 pb-4">
          <div>
-            <span className="text-pink-500 font-black uppercase tracking-widest text-[10px] mb-2 block">DASHBOARD</span>
             <h4 className="text-2xl font-black text-blue-900 uppercase tracking-tighter">{group}</h4>
          </div>
          {items.length > 4 && !isExpanded && (
@@ -245,7 +244,7 @@ const Home = ({ onAddToCart }: HomeProps) => {
             </div>
 
             {/* Grouped Product Sections */}
-            <div className="space-y-20">
+            <div className="space-y-12">
                {loading ? (
                  <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {Array.from({ length: 4 }).map((_, i) => (
