@@ -203,19 +203,19 @@ const Home = ({ onAddToCart }: HomeProps) => {
             </div>
 
             {/* Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                {loading ? (
                  Array.from({ length: 6 }).map((_, i) => (
-                   <div key={i} className="bg-white rounded-[40px] h-[450px] animate-pulse border border-gray-100"></div>
+                   <div key={i} className="bg-white rounded-[32px] h-[400px] animate-pulse border border-gray-100"></div>
                  ))
                ) : (
                  filteredProducts.map((item) => (
                    <motion.div 
                     layout
                     key={item.id} 
-                    className="bg-white rounded-[40px] border border-gray-100 shadow-sm p-6 group transition-all hover:shadow-2xl hover:-translate-y-2 flex flex-col"
+                    className="bg-white rounded-[32px] border border-gray-100 shadow-sm p-5 group transition-all hover:shadow-2xl hover:-translate-y-2 flex flex-col"
                    >
-                      <div className="relative mb-6 rounded-[32px] overflow-hidden bg-gray-50 aspect-square shrink-0">
+                      <div className="relative mb-6 rounded-[24px] overflow-hidden bg-gray-50 aspect-square shrink-0">
                          <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                          <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[9px] font-black text-blue-900 uppercase tracking-widest border border-white/50">
                             {item.brand}
