@@ -1,19 +1,17 @@
--- 🚀 CHẠY LỆNH NÀY TRONG SQL EDITOR ĐỂ CẬP NHẬT DATABASE
--- Đừng lo nếu nó báo "already exists", lệnh này rất an toàn.
+-- 🚨 QUAN TRỌNG: COPY VÀ CHẠY ĐOẠN NÀY TRONG SQL EDITOR CỦA SUPABASE ĐỂ CẬP NHẬT DATABASE 🚨
+-- Chạy xong hãy nhấn F5 tải lại trang web.
 
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-
--- Cập nhật bảng Sản phẩm (Products)
+-- 1. Cập nhật bảng Sản phẩm (Products)
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'Chưa phân loại';
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS description TEXT;
 ALTER TABLE public.products ADD COLUMN IF NOT EXISTS specifications JSONB DEFAULT '[]'::jsonb;
 
--- Cập nhật bảng Trang (Pages)
+-- 2. Cập nhật bảng Trang nội dung (Pages)
 ALTER TABLE public.pages ADD COLUMN IF NOT EXISTS show_on_home BOOLEAN DEFAULT false;
 ALTER TABLE public.pages ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'policy';
 ALTER TABLE public.pages ADD COLUMN IF NOT EXISTS slug TEXT;
 
--- Tạo bảng Video mới (Nếu chưa có)
+-- 3. Tạo bảng Video (videos)
 CREATE TABLE IF NOT EXISTS public.videos (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     created_at TIMESTAMPTZ DEFAULT now(),
@@ -24,6 +22,8 @@ CREATE TABLE IF NOT EXISTS public.videos (
 ALTER TABLE public.videos DISABLE ROW LEVEL SECURITY;
 
 -- DƯỚI ĐÂY LÀ TOÀN BỘ CẤU TRÚC (Nếu tạo mới từ đầu):
+-- Nếu bạn đã chạy các lệnh trên thì không cần chạy phần dưới này.
+
 CREATE TABLE IF NOT EXISTS public.news (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     created_at TIMESTAMPTZ DEFAULT now(),
