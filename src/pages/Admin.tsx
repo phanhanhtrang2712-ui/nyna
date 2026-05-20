@@ -267,7 +267,11 @@ const NewsManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, o
       await load();
     } catch (err: any) {
       console.error(err);
-      onError(err.message || "Có lỗi khi lưu bài viết");
+      if (err.message?.includes('column')) {
+        onError("Lỗi: Thiếu cột dữ liệu trong Database. Vui lòng copy nội dung file 'supabase_schema.sql' vào SQL Editor trên Supabase Dashboard và nhấn RUN để cập nhật.");
+      } else {
+        onError(err.message || "Có lỗi khi lưu bài viết");
+      }
     } finally {
       setUploading(false);
     }
@@ -750,7 +754,12 @@ const JobManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, on
       setFormData({ title: '', location: '', salary: '', deadline: '' });
       await load();
     } catch (err: any) {
-      onError(err.message || "Lỗi khi lưu tin tuyển dụng");
+      console.error(err);
+      if (err.message?.includes('column')) {
+        onError("Lỗi: Thiếu cột dữ liệu trong Database. Vui lòng copy nội dung file 'supabase_schema.sql' vào SQL Editor trên Supabase Dashboard và nhấn RUN để cập nhật.");
+      } else {
+        onError(err.message || "Lỗi khi lưu tin tuyển dụng");
+      }
     } finally {
       setLoading(false);
     }
@@ -1006,7 +1015,12 @@ const DistributorManager = ({ onSuccess, onError }: { onSuccess: (m: string) => 
       setFormData({ name: '', address: '', phone: '', region: 'Miền Nam' });
       await load();
     } catch (err: any) {
-      onError(err.message || "Lỗi khi lưu nhà phân phối");
+      console.error(err);
+      if (err.message?.includes('column')) {
+        onError("Lỗi: Thiếu cột dữ liệu trong Database. Vui lòng copy nội dung file 'supabase_schema.sql' vào SQL Editor trên Supabase Dashboard và nhấn RUN để cập nhật.");
+      } else {
+        onError(err.message || "Lỗi khi lưu nhà phân phối");
+      }
     } finally {
       setLoading(false);
     }

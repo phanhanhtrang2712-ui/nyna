@@ -2,6 +2,8 @@
 -- ALTER TABLE public.products ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'Chưa phân loại';
 -- ALTER TABLE public.products ADD COLUMN IF NOT EXISTS description TEXT;
 -- ALTER TABLE public.products ADD COLUMN IF NOT EXISTS specifications JSONB DEFAULT '[]'::jsonb;
+-- ALTER TABLE public.pages ADD COLUMN IF NOT EXISTS show_on_home BOOLEAN DEFAULT false;
+-- ALTER TABLE public.pages ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'policy';
 -- 
 -- CREATE TABLE IF NOT EXISTS public.videos (
 --     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
