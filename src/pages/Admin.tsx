@@ -803,7 +803,13 @@ const PageManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, o
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const load = () => dataService.list<any>('pages', 'category').then(setItems);
+  const load = () => {
+    dataService.list<any>('pages').then(setItems).catch(err => {
+      console.error("Lỗi khi tải trang:", err);
+      // Fallback empty if table doesn't exist yet
+      setItems([]);
+    });
+  };
   useEffect(() => { load(); }, []);
 
   const handleEdit = (item: any) => {
@@ -837,7 +843,12 @@ const PageManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, o
       setFormData({ title: '', content: '', slug: '', category: 'policy', show_on_home: false });
       await load();
     } catch (err: any) {
-      onError(err.message || "Lỗi khi lưu trang");
+      console.error(err);
+      if (err.message?.includes('column') || err.message?.includes('category')) {
+        onError("Lỗi: Thiếu cột dữ liệu trong Database. Vui lòng copy nội dung file 'supabase_schema.sql' vào SQL Editor trên Supabase Dashboard và nhấn RUN để cập nhật.");
+      } else {
+        onError(err.message || "Lỗi khi lưu trang");
+      }
     } finally {
       setLoading(false);
     }

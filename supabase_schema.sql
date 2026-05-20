@@ -62,6 +62,17 @@ CREATE TABLE IF NOT EXISTS public.settings (
     footer_text TEXT
 );
 
+-- 7. Bảng Trang nội dung (pages) - Dùng cho Footer & Chính sách
+CREATE TABLE IF NOT EXISTS public.pages (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    title TEXT NOT NULL,
+    slug TEXT UNIQUE,
+    category TEXT DEFAULT 'about',
+    content TEXT,
+    show_on_home BOOLEAN DEFAULT false
+);
+
 -- Bật quyền truy cập công khai (RLS disabled hoặc Policy cho Anon)
 -- Lưu ý: Để đơn giản, hãy tắt RLS cho các bảng này trong Dashboard nếu bạn chưa cấu hình Auth.
 ALTER TABLE public.news DISABLE ROW LEVEL SECURITY;
@@ -70,3 +81,4 @@ ALTER TABLE public.products DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.jobs DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.distributors DISABLE ROW LEVEL SECURITY;
 ALTER TABLE public.settings DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.pages DISABLE ROW LEVEL SECURITY;
