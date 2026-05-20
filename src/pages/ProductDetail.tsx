@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ShoppingCart, ArrowLeft, CheckCircle2, ShieldCheck, 
@@ -13,9 +13,12 @@ interface ProductDetailProps {
   onAddToCart?: (product: any) => void;
 }
 
-const ProductDetail = ({ onAddToCart }: ProductDetailProps) => {
+const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const context = useOutletContext<{ onAddToCart?: (p: any) => void }>();
+  const onAddToCart = propsOnAddToCart || context?.onAddToCart;
+
   const [product, setProduct] = useState<ProductItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'description' | 'specifications'>('description');

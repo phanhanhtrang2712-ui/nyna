@@ -67,7 +67,11 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       <main>
         {React.Children.map(children, child => {
           if (React.isValidElement(child)) {
-            return React.cloneElement(child as React.ReactElement<any>, { onAddToCart: handleAddToCart });
+            // Check if it's an Outlet to pass context
+            return React.cloneElement(child as React.ReactElement<any>, { 
+              onAddToCart: handleAddToCart,
+              context: { onAddToCart: handleAddToCart } 
+            });
           }
           return child;
         })}

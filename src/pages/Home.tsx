@@ -5,6 +5,7 @@ import {
   Search, ChevronRight, 
   Filter, X, LayoutGrid, List, SlidersHorizontal, ArrowRight, Zap, ShieldCheck
 } from 'lucide-react';
+import { useOutletContext } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import { dataService } from '../services/dataService';
 import { ProductItem } from '../types';
@@ -53,7 +54,10 @@ const CategorySection = ({ group, items, onAddToCart }: { group: string; items: 
   );
 };
 
-const Home = ({ onAddToCart }: HomeProps) => {
+const Home = ({ onAddToCart: propsOnAddToCart }: HomeProps) => {
+  const context = useOutletContext<{ onAddToCart?: (p: any) => void }>();
+  const onAddToCart = propsOnAddToCart || context?.onAddToCart;
+
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<ProductItem[]>([]);
   const [loading, setLoading] = useState(true);
