@@ -508,7 +508,11 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
       await load();
     } catch (err: any) {
       console.error(err);
-      onError(err.message || "Lỗi khi lưu sản phẩm");
+      if (err.message?.includes('column') || err.message?.includes('category') || err.message?.includes('description')) {
+        onError("Lỗi: Thiếu cột dữ liệu trong Database. Vui lòng copy nội dung file 'supabase_schema.sql' vào SQL Editor trên Supabase Dashboard và nhấn RUN để cập nhật.");
+      } else {
+        onError(err.message || "Lỗi khi lưu sản phẩm");
+      }
     } finally {
       setUploading(false);
     }

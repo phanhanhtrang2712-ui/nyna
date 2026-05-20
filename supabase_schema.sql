@@ -1,6 +1,18 @@
--- Copy toàn bộ nội dung này vào Supabase SQL Editor và nhấn RUN
+-- ⚠️ CẬP NHẬT DATABASE (Nếu bạn đã có bảng cũ, hãy chạy các lệnh này trước):
+-- ALTER TABLE public.products ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'Chưa phân loại';
+-- ALTER TABLE public.products ADD COLUMN IF NOT EXISTS description TEXT;
+-- ALTER TABLE public.products ADD COLUMN IF NOT EXISTS specifications JSONB DEFAULT '[]'::jsonb;
+-- 
+-- CREATE TABLE IF NOT EXISTS public.videos (
+--     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+--     created_at TIMESTAMPTZ DEFAULT now(),
+--     title TEXT NOT NULL,
+--     youtube_url TEXT NOT NULL,
+--     tag TEXT DEFAULT 'SỰ KIỆN'
+-- );
+-- ALTER TABLE public.videos DISABLE ROW LEVEL SECURITY;
 
--- 1. Bảng Tin tức (news)
+-- DƯỚI ĐÂY LÀ TOÀN BỘ CẤU TRÚC (Nếu tạo mới từ đầu):
 CREATE TABLE IF NOT EXISTS public.news (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     created_at TIMESTAMPTZ DEFAULT now(),
