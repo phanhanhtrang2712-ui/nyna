@@ -63,3 +63,13 @@ export interface VideoItem {
   youtube_url: string;
   tag: string;
 }
+
+export interface BrandItem {
+  id?: string;
+  name: string;
+  description: string;
+  image: string;
+  content: string;
+  color?: string;
+  slug?: string;
+}

@@ -422,8 +422,16 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingBrandId, setEditingBrandId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ title: '', brand: '', image: '', price: '', category: '', description: '' });
-  const [brandFormData, setBrandFormData] = useState({ name: '', description: '', color: 'text-blue-600' });
+  const [brandFormData, setBrandFormData] = useState({ 
+    name: '', 
+    description: '', 
+    color: 'text-blue-600',
+    image: '',
+    content: '',
+    slug: ''
+  });
   const [uploading, setUploading] = useState(false);
+  const [uploadingBrandImage, setUploadingBrandImage] = useState(false);
 
   const load = () => {
     dataService.list<any>('products').then(setItems).catch(err => {
@@ -460,7 +468,10 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
     setBrandFormData({
       name: brand.name,
       description: brand.description || '',
-      color: brand.color
+      color: brand.color,
+      image: brand.image || '',
+      content: brand.content || '',
+      slug: brand.slug || ''
     });
     setEditingBrandId(brand.id);
     setIsAddingBrand(true);
@@ -479,6 +490,22 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
     reader.onloadend = () => {
       setFormData({ ...formData, image: reader.result as string });
       setUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleBrandFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Dung lượng ảnh quá lớn (Vui lòng chọn ảnh < 2MB)");
+      return;
+    }
+    setUploadingBrandImage(true);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setBrandFormData({ ...brandFormData, image: reader.result as string });
+      setUploadingBrandImage(false);
     };
     reader.readAsDataURL(file);
   };
@@ -527,16 +554,21 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
     e.preventDefault();
     setUploading(true);
     try {
+      const payload = {
+        ...brandFormData,
+        slug: brandFormData.slug || brandFormData.name.toLowerCase().replace(/ /g, '-')
+      };
+
       if (editingBrandId) {
-        await dataService.update('brands', editingBrandId, brandFormData);
+        await dataService.update('brands', editingBrandId, payload);
         onSuccess("Đã cập nhật thương hiệu!");
       } else {
-        await dataService.create('brands', brandFormData);
+        await dataService.create('brands', payload);
         onSuccess("Đã thêm thương hiệu mới!");
       }
       setIsAddingBrand(false);
       setEditingBrandId(null);
-      setBrandFormData({ name: '', description: '', color: 'text-blue-600' });
+      setBrandFormData({ name: '', description: '', color: 'text-blue-600', image: '', content: '', slug: '' });
       await load();
     } catch (err: any) {
       onError(err.message || "Lỗi khi tạo thương hiệu");
@@ -579,8 +611,32 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Mô tả ngắn</label>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Mô tả ngắn (Hiển thị ở danh sách)</label>
                 <input required className="w-full p-3 bg-white border-2 border-transparent focus:border-pink-500 rounded-xl outline-none transition-all" value={brandFormData.description} onChange={e=>setBrandFormData({...brandFormData, description: e.target.value})} />
+              </div>
+              
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Hình ảnh thương hiệu (Menu Thương hiệu)</label>
+                <div className="flex items-center gap-4">
+                  <label className="flex-1 cursor-pointer">
+                    <div className="border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center justify-center gap-2 bg-white hover:border-pink-500 transition-all">
+                      <ImageIcon className="text-gray-400 w-5 h-5" />
+                      <span className="text-sm font-bold text-gray-400">{uploadingBrandImage ? 'Đang tải...' : 'Chọn ảnh thương hiệu'}</span>
+                    </div>
+                    <input type="file" className="hidden" accept="image/*" onChange={handleBrandFileChange} />
+                  </label>
+                  {brandFormData.image && <img src={brandFormData.image} className="w-16 h-16 rounded-xl border object-cover shadow-sm" alt="brand" />}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Slug (Đường dẫn tinh gọn)</label>
+                <input className="w-full p-3 bg-white border-2 border-transparent focus:border-pink-500 rounded-xl outline-none transition-all" value={brandFormData.slug} onChange={e=>setBrandFormData({...brandFormData, slug: e.target.value})} placeholder="VD: nyna-baby" />
+              </div>
+
+              <div className="md:col-span-3">
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Giới thiệu chi tiết (Markdown)</label>
+                <textarea rows={6} className="w-full p-3 bg-white border-2 border-transparent focus:border-pink-500 rounded-xl outline-none transition-all resize-none" value={brandFormData.content} onChange={e=>setBrandFormData({...brandFormData, content: e.target.value})} placeholder="Nhập giới thiệu đầy đủ về thương hiệu (Hỗ trợ Markdown)..." />
               </div>
            </div>
            <div className="flex gap-3">

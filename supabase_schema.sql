@@ -21,6 +21,11 @@ CREATE TABLE IF NOT EXISTS public.videos (
 );
 ALTER TABLE public.videos DISABLE ROW LEVEL SECURITY;
 
+-- 4. Cập nhật bảng Thương hiệu (Brands)
+ALTER TABLE public.brands ADD COLUMN IF NOT EXISTS image TEXT;
+ALTER TABLE public.brands ADD COLUMN IF NOT EXISTS content TEXT;
+ALTER TABLE public.brands ADD COLUMN IF NOT EXISTS slug TEXT;
+
 -- DƯỚI ĐÂY LÀ TOÀN BỘ CẤU TRÚC (Nếu tạo mới từ đầu):
 -- Nếu bạn đã chạy các lệnh trên thì không cần chạy phần dưới này.
 
