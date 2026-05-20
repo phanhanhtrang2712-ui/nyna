@@ -76,7 +76,7 @@ const Footer = () => {
           © 2026 CÔNG TY TNHH MTV SẢN XUẤT VÀ THƯƠNG MẠI NYNA. ALL RIGHTS RESERVED.
         </p>
         <div className="flex items-center gap-10">
-           <Link to="/cms" className="text-[11px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-400/10 px-4 py-2 rounded-lg hover:bg-emerald-400 hover:text-blue-900 transition-all">ADMIN DASHBOARD</Link>
+           
            <div className="text-[11px] font-black text-blue-100/30 uppercase tracking-[0.3em]">THIẾT KẾ BỞI NYNA</div>
         </div>
       </div>
