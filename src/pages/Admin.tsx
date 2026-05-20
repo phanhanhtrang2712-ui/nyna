@@ -268,8 +268,8 @@ const NewsManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, o
       await load();
     } catch (err: any) {
       console.error(err);
-      if (err.message?.includes('column')) {
-        onError("Lỗi: Thiếu cột dữ liệu trong Database. Vui lòng copy nội dung file 'supabase_schema.sql' vào SQL Editor trên Supabase Dashboard và nhấn RUN để cập nhật.");
+      if (err.message?.includes('column') || err.message?.includes('category') || err.message?.includes('description')) {
+        onError("Lỗi: Thiếu cột dữ liệu trong Database. Vui lòng copy nội dung file 'supabase_schema.sql' vào SQL Editor trên Supabase Dashboard và nhấn RUN để cập nhật. Sau khi chạy SQL, hãy tải lại trang (F5) để áp dụng.");
       } else {
         onError(err.message || "Có lỗi khi lưu bài viết");
       }
@@ -514,7 +514,7 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
     } catch (err: any) {
       console.error(err);
       if (err.message?.includes('column') || err.message?.includes('category') || err.message?.includes('description')) {
-        onError("Lỗi: Thiếu cột dữ liệu trong Database. Vui lòng copy nội dung file 'supabase_schema.sql' vào SQL Editor trên Supabase Dashboard và nhấn RUN để cập nhật.");
+        onError("Lỗi: Thiếu cột dữ liệu trong Database. Vui lòng copy nội dung file 'supabase_schema.sql' vào SQL Editor trên Supabase Dashboard và nhấn RUN để cập nhật. Sau khi chạy SQL, hãy tải lại trang (F5) để áp dụng.");
       } else {
         onError(err.message || "Lỗi khi lưu sản phẩm");
       }
@@ -757,7 +757,7 @@ const JobManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, on
     } catch (err: any) {
       console.error(err);
       if (err.message?.includes('column')) {
-        onError("Lỗi: Thiếu cột dữ liệu trong Database. Vui lòng copy nội dung file 'supabase_schema.sql' vào SQL Editor trên Supabase Dashboard và nhấn RUN để cập nhật.");
+        onError("Lỗi: Thiếu cột dữ liệu trong Database. Vui lòng copy nội dung file 'supabase_schema.sql' vào SQL Editor trên Supabase Dashboard và nhấn RUN để cập nhật. Sau khi chạy SQL, hãy tải lại trang (F5) để áp dụng.");
       } else {
         onError(err.message || "Lỗi khi lưu tin tuyển dụng");
       }
@@ -882,7 +882,7 @@ const PageManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, o
     } catch (err: any) {
       console.error(err);
       if (err.message?.includes('column') || err.message?.includes('category')) {
-        onError("Lỗi: Thiếu cột dữ liệu trong Database. Vui lòng copy nội dung file 'supabase_schema.sql' vào SQL Editor trên Supabase Dashboard và nhấn RUN để cập nhật.");
+        onError("Lỗi: Thiếu cột dữ liệu trong Database. Vui lòng copy nội dung file 'supabase_schema.sql' vào SQL Editor trên Supabase Dashboard và nhấn RUN để cập nhật. Sau khi chạy SQL, hãy tải lại trang (F5) để áp dụng.");
       } else {
         onError(err.message || "Lỗi khi lưu trang");
       }
@@ -1018,7 +1018,7 @@ const DistributorManager = ({ onSuccess, onError }: { onSuccess: (m: string) => 
     } catch (err: any) {
       console.error(err);
       if (err.message?.includes('column')) {
-        onError("Lỗi: Thiếu cột dữ liệu trong Database. Vui lòng copy nội dung file 'supabase_schema.sql' vào SQL Editor trên Supabase Dashboard và nhấn RUN để cập nhật.");
+        onError("Lỗi: Thiếu cột dữ liệu trong Database. Vui lòng copy nội dung file 'supabase_schema.sql' vào SQL Editor trên Supabase Dashboard và nhấn RUN để cập nhật. Sau khi chạy SQL, hãy tải lại trang (F5) để áp dụng.");
       } else {
         onError(err.message || "Lỗi khi lưu nhà phân phối");
       }
