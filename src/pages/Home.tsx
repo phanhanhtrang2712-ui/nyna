@@ -21,7 +21,7 @@ const CategorySection = ({ group, items, onAddToCart }: { group: string; items: 
     <div className="space-y-6">
       <div className="flex justify-between items-end border-b border-gray-100 pb-4">
          <div>
-            <h4 className="text-2xl font-black text-blue-900 uppercase tracking-tighter">{group}</h4>
+            <h4 className="text-xl font-black text-blue-900 uppercase tracking-tighter">{group}</h4>
          </div>
          {items.length > 4 && !isExpanded && (
            <button 

@@ -26,7 +26,7 @@ const ProductCard = ({ item, onAddToCart }: ProductCardProps) => {
       </div>
 
       <div className="flex-1 flex flex-col">
-        <h3 className="text-lg font-black text-blue-900 mb-4 uppercase tracking-tight group-hover:text-pink-500 transition-colors line-clamp-2 min-h-[56px] leading-tight">
+        <h3 className="text-base font-black text-blue-900 mb-4 uppercase tracking-tight group-hover:text-pink-500 transition-colors line-clamp-2 min-h-[48px] leading-tight">
           {item.title}
         </h3>
         
