@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, Newspaper, Package, Briefcase, 
-  MapPin, LogOut, Plus, Trash2, Edit, Save, X, Image as ImageIcon, FileText
+  MapPin, LogOut, Plus, Trash2, Edit, Save, X, Image as ImageIcon, FileText, ShieldCheck
 } from 'lucide-react';
 import { auth, signInWithGoogle, logout } from '../lib/firebase';
 import { dataService } from '../services/dataService';
@@ -31,7 +31,7 @@ const AdminPage = () => {
     }
   }, [isAuthenticated]);
 
-  const [activeTab, setActiveTab] = useState<'news' | 'products' | 'jobs' | 'distributors'>('news');
+  const [activeTab, setActiveTab] = useState<'news' | 'products' | 'jobs' | 'distributors' | 'pages'>('news');
   const [loginData, setLoginData] = useState({ username: '', password: '' });
   const [loginError, setLoginError] = useState('');
 
@@ -340,6 +340,10 @@ const NewsManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, o
 
             <div className="col-span-2">
               <label className="block text-sm font-bold text-gray-700 mb-2">Nội dung chi tiết bài viết (Toàn bộ bài viết)</label>
+              <p className="text-[10px] text-gray-400 mb-2 font-black uppercase tracking-widest italic flex items-center gap-2">
+                <ShieldCheck size={14} className="text-emerald-500" />
+                Hỗ trợ Markdown. Để chèn ảnh: ![Tên mô tả](đường-dẫn-ảnh)
+              </p>
               <textarea 
                 className="w-full p-4 bg-gray-50 rounded-xl border-2 border-transparent focus:border-blue-900 focus:bg-white outline-none transition-all h-64"
                 value={formData.content} 
@@ -873,6 +877,7 @@ const PageManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, o
             </div>
             <div className="col-span-2">
               <label className="block text-sm font-bold text-gray-700 mb-2">Nội dung chi tiết (Markdown / Text)</label>
+              <p className="text-[10px] text-gray-400 mb-2 font-black uppercase tracking-widest italic">Hỗ trợ Markdown. Chèn ảnh: ![Mô tả](link-ảnh)</p>
               <textarea rows={10} className="w-full p-4 bg-gray-50 border-2 border-transparent focus:border-blue-900 rounded-2xl outline-none transition-all" value={formData.content} onChange={e => setFormData({ ...formData, content: e.target.value })} />
             </div>
             <div className="flex items-center gap-6 col-span-2">

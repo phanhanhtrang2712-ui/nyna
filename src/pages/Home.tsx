@@ -4,6 +4,7 @@ import {
   Facebook, Youtube, Send, ChevronRight, Menu, X, ArrowUpRight,
   Wind, ShieldCheck, Feather, Droplets, Zap, ArrowRight, Play, PhoneCall, MessageCircle
 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -16,6 +17,7 @@ interface NewsItem {
   date: string;
   excerpt: string;
   image: string;
+  content?: string;
 }
 
 interface ProductItem {
@@ -446,7 +448,7 @@ const WhyChooseSection = () => (
         ].map((item, idx) => (
           <div key={idx} className="group">
             <div className="w-20 h-20 bg-white shadow-lg rounded-[28px] flex items-center justify-center mx-auto mb-8 group-hover:bg-blue-900 group-hover:text-white transition-all duration-500 group-hover:-translate-y-2">
-              {React.cloneElement(item.icon as React.ReactElement, { size: 36, strokeWidth: 1.5 })}
+              {React.cloneElement(item.icon as React.ReactElement<any>, { size: 36, strokeWidth: 1.5 })}
             </div>
             <h4 className="text-lg font-black text-blue-900 mb-3 uppercase tracking-tight">{item.title}</h4>
             <p className="text-sm text-gray-500 font-medium leading-relaxed max-w-[180px] mx-auto">{item.desc}</p>
@@ -528,8 +530,8 @@ const NewsSection = () => {
                      {activeNews.title}
                    </h2>
                 </div>
-                <div className="prose prose-xl max-w-none text-gray-600 font-medium leading-[1.8] whitespace-pre-wrap">
-                  {activeNews.content || activeNews.excerpt}
+                <div className="prose prose-xl max-w-none text-gray-600 font-medium leading-[1.8]">
+                  <ReactMarkdown>{activeNews.content || activeNews.excerpt}</ReactMarkdown>
                 </div>
               </div>
             </motion.div>
@@ -737,8 +739,8 @@ const Footer = () => {
                 <span className="text-blue-500 font-black uppercase tracking-widest text-xs mb-2 block">{activePage.category === 'policy' ? 'Chính sách' : 'Đối tác'}</span>
                 <h2 className="text-4xl font-black text-blue-900 uppercase tracking-tighter">{activePage.title}</h2>
               </div>
-              <div className="prose prose-lg max-w-none text-gray-600 font-medium leading-relaxed whitespace-pre-wrap">
-                {activePage.content}
+              <div className="prose prose-lg max-w-none text-gray-600 font-medium leading-relaxed">
+                <ReactMarkdown>{activePage.content}</ReactMarkdown>
               </div>
               <div className="mt-12 pt-8 border-t border-gray-100 flex justify-end">
                 <button onClick={() => setActivePage(null)} className="bg-blue-900 text-white px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-xs">Đóng lại</button>
