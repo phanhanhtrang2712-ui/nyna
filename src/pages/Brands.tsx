@@ -41,8 +41,8 @@ const Brands = () => {
               viewport={{ once: true }}
               className="flex flex-col md:flex-row bg-gray-50 rounded-[32px] md:rounded-[48px] overflow-hidden group hover:shadow-2xl transition-all"
             >
-              <div className="md:w-1/2 aspect-square overflow-hidden">
-                <img src={brand.image || 'https://images.unsplash.com/photo-1544126592-807daa2b567b?auto=format&fit=crop&q=80&w=800'} alt={brand.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+              <div className="md:w-1/2 aspect-square overflow-hidden bg-white p-8">
+                <img src={brand.image || 'https://images.unsplash.com/photo-1544126592-807daa2b567b?auto=format&fit=crop&q=80&w=800'} alt={brand.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700" />
               </div>
               <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
                 <h3 className={`text-3xl md:text-5xl font-black mb-4 uppercase ${brand.color || 'text-blue-900'}`}>{brand.name}</h3>
@@ -88,12 +88,12 @@ const Brands = () => {
               </button>
 
               <div className="flex-1 overflow-y-auto no-scrollbar">
-                <div className="relative h-[300px] md:h-[450px]">
-                   <img src={selectedBrand.image} className="w-full h-full object-cover" alt={selectedBrand.name} />
-                   <div className="absolute inset-0 bg-gradient-to-t from-white via-white/20 to-transparent"></div>
+                <div className="relative h-[300px] md:h-[450px] bg-white p-12 md:p-20 flex items-center justify-center">
+                   <img src={selectedBrand.image} className="max-w-full max-h-full object-contain" alt={selectedBrand.name} />
+                   <div className="absolute inset-0 bg-gradient-to-t from-white/10 to-transparent pointer-events-none"></div>
                    <div className="absolute bottom-12 left-12">
-                      <h2 className={`text-6xl md:text-8xl font-black uppercase tracking-tighter ${selectedBrand.color || 'text-blue-900'}`}>{selectedBrand.name}</h2>
-                      <p className="text-xl font-bold bg-white/80 backdrop-blur-sm px-6 py-2 rounded-full inline-block mt-4 text-blue-900 shadow-xl">{selectedBrand.description}</p>
+                      <h2 className={`text-5xl md:text-8xl font-black uppercase tracking-tighter ${selectedBrand.color || 'text-blue-900'} drop-shadow-sm`}>{selectedBrand.name}</h2>
+                      <p className="text-lg md:text-xl font-bold bg-white/90 backdrop-blur-sm px-6 py-2 rounded-full inline-block mt-4 text-blue-900 shadow-xl border border-gray-100">{selectedBrand.description}</p>
                    </div>
                 </div>
 
