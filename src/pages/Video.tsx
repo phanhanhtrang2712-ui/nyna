@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Play, X } from 'lucide-react';
 import { dataService } from '../services/dataService';
 import { VideoItem } from '../types';
+import { getYoutubeThumbnail, getYoutubeEmbedUrl } from '../lib/youtube';
 
 const Video = () => {
   const [videos, setVideos] = useState<VideoItem[]>([]);
@@ -12,30 +13,6 @@ const Video = () => {
   useEffect(() => {
     dataService.list<VideoItem>('videos').then(setVideos);
   }, []);
-
-  const getYoutubeEmbedUrl = (url: string) => {
-    let videoId = '';
-    if (url.includes('v=')) {
-      videoId = url.split('v=')[1].split('&')[0];
-    } else if (url.includes('youtu.be/')) {
-      videoId = url.split('youtu.be/')[1].split('?')[0];
-    } else {
-      videoId = url.split('/').pop() || '';
-    }
-    return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-  };
-
-  const getYoutubeThumbnail = (url: string) => {
-    let videoId = '';
-    if (url.includes('v=')) {
-      videoId = url.split('v=')[1].split('&')[0];
-    } else if (url.includes('youtu.be/')) {
-      videoId = url.split('youtu.be/')[1].split('?')[0];
-    } else {
-      videoId = url.split('/').pop() || '';
-    }
-    return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-  };
 
   return (
     <div className="py-24 bg-white min-h-screen">

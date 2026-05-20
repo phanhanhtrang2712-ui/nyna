@@ -9,6 +9,7 @@ import { dataService } from '../services/dataService';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { VideoItem } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
+import { getYoutubeThumbnail } from '../lib/youtube';
 
 const AdminPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -1145,18 +1146,6 @@ const VideoManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, 
     }
   };
 
-  const getYoutubeThumbnail = (url: string) => {
-    let videoId = '';
-    if (url.includes('v=')) {
-      videoId = url.split('v=')[1].split('&')[0];
-    } else if (url.includes('youtu.be/')) {
-      videoId = url.split('youtu.be/')[1].split('?')[0];
-    } else {
-      videoId = url.split('/').pop() || '';
-    }
-    return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-  };
-
   return (
     <div className="space-y-12">
       <div className="flex justify-between items-center">
@@ -1182,6 +1171,23 @@ const VideoManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, 
               <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Link YouTube</label>
               <input required className="w-full p-4 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-2xl outline-none transition-all font-bold" value={formData.youtube_url} onChange={e=>setFormData({...formData, youtube_url: e.target.value})} placeholder="https://www.youtube.com/watch?v=..." />
             </div>
+            
+            {/* Live Thumbnail Preview */}
+            {formData.youtube_url && (
+              <div className="md:col-span-2 p-6 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
+                <span className="block text-xs font-bold text-gray-400 uppercase mb-3 ml-1">Thumbnail xem trước (Tự động)</span>
+                <div className="aspect-video w-full max-w-sm rounded-2xl overflow-hidden shadow-lg bg-gray-200">
+                  <img 
+                    src={getYoutubeThumbnail(formData.youtube_url)} 
+                    alt="Preview" 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=Link+YouTube+không+hợp+lệ';
+                    }}
+                  />
+                </div>
+              </div>
+            )}
             <div className="md:col-span-2 flex gap-4 pt-4">
               <button disabled={loading} type="submit" className="flex-1 bg-blue-900 text-white h-14 rounded-2xl font-black uppercase tracking-widest hover:bg-emerald-500 transition-all disabled:opacity-50">
                 {loading ? 'Đang lưu...' : (editingId ? 'Cập nhật' : 'Lưu Video')}
