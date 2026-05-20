@@ -107,7 +107,7 @@ const CartDrawer = ({
                     </div>
                     <div className="text-left bg-emerald-50 p-4 rounded-2xl space-y-1">
                       <p className="text-[10px] font-black text-emerald-800 uppercase">Thông tin thụ hưởng:</p>
-                      <p className="text-xs font-bold text-gray-700">Công ty NYNA VIETNAM</p>
+                      <p className="text-xs font-bold text-gray-700">CÔNG TY TNHH MTV SẢN XUẤT VÀ THƯƠNG MẠI NYNA</p>
                       <p className="text-xs font-bold text-gray-700">STK: 0916070421</p>
                       <p className="text-xs font-bold text-gray-700">Ngân hàng: MB Bank</p>
                     </div>

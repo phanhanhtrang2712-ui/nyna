@@ -23,7 +23,7 @@ const About = () => {
         >
           <span className="text-pink-500 font-black uppercase tracking-[0.4em] text-xs mb-8 block text-center">GIỚI THIỆU CHUNG</span>
           <h1 className="text-5xl md:text-6xl font-black text-blue-900 mb-12 tracking-tight leading-[1.1] uppercase text-center">
-            {about?.title || "Về NYNA VIỆT NAM"}
+            {about?.title || "Về NYNA"}
           </h1>
           
           <div className="prose prose-xl max-w-none text-gray-600 font-medium leading-relaxed whitespace-pre-wrap">

@@ -19,9 +19,9 @@ const Contact = () => {
 
             <div className="space-y-10">
               {[
-                { icon: <Phone size={24} />, label: "GỌI CHO CHÚNG TÔI", value: "0916 070 421 - 0916 070 422" },
+                { icon: <Phone size={24} />, label: "GỌI CHO CHÚNG TÔI", value: "0235 3675 822" },
                 { icon: <Mail size={24} />, label: "EMAIL HỖ TRỢ", value: "info@nyna.com.vn" },
-                { icon: <MapPin size={24} />, label: "TRỤ SỞ CHÍNH", value: "Lô 05, Khu Công Nghiệp, Đống Đa, Hà Nội" },
+                { icon: <MapPin size={24} />, label: "TRỤ SỞ CHÍNH", value: "08 Trần Hớn , Xã Thăng Bình , TP Đà Nẵng" },
               ].map(item => (
                 <div key={item.label} className="flex gap-6 items-center group">
                   <div className="w-16 h-16 rounded-[24px] bg-gray-50 text-blue-900 flex items-center justify-center group-hover:bg-blue-900 group-hover:text-white transition-all transform group-hover:rotate-6">
