@@ -40,11 +40,11 @@ const CategorySection = ({ group, items, onAddToCart }: { group: string; items: 
       </div>
       
       {/* Container with horizontal scroll on mobile, grid on desktop */}
-      <div className="flex overflow-x-auto overflow-y-hidden pb-6 gap-4 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6 snap-x snap-mandatory -mx-6 px-6 md:mx-0 md:px-0 no-scrollbar">
+      <div className="flex overflow-x-auto overflow-y-hidden pb-6 gap-3 md:gap-6 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 snap-x snap-mandatory -mx-6 px-6 md:mx-0 md:px-0 no-scrollbar">
         {items.map((item, index) => (
           <div 
             key={item.id} 
-            className={`min-w-[46vw] sm:min-w-[45vw] md:min-w-0 snap-start flex-shrink-0 ${!isExpanded && index >= 8 ? 'md:hidden' : ''}`}
+            className={`min-w-[44vw] sm:min-w-[42vw] md:min-w-0 snap-start flex-shrink-0 ${!isExpanded && index >= 8 ? 'md:hidden' : ''}`}
           >
             <ProductCard item={item} onAddToCart={onAddToCart} />
           </div>
@@ -111,25 +111,25 @@ const Home = ({ onAddToCart: propsOnAddToCart }: HomeProps) => {
   return (
     <div className="bg-gray-50/50 min-h-screen">
       {/* Hero Header for Home - Minimalist but Impactful */}
-      <section className="bg-blue-900 pt-16 pb-32 text-center relative overflow-hidden">
+      <section className="bg-blue-900 pt-16 md:pt-24 pb-24 md:pb-32 text-center relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-blue-800/50 to-transparent"></div>
         <div className="max-w-4xl mx-auto px-6 relative z-10">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <span className="text-pink-500 font-black uppercase tracking-[0.4em] text-xs mb-6 block">PREMIUM QUALITY</span>
-            <h1 className="text-5xl md:text-7xl font-black text-white mb-8 tracking-tighter uppercase leading-[0.95]">
-              GIẢI PHÁP <br/> CHĂM SÓC GIA ĐÌNH
+            <span className="text-pink-500 font-black uppercase tracking-[0.4em] text-[10px] md:text-xs mb-4 md:mb-6 block text-center">PREMIUM QUALITY</span>
+            <h1 className="text-3xl md:text-7xl font-black text-white mb-4 md:mb-8 tracking-tighter uppercase leading-[1.1] md:leading-[0.95] text-center">
+              GIẢI PHÁP <br className="hidden md:block"/> CHĂM SÓC GIA ĐÌNH
             </h1>
-            <p className="text-blue-100/70 text-lg font-medium max-w-2xl mx-auto mb-12">
+            <p className="text-blue-100/70 text-sm md:text-lg font-medium max-w-2xl mx-auto mb-8 md:mb-12 text-center">
               Khám phá hệ sinh thái sản phẩm cao cấp từ NYNA - Vì sức khỏe và hạnh phúc bền lâu của người Việt.
             </p>
           </motion.div>
         </div>
         {/* Decorative elements */}
-        <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-pink-500/10 rounded-full blur-[100px]"></div>
-        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-400/10 rounded-full blur-[80px]"></div>
+        <div className="absolute -bottom-20 -left-20 w-64 h-64 md:w-96 md:h-96 bg-pink-500/10 rounded-full blur-[60px] md:blur-[100px]"></div>
+        <div className="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 bg-blue-400/10 rounded-full blur-[50px] md:blur-[80px]"></div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-6 -mt-16 pb-24 relative z-10">
+      <div className="max-w-7xl mx-auto px-6 -mt-8 md:-mt-16 pb-24 relative z-10">
         <div className="flex flex-col lg:flex-row gap-8">
           
           {/* Sidebar Area */}

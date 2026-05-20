@@ -72,27 +72,27 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
            <span className="text-blue-900">{product.title}</span>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-16 md:gap-24 items-start">
+        <div className="grid lg:grid-cols-2 gap-10 md:gap-24 items-start">
           {/* Product Images Area */}
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
-            className="space-y-6"
+            className="space-y-4 md:space-y-6"
           >
-            <div className="aspect-square bg-gray-50 rounded-[48px] overflow-hidden border border-gray-100 group relative">
+            <div className="aspect-[4/3] md:aspect-square bg-gray-50 rounded-[32px] md:rounded-[48px] overflow-hidden border border-gray-100 group relative">
                <img 
                 src={product.image} 
                 alt={product.title} 
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
                />
-               <div className="absolute top-8 left-8 bg-white/90 backdrop-blur px-4 py-1.5 rounded-full text-[10px] font-black uppercase text-blue-900 border border-white/50 tracking-widest">
+               <div className="absolute top-4 left-4 md:top-8 md:left-8 bg-white/90 backdrop-blur px-3 py-1 md:px-4 md:py-1.5 rounded-full text-[8px] md:text-[10px] font-black uppercase text-blue-900 border border-white/50 tracking-widest">
                  {product.brand}
                </div>
             </div>
             
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-4 gap-2 md:gap-4">
                {[1,2,3,4].map(i => (
-                 <div key={i} className="aspect-square bg-gray-50 rounded-2xl overflow-hidden opacity-50 hover:opacity-100 cursor-pointer transition-all border border-gray-100">
+                 <div key={i} className="aspect-square bg-gray-50 rounded-xl md:rounded-2xl overflow-hidden opacity-50 hover:opacity-100 cursor-pointer transition-all border border-gray-100">
                     <img src={product.image} alt={product.title} className="w-full h-full object-cover" />
                  </div>
                ))}

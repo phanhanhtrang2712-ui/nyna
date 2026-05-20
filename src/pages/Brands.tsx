@@ -36,13 +36,13 @@ const Brands = () => {
               initial={{ opacity: 0, x: idx % 2 === 0 ? -50 : 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="flex flex-col md:flex-row bg-gray-50 rounded-[48px] overflow-hidden group hover:shadow-2xl transition-all"
+              className="flex flex-col md:flex-row bg-gray-50 rounded-[32px] md:rounded-[48px] overflow-hidden group hover:shadow-2xl transition-all"
             >
               <div className="md:w-1/2 aspect-square overflow-hidden">
                 <img src={brand.image || 'https://images.unsplash.com/photo-1544126592-807daa2b567b?auto=format&fit=crop&q=80&w=800'} alt={brand.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
               </div>
-              <div className="md:w-1/2 p-12 flex flex-col justify-center">
-                <h3 className={`text-5xl font-black mb-4 uppercase ${brand.color}`}>{brand.name}</h3>
+              <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+                <h3 className={`text-3xl md:text-5xl font-black mb-4 uppercase ${brand.color}`}>{brand.name}</h3>
                 <p className="text-gray-500 font-medium leading-relaxed mb-8">{brand.description}</p>
                 <div className="flex gap-2 mb-8">
                   {[1,2,3].map(i => <div key={i} className="w-8 h-1 bg-gray-200 rounded-full"></div>)}
