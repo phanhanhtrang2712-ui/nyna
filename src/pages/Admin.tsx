@@ -416,7 +416,12 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
   const [uploading, setUploading] = useState(false);
 
   const load = () => {
-    dataService.list<any>('products').then(setItems);
+    dataService.list<any>('products').then(setItems).catch(err => {
+      console.error("Lỗi tải sản phẩm:", err);
+      if (err.message?.includes('category')) {
+        onError("Database thiếu cột 'category'. Vui lòng chạy lệnh SQL trong file schema để cập nhật.");
+      }
+    });
     dataService.list<any>('brands').then(res => {
       setBrands(res);
       if (res.length > 0 && !formData.brand) {

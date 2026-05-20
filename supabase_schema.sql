@@ -26,10 +26,14 @@ CREATE TABLE IF NOT EXISTS public.products (
     created_at TIMESTAMPTZ DEFAULT now(),
     title TEXT NOT NULL,
     brand TEXT REFERENCES public.brands(name) ON UPDATE CASCADE,
+    category TEXT DEFAULT 'Chưa phân loại',
     image TEXT,
     price NUMERIC DEFAULT 0,
     features JSONB DEFAULT '[]'::jsonb
 );
+
+-- Nếu bảng đã tồn tại, chạy lệnh này trong SQL Editor:
+-- ALTER TABLE public.products ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'Chưa phân loại';
 
 -- 4. Bảng Tuyển dụng (jobs)
 CREATE TABLE IF NOT EXISTS public.jobs (
