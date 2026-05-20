@@ -121,7 +121,7 @@ const AdminPage = () => {
           </form>
           
           <div className="mt-8 pt-8 border-t border-gray-100 text-[10px] text-center text-gray-400 uppercase tracking-widest leading-relaxed">
-            Mặc định: admin / 123456123456
+            Quản trị: BINHPHAN
           </div>
         </div>
       </div>
