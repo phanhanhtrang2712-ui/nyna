@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  Facebook, Youtube, Send, PhoneCall, MessageCircle, ArrowUpRight, X 
+  Facebook, Youtube, Send, X 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
@@ -99,11 +99,7 @@ const Footer = () => {
         )}
       </AnimatePresence>
 
-      <div className="fixed bottom-10 right-10 flex flex-col gap-4 z-[100]">
-        <motion.div whileHover={{ scale: 1.1 }} className="w-16 h-16 bg-blue-500 text-white rounded-full shadow-2xl flex items-center justify-center cursor-pointer border-4 border-white/20"><PhoneCall size={28} /></motion.div>
-        <motion.div whileHover={{ scale: 1.1 }} className="w-16 h-16 bg-emerald-500 text-white rounded-full shadow-2xl flex items-center justify-center cursor-pointer border-4 border-white/20"><MessageCircle size={28} /></motion.div>
-        <motion.div whileHover={{ scale: 1.1 }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="w-16 h-16 bg-blue-900 text-white rounded-full shadow-2xl flex items-center justify-center cursor-pointer border-4 border-white/20"><ArrowUpRight size={28} /></motion.div>
-      </div>
+
     </footer>
   );
 };

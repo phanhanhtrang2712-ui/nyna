@@ -16,7 +16,6 @@ interface HomeProps {
 
 const CategorySection = ({ group, items, onAddToCart }: { group: string; items: ProductItem[]; onAddToCart?: (p: any) => void }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const displayItems = isExpanded ? items : items; // On mobile we scroll, on desktop we might want to limit but user asked for "slider to view other products"
 
   return (
     <div className="space-y-6">
@@ -25,12 +24,13 @@ const CategorySection = ({ group, items, onAddToCart }: { group: string; items: 
             <h4 className="text-xl font-black text-blue-900 uppercase tracking-tighter">{group}</h4>
          </div>
          <div className="hidden md:block">
-           {items.length > 4 && !isExpanded && (
+           {items.length > 4 && (
              <button 
-              onClick={() => setIsExpanded(true)}
+              onClick={() => setIsExpanded(!isExpanded)}
               className="text-blue-900 font-black text-[11px] uppercase tracking-widest hover:text-pink-500 transition-colors flex items-center gap-2 group"
              >
-               Xem tất cả ({items.length}) <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+               {isExpanded ? 'Thu nhỏ' : `Xem tất cả (${items.length})`} 
+               {!isExpanded && <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />}
              </button>
            )}
          </div>
@@ -41,23 +41,15 @@ const CategorySection = ({ group, items, onAddToCart }: { group: string; items: 
       
       {/* Container with horizontal scroll on mobile, grid on desktop */}
       <div className="flex overflow-x-auto overflow-y-hidden pb-6 gap-4 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-6 snap-x snap-mandatory -mx-6 px-6 md:mx-0 md:px-0 no-scrollbar">
-        {(isExpanded ? items : items.slice(0, isExpanded ? 999 : 8)).map((item) => (
-          <div key={item.id} className="min-w-[75vw] sm:min-w-[45vw] md:min-w-0 snap-start flex-shrink-0">
+        {items.map((item, index) => (
+          <div 
+            key={item.id} 
+            className={`min-w-[46vw] sm:min-w-[45vw] md:min-w-0 snap-start flex-shrink-0 ${!isExpanded && index >= 8 ? 'md:hidden' : ''}`}
+          >
             <ProductCard item={item} onAddToCart={onAddToCart} />
           </div>
         ))}
       </div>
-      
-      {isExpanded && (
-        <div className="hidden md:block pt-4 text-center">
-           <button 
-            onClick={() => setIsExpanded(false)}
-            className="text-gray-400 font-black text-[10px] uppercase tracking-[0.3em] hover:text-blue-900 transition-colors"
-           >
-             Thu gọn "{group}"
-           </button>
-        </div>
-      )}
     </div>
   );
 };
