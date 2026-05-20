@@ -77,7 +77,7 @@ const Footer = () => {
         </p>
         <div className="flex items-center gap-10">
            
-           <div className="text-[11px] font-black text-blue-100/30 uppercase tracking-[0.3em]">THIẾT KẾ BỞI NYNA</div>
+           <div className="text-[11px] font-black text-blue-100/30 uppercase tracking-[0.3em]">THIẾT KẾ BỞI BINHPT</div>
         </div>
       </div>
 
