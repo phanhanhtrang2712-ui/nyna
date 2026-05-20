@@ -27,10 +27,10 @@ const CategorySection = ({ group, items, onAddToCart }: { group: string; items: 
            {items.length > 4 && (
              <button 
               onClick={() => setIsExpanded(!isExpanded)}
-              className="text-blue-900 font-black text-[11px] uppercase tracking-widest hover:text-pink-500 transition-colors flex items-center gap-2 group"
+              className="px-6 py-2 bg-blue-900/5 text-blue-900 rounded-full font-black text-[11px] uppercase tracking-widest hover:bg-blue-900 hover:text-white transition-all flex items-center gap-2 group"
              >
-               {isExpanded ? 'Thu nhỏ' : `Xem tất cả (${items.length})`} 
-               {!isExpanded && <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />}
+               {isExpanded ? 'Thu gọn' : `Xem thêm (${items.length - 4})`} 
+               <ChevronRight size={16} className={`transition-transform ${isExpanded ? 'rotate-90' : 'group-hover:translate-x-1'}`} />
              </button>
            )}
          </div>
@@ -44,7 +44,7 @@ const CategorySection = ({ group, items, onAddToCart }: { group: string; items: 
         {items.map((item, index) => (
           <div 
             key={item.id} 
-            className={`min-w-[44vw] sm:min-w-[42vw] md:min-w-0 snap-start flex-shrink-0 ${!isExpanded && index >= 8 ? 'md:hidden' : ''}`}
+            className={`min-w-[44vw] sm:min-w-[42vw] md:min-w-0 snap-start flex-shrink-0 ${!isExpanded && index >= 4 ? 'md:hidden' : ''}`}
           >
             <ProductCard item={item} onAddToCart={onAddToCart} />
           </div>
