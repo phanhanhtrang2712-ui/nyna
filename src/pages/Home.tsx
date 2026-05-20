@@ -19,32 +19,37 @@ const CategorySection = ({ group, items, onAddToCart }: { group: string; items: 
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-end border-b border-gray-100 pb-4">
+      <div className="flex justify-between items-center border-b border-gray-100 pb-4">
          <div>
-            <h4 className="text-xl font-black text-blue-900 uppercase tracking-tighter">{group}</h4>
+            <h4 className="text-lg md:text-xl font-black text-blue-900 uppercase tracking-tighter">{group}</h4>
          </div>
-         <div className="hidden md:block">
-           {items.length > 4 && (
-             <button 
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="px-6 py-2 bg-blue-900/5 text-blue-900 rounded-full font-black text-[11px] uppercase tracking-widest hover:bg-blue-900 hover:text-white transition-all flex items-center gap-2 group"
-             >
-               {isExpanded ? 'Thu gọn' : `Xem thêm (${items.length - 4})`} 
-               <ChevronRight size={16} className={`transition-transform ${isExpanded ? 'rotate-90' : 'group-hover:translate-x-1'}`} />
-             </button>
-           )}
-         </div>
-         <div className="md:hidden">
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Vuốt để xem ({items.length})</span>
+         <div className="flex items-center gap-3">
+           <button 
+             onClick={() => setIsExpanded(!isExpanded)}
+             className={`px-4 md:px-6 py-2 rounded-full font-black text-[9px] md:text-[11px] uppercase tracking-widest transition-all flex items-center gap-2 group ${
+               items.length > 3 ? 'flex' : 'hidden md:flex'
+             } ${
+               isExpanded 
+               ? 'bg-pink-500 text-white shadow-lg shadow-pink-200' 
+               : 'bg-blue-900/5 text-blue-900 hover:bg-blue-900 hover:text-white'
+             }`}
+           >
+             {isExpanded ? 'Thu gọn' : 'Xem thêm'} 
+             <ChevronRight size={14} className={`transition-transform md:w-4 md:h-4 ${isExpanded ? 'rotate-90' : 'group-hover:translate-x-1'}`} />
+           </button>
          </div>
       </div>
       
-      {/* Container with horizontal scroll on mobile, grid on desktop */}
-      <div className="flex overflow-x-auto overflow-y-hidden pb-6 gap-3 md:gap-6 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 snap-x snap-mandatory -mx-6 px-6 md:mx-0 md:px-0 no-scrollbar">
+      {/* Grid container for both mobile and desktop */}
+      <div className="grid grid-cols-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
         {items.map((item, index) => (
           <div 
             key={item.id} 
-            className={`min-w-[44vw] sm:min-w-[42vw] md:min-w-0 snap-start flex-shrink-0 ${!isExpanded && index >= 4 ? 'md:hidden' : ''}`}
+            className={`
+              ${!isExpanded && index >= 3 ? 'hidden md:block' : ''} 
+              ${!isExpanded && index >= 4 ? 'md:hidden' : ''}
+              ${isExpanded ? 'block' : ''}
+            `}
           >
             <ProductCard item={item} onAddToCart={onAddToCart} />
           </div>
