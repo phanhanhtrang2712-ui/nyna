@@ -411,7 +411,7 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
   const [isAddingBrand, setIsAddingBrand] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingBrandId, setEditingBrandId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({ title: '', brand: '', image: '', price: '' });
+  const [formData, setFormData] = useState({ title: '', brand: '', image: '', price: '', category: '' });
   const [brandFormData, setBrandFormData] = useState({ name: '', description: '', color: 'text-blue-600' });
   const [uploading, setUploading] = useState(false);
 
@@ -432,7 +432,8 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
       title: item.title,
       brand: item.brand,
       image: item.image,
-      price: item.price.toString()
+      price: item.price.toString(),
+      category: item.category || ''
     });
     setEditingId(item.id);
     setIsAdding(true);
@@ -477,6 +478,7 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
       const payload = { 
         ...formData, 
         price: Number(formData.price),
+        category: formData.category || 'Chưa phân loại',
         features: [{label: 'Nổi bật', icon: 'zap'}] 
       };
 
@@ -490,7 +492,7 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
       
       setIsAdding(false);
       setEditingId(null);
-      setFormData({ title: '', brand: brands[0]?.name || '', image: '', price: '' });
+      setFormData({ title: '', brand: brands[0]?.name || '', image: '', price: '', category: '' });
       await load();
     } catch (err: any) {
       console.error(err);
@@ -597,6 +599,10 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
                 <input type="number" required className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none transition-all" value={formData.price} onChange={e=>setFormData({...formData, price: e.target.value})} />
               </div>
               <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Nhóm sản phẩm (Phân loại)</label>
+                <input required className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none transition-all" value={formData.category} onChange={e=>setFormData({...formData, category: e.target.value})} placeholder="VD: Tã bỉm em bé, Băng vệ sinh..." />
+              </div>
+              <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Ảnh đại diện sản phẩm</label>
                 <div className="flex items-center gap-4">
                   <label className="flex-1 cursor-pointer">
@@ -670,6 +676,7 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
                 <h4 className="font-bold text-blue-900 leading-tight mb-1 line-clamp-1">{item.title}</h4>
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded-md">{item.brand}</span>
+                  <span className="text-[10px] font-black text-pink-500 uppercase tracking-widest bg-pink-50 px-2 py-0.5 rounded-md">{item.category}</span>
                   <span className="text-[11px] font-bold text-emerald-600">{new Intl.NumberFormat('vi-VN').format(item.price || 0)}đ</span>
                 </div>
               </div>
