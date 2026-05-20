@@ -11,6 +11,7 @@ import Contact from './pages/Contact';
 import Distribution from './pages/Distribution';
 import Jobs from './pages/Jobs';
 import Admin from './pages/Admin';
+import ProductDetail from './pages/ProductDetail';
 
 const WrappedRoute = () => (
   <MainLayout>
@@ -26,6 +27,7 @@ export default function App() {
         
         <Route element={<WrappedRoute />}>
           <Route path="/" element={<Home />} />
+          <Route path="/san-pham/:id" element={<ProductDetail />} />
           <Route path="/gioi-thieu" element={<About />} />
           <Route path="/thuong-hieu" element={<Brands />} />
           <Route path="/tin-tuc" element={<News />} />

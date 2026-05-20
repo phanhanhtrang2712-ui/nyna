@@ -82,6 +82,21 @@ export const dataService = {
     }
   },
 
+  async get<T>(table: string, id: string): Promise<T> {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from(table)
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) {
+      console.error(`Supabase Get Error [${table}/${id}]: `, error);
+      throw error;
+    }
+    return data as T;
+  },
+
   // Settings
   async getSettings(): Promise<any> {
     try {

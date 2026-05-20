@@ -411,7 +411,7 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
   const [isAddingBrand, setIsAddingBrand] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingBrandId, setEditingBrandId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({ title: '', brand: '', image: '', price: '', category: '' });
+  const [formData, setFormData] = useState({ title: '', brand: '', image: '', price: '', category: '', description: '' });
   const [brandFormData, setBrandFormData] = useState({ name: '', description: '', color: 'text-blue-600' });
   const [uploading, setUploading] = useState(false);
 
@@ -438,7 +438,8 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
       brand: item.brand,
       image: item.image,
       price: item.price.toString(),
-      category: item.category || ''
+      category: item.category || '',
+      description: item.description || ''
     });
     setEditingId(item.id);
     setIsAdding(true);
@@ -484,6 +485,7 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
         ...formData, 
         price: Number(formData.price),
         category: formData.category || 'Chưa phân loại',
+        description: formData.description || '',
         features: [{label: 'Nổi bật', icon: 'zap'}] 
       };
 
@@ -497,7 +499,7 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
       
       setIsAdding(false);
       setEditingId(null);
-      setFormData({ title: '', brand: brands[0]?.name || '', image: '', price: '', category: '' });
+      setFormData({ title: '', brand: brands[0]?.name || '', image: '', price: '', category: '', description: '' });
       await load();
     } catch (err: any) {
       console.error(err);
@@ -602,6 +604,10 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Giá bán dự kiến (VND)</label>
                 <input type="number" required className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none transition-all" value={formData.price} onChange={e=>setFormData({...formData, price: e.target.value})} />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Mô tả & Công dụng sản phẩm</label>
+                <textarea rows={4} className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none transition-all resize-none" value={formData.description} onChange={e=>setFormData({...formData, description: e.target.value})} placeholder="Nhập chi tiết về ưu điểm, công dụng, đặc tính của sản phẩm..." />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Nhóm sản phẩm (Phân loại)</label>

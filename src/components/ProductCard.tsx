@@ -2,6 +2,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Heart, ShoppingCart, CheckCircle2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { ProductItem } from '../types';
 
 interface ProductCardProps {
@@ -15,20 +16,22 @@ const ProductCard = ({ item, onAddToCart }: ProductCardProps) => {
       layout
       className="bg-white rounded-[32px] border border-gray-100 shadow-sm p-5 group transition-all hover:shadow-2xl hover:-translate-y-2 flex flex-col h-full"
     >
-      <div className="relative mb-6 rounded-[24px] overflow-hidden bg-gray-50 aspect-square shrink-0">
+      <Link to={`/san-pham/${item.id}`} className="relative mb-6 rounded-[24px] overflow-hidden bg-gray-50 aspect-square shrink-0 block">
         <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
         <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[9px] font-black text-blue-900 uppercase tracking-widest border border-white/50">
           {item.brand}
         </div>
-        <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-gray-400 hover:text-pink-500 transition-colors shadow-lg">
+        <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-gray-400 hover:text-pink-500 transition-colors shadow-lg" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
           <Heart size={18} />
         </button>
-      </div>
+      </Link>
 
       <div className="flex-1 flex flex-col">
-        <h3 className="text-base font-black text-blue-900 mb-4 uppercase tracking-tight group-hover:text-pink-500 transition-colors line-clamp-2 min-h-[48px] leading-tight">
-          {item.title}
-        </h3>
+        <Link to={`/san-pham/${item.id}`} className="block group-hover:text-pink-500 transition-colors">
+          <h3 className="text-base font-black text-blue-900 mb-4 uppercase tracking-tight line-clamp-2 min-h-[48px] leading-tight">
+            {item.title}
+          </h3>
+        </Link>
         
         <div className="flex flex-wrap gap-2 mb-6">
           {item.features?.slice(0, 2).map((f, i) => (

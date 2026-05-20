@@ -19,6 +19,8 @@ export interface ProductItem {
   color?: string;
   price?: number;
   category?: string;
+  description?: string;
+  specifications?: { key: string; value: string }[];
 }
 
 export interface JobItem {

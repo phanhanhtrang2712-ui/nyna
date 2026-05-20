@@ -27,6 +27,8 @@ CREATE TABLE IF NOT EXISTS public.products (
     title TEXT NOT NULL,
     brand TEXT REFERENCES public.brands(name) ON UPDATE CASCADE,
     category TEXT DEFAULT 'Chưa phân loại',
+    description TEXT,
+    specifications JSONB DEFAULT '[]'::jsonb,
     image TEXT,
     price NUMERIC DEFAULT 0,
     features JSONB DEFAULT '[]'::jsonb
