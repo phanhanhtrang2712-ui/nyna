@@ -38,9 +38,16 @@ const ProductCard = ({ item, onAddToCart }: ProductCardProps) => {
           ))}
         </div>
 
-        <div className="mt-auto pt-3 md:pt-6 border-t border-gray-50 flex items-center justify-between">
-          <div className="text-base md:text-xl font-black text-blue-900 italic">
-            {new Intl.NumberFormat('vi-VN').format(item.price || 0)}đ
+        <div className="mt-auto pt-3 md:pt-4 border-t border-gray-50 flex items-center justify-between">
+          <div className="flex flex-col">
+            <div className="text-base md:text-xl font-black text-blue-900 italic">
+              {new Intl.NumberFormat('vi-VN').format(item.price || 0)}đ
+            </div>
+            {item.original_price && item.original_price > (item.price || 0) && (
+              <div className="text-[9px] md:text-[10px] font-bold text-gray-300 line-through decoration-pink-500/30">
+                {new Intl.NumberFormat('vi-VN').format(item.original_price)}đ
+              </div>
+            )}
           </div>
           <button 
             onClick={(e) => { e.preventDefault(); onAddToCart && onAddToCart(item); }}

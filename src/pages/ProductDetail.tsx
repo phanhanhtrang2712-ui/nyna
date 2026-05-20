@@ -21,7 +21,7 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
 
   const [product, setProduct] = useState<ProductItem | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'description' | 'specifications'>('description');
+  const [activeImage, setActiveImage] = useState<string>('');
 
   useEffect(() => {
     if (id) {
@@ -29,6 +29,7 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
       dataService.get<ProductItem>('products', id)
         .then(res => {
           setProduct(res);
+          setActiveImage(res.image);
           setLoading(false);
         })
         .catch(err => {
@@ -77,26 +78,40 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
-            className="space-y-4 md:space-y-6"
+            className="space-y-4 md:space-y-6 sticky top-24"
           >
             <div className="aspect-[4/3] md:aspect-square bg-gray-50 rounded-[32px] md:rounded-[48px] overflow-hidden border border-gray-100 group relative">
-               <img 
-                src={product.image} 
-                alt={product.title} 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-               />
+               <AnimatePresence mode="wait">
+                 <motion.img 
+                  key={activeImage}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  src={activeImage} 
+                  alt={product.title} 
+                  className="w-full h-full object-contain p-8 md:p-12 transition-transform duration-700 group-hover:scale-105" 
+                 />
+               </AnimatePresence>
                <div className="absolute top-4 left-4 md:top-8 md:left-8 bg-white/90 backdrop-blur px-3 py-1 md:px-4 md:py-1.5 rounded-full text-[8px] md:text-[10px] font-black uppercase text-blue-900 border border-white/50 tracking-widest">
                  {product.brand}
                </div>
             </div>
             
-            <div className="grid grid-cols-4 gap-2 md:gap-4">
-               {[1,2,3,4].map(i => (
-                 <div key={i} className="aspect-square bg-gray-50 rounded-xl md:rounded-2xl overflow-hidden opacity-50 hover:opacity-100 cursor-pointer transition-all border border-gray-100">
-                    <img src={product.image} alt={product.title} className="w-full h-full object-cover" />
-                 </div>
-               ))}
-            </div>
+            {product.images && product.images.length > 0 && (
+              <div className="flex gap-2 md:gap-4 overflow-x-auto no-scrollbar pb-2">
+                 {[product.image, ...product.images].filter(Boolean).map((img, i) => (
+                   <div 
+                    key={i} 
+                    onClick={() => setActiveImage(img)}
+                    className={`aspect-square w-20 md:w-24 bg-gray-50 rounded-xl md:rounded-2xl overflow-hidden cursor-pointer transition-all border-2 shrink-0 ${
+                      activeImage === img ? 'border-pink-500 scale-105' : 'border-transparent opacity-60 hover:opacity-100'
+                    }`}
+                   >
+                      <img src={img} alt={`${product.title} ${i}`} className="w-full h-full object-contain p-2" />
+                   </div>
+                 ))}
+              </div>
+            )}
           </motion.div>
 
           {/* Product Info Area */}
@@ -111,12 +126,17 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
                 {product.title}
               </h1>
               <div className="flex items-center gap-6">
-                <div className="text-4xl font-black text-blue-900 italic">
+                <div className="text-4xl md:text-5xl font-black text-blue-900 italic">
                   {new Intl.NumberFormat('vi-VN').format(product.price || 0)}đ
                 </div>
-                <div className="text-xs font-bold text-gray-400 uppercase tracking-widest line-through decoration-pink-500/30">
-                  {new Intl.NumberFormat('vi-VN').format((product.price || 0) * 1.2)}đ
-                </div>
+                {product.original_price && product.original_price > (product.price || 0) && (
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-black text-pink-500 uppercase tracking-tighter mb-1">Tiết kiệm {new Intl.NumberFormat('vi-VN').format(product.original_price - (product.price || 0))}đ</span>
+                    <div className="text-sm font-bold text-gray-300 uppercase tracking-widest line-through decoration-pink-500/30">
+                      {new Intl.NumberFormat('vi-VN').format(product.original_price)}đ
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -160,79 +180,27 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
           </motion.div>
         </div>
 
-        {/* Detailed Tabs */}
+        {/* Detailed Section */}
         <div className="mt-24 md:mt-32">
-          <div className="flex gap-10 border-b border-gray-100 mb-12">
-             <button 
-              onClick={() => setActiveTab('description')}
-              className={`pb-6 text-sm font-black uppercase tracking-widest relative transition-all ${activeTab === 'description' ? 'text-blue-900' : 'text-gray-300 hover:text-gray-500'}`}
-             >
+          <div className="border-b border-gray-100 mb-12">
+             <div className="pb-6 text-sm font-black uppercase text-blue-900 tracking-[0.3em] relative inline-block">
                 Ưu điểm & Công dụng
-                {activeTab === 'description' && <motion.div layoutId="tab" className="absolute bottom-0 left-0 w-full h-1 bg-pink-500 rounded-full" />}
-             </button>
-             <button 
-              onClick={() => setActiveTab('specifications')}
-              className={`pb-6 text-sm font-black uppercase tracking-widest relative transition-all ${activeTab === 'specifications' ? 'text-blue-900' : 'text-gray-300 hover:text-gray-500'}`}
-             >
-                Thông số kỹ thuật
-                {activeTab === 'specifications' && <motion.div layoutId="tab" className="absolute bottom-0 left-0 w-full h-1 bg-pink-500 rounded-full" />}
-             </button>
+                <div className="absolute bottom-0 left-0 w-full h-1 bg-pink-500 rounded-full" />
+             </div>
           </div>
 
           <div className="max-w-4xl">
-             <AnimatePresence mode="wait">
-                {activeTab === 'description' ? (
-                  <motion.div 
-                    key="desc"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="prose prose-lg max-w-none text-gray-600 font-medium leading-[1.8] whitespace-pre-wrap"
-                  >
-                    {product.description || (
-                      <div className="space-y-8">
-                        <p>Với công nghệ tiên tiến nhất tại NYNA, dòng sản phẩm {product.title} được thiết kế để mang lại sự thoải mái tuyệt đối cho người sử dụng. Mỗi giai đoạn từ nguyên liệu đầu vào đến thành phẩm cuối cùng đều trải qua quy trình kiểm soát nghiêm ngặt.</p>
-                        <div className="grid md:grid-cols-2 gap-8 not-prose">
-                          <div className="bg-blue-50 p-8 rounded-[40px] border border-blue-100">
-                             <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-blue-900 mb-6 shadow-sm"><Info size={24} /></div>
-                             <h4 className="text-xl font-black text-blue-900 uppercase tracking-tight mb-4">Đặc tính nổi bật</h4>
-                             <ul className="space-y-3 text-sm font-bold text-gray-600">
-                               <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-pink-500 mt-2 shrink-0"></div> Bề mặt êm mềm như tơ, không gây kích ứng</li>
-                               <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-pink-500 mt-2 shrink-0"></div> Khả năng thấm hút cực lớn, giữ khô sạch suốt 12h</li>
-                               <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-pink-500 mt-2 shrink-0"></div> Công nghệ màng đáy thở thế hệ mới</li>
-                             </ul>
-                          </div>
-                          <div className="bg-pink-50 p-8 rounded-[40px] border border-pink-100">
-                             <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-pink-500 mb-6 shadow-sm"><ListChecks size={24} /></div>
-                             <h4 className="text-xl font-black text-blue-900 uppercase tracking-tight mb-4">Hướng dẫn sử dụng</h4>
-                             <p className="text-sm font-bold text-gray-600">Để phát huy tối đa công dụng của sản phẩm, quý khách vui lòng tuân thủ các bước hướng dẫn chuẩn từ nhà sản xuất...</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </motion.div>
-                ) : (
-                  <motion.div 
-                    key="spec"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="space-y-4"
-                  >
-                    {[
-                      { key: 'Chất liệu', value: 'Cotton cao cấp, vải không dệt SAP Nhật Bản' },
-                      { key: 'Xuất xứ', value: 'Việt Nam (Công nghệ CHLB Đức)' },
-                      { key: 'Hạn sử dụng', value: '3 năm kể từ ngày sản xuất' },
-                      { key: 'Quy chuẩn đóng gói', value: 'Gói đại / Gói trung (Tùy size)' }
-                    ].map((spec, i) => (
-                      <div key={i} className="flex border-b border-gray-100 py-6 last:border-0">
-                         <div className="w-1/3 text-xs font-black text-gray-400 uppercase tracking-widest">{spec.key}</div>
-                         <div className="flex-1 text-sm font-bold text-blue-900">{spec.value}</div>
-                      </div>
-                    ))}
-                  </motion.div>
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="prose prose-lg max-w-none text-gray-600 font-medium leading-[1.8] whitespace-pre-wrap"
+              >
+                {product.description || (
+                  <div className="space-y-8">
+                    <p>Với công nghệ tiên tiến nhất tại NYNA, dòng sản phẩm {product.title} được thiết kế để mang lại sự thoải mái tuyệt đối cho người sử dụng.</p>
+                  </div>
                 )}
-             </AnimatePresence>
+              </motion.div>
           </div>
         </div>
       </div>

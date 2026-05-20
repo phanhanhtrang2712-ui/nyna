@@ -15,9 +15,11 @@ export interface ProductItem {
   title: string;
   brand: string;
   image: string;
+  images?: string[]; // Up to 3 images
   features: { label: string; icon: any }[];
   color?: string;
   price?: number;
+  original_price?: number;
   category?: string;
   description?: string;
   specifications?: { key: string; value: string }[];
@@ -72,4 +74,12 @@ export interface BrandItem {
   content: string;
   color?: string;
   slug?: string;
+}
+
+export interface BusinessSettings {
+  id: 'main';
+  bank_name: string;
+  account_name: string;
+  account_number: string;
+  branch: string;
 }

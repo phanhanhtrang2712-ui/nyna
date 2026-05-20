@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, Newspaper, Package, Briefcase, 
   MapPin, LogOut, Plus, Trash2, Edit, Save, X, Image as ImageIcon, FileText, ShieldCheck,
-  PlayCircle
+  PlayCircle, Settings, Download, Upload, Database, CreditCard
 } from 'lucide-react';
 import { auth, signInWithGoogle, logout } from '../lib/firebase';
 import { dataService } from '../services/dataService';
@@ -35,7 +35,7 @@ const AdminPage = () => {
     }
   }, [isAuthenticated]);
 
-  const [activeTab, setActiveTab] = useState<'news' | 'products' | 'jobs' | 'distributors' | 'pages' | 'videos'>('news');
+  const [activeTab, setActiveTab] = useState<'news' | 'products' | 'jobs' | 'distributors' | 'pages' | 'videos' | 'settings'>('news');
   const [loginData, setLoginData] = useState({ username: '', password: '' });
   const [loginError, setLoginError] = useState('');
 
@@ -121,7 +121,7 @@ const AdminPage = () => {
           </form>
           
           <div className="mt-8 pt-8 border-t border-gray-100 text-[10px] text-center text-gray-400 uppercase tracking-widest leading-relaxed">
-            Quản trị: Phan Thái Bình
+            Mặc định: admin / 123456123456
           </div>
         </div>
       </div>
@@ -147,6 +147,7 @@ const AdminPage = () => {
             { id: 'jobs', icon: <Briefcase size={20} />, label: 'Quản lý Tuyển dụng' },
             { id: 'distributors', icon: <MapPin size={20} />, label: 'Nhà phân phối' },
             { id: 'pages', icon: <FileText size={20} />, label: 'Nội dung trang' },
+            { id: 'settings', icon: <Settings size={20} />, label: 'Cấu hình & Backup' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -189,6 +190,7 @@ const AdminPage = () => {
           {activeTab === 'jobs' && <JobManager onSuccess={showSuccess} onError={showError} />}
           {activeTab === 'distributors' && <DistributorManager onSuccess={showSuccess} onError={showError} />}
           {activeTab === 'pages' && <PageManager onSuccess={showSuccess} onError={showError} />}
+          {activeTab === 'settings' && <SettingsManager onSuccess={showSuccess} onError={showError} />}
         </div>
       </main>
 
@@ -421,7 +423,16 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
   const [isAddingBrand, setIsAddingBrand] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingBrandId, setEditingBrandId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({ title: '', brand: '', image: '', price: '', category: '', description: '' });
+  const [formData, setFormData] = useState({ 
+    title: '', 
+    brand: '', 
+    image: '', 
+    images: [] as string[],
+    price: '', 
+    original_price: '',
+    category: '', 
+    description: '' 
+  });
   const [brandFormData, setBrandFormData] = useState({ 
     name: '', 
     description: '', 
@@ -455,7 +466,9 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
       title: item.title,
       brand: item.brand,
       image: item.image,
+      images: item.images || [],
       price: item.price.toString(),
+      original_price: (item.original_price || '').toString(),
       category: item.category || '',
       description: item.description || ''
     });
@@ -478,7 +491,7 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, isMain: boolean = true) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) {
@@ -488,7 +501,12 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
     setUploading(true);
     const reader = new FileReader();
     reader.onloadend = () => {
-      setFormData({ ...formData, image: reader.result as string });
+      if (isMain) {
+        setFormData({ ...formData, image: reader.result as string });
+      } else {
+        const newImages = [...formData.images, reader.result as string].slice(0, 3);
+        setFormData({ ...formData, images: newImages });
+      }
       setUploading(false);
     };
     reader.readAsDataURL(file);
@@ -521,6 +539,7 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
       const payload = { 
         ...formData, 
         price: Number(formData.price),
+        original_price: formData.original_price ? Number(formData.original_price) : null,
         category: formData.category || 'Chưa phân loại',
         description: formData.description || '',
         features: [{label: 'Nổi bật', icon: 'zap'}] 
@@ -536,7 +555,16 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
       
       setIsAdding(false);
       setEditingId(null);
-      setFormData({ title: '', brand: brands[0]?.name || '', image: '', price: '', category: '', description: '' });
+      setFormData({ 
+        title: '', 
+        brand: brands[0]?.name || '', 
+        image: '', 
+        images: [],
+        price: '', 
+        original_price: '',
+        category: '', 
+        description: '' 
+      });
       await load();
     } catch (err: any) {
       console.error(err);
@@ -672,7 +700,11 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Giá bán dự kiến (VND)</label>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Giá gốc (Gạch bỏ nếu có)</label>
+                <input type="number" className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none transition-all placeholder:font-normal" value={formData.original_price} onChange={e=>setFormData({...formData, original_price: e.target.value})} placeholder="VD: 250000" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Giá bán hiện tại (VND)</label>
                 <input type="number" required className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none transition-all" value={formData.price} onChange={e=>setFormData({...formData, price: e.target.value})} />
               </div>
               <div className="md:col-span-2">
@@ -683,17 +715,44 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Nhóm sản phẩm (Phân loại)</label>
                 <input required className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none transition-all" value={formData.category} onChange={e=>setFormData({...formData, category: e.target.value})} placeholder="VD: Tã bỉm em bé, Băng vệ sinh..." />
               </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Ảnh đại diện sản phẩm</label>
-                <div className="flex items-center gap-4">
-                  <label className="flex-1 cursor-pointer">
-                    <div className="border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center justify-center gap-2 bg-gray-50 hover:border-blue-900 transition-all">
-                      <ImageIcon className="text-gray-400 w-5 h-5" />
-                      <span className="text-sm font-bold text-gray-400">{uploading ? 'Đang tải...' : 'Chọn từ máy'}</span>
+              
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Hình ảnh sản phẩm (Tối đa 3 ảnh bổ sung + 1 ảnh chính)</label>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <label className="flex-1 cursor-pointer">
+                      <div className="border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center justify-center gap-2 bg-gray-50 hover:border-blue-900 transition-all">
+                        <ImageIcon className="text-gray-400 w-5 h-5" />
+                        <span className="text-sm font-bold text-gray-400">{uploading ? 'Đang tải...' : 'Thêm ảnh chính'}</span>
+                      </div>
+                      <input type="file" className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, true)} />
+                    </label>
+                    {formData.image && <img src={formData.image} className="w-16 h-16 rounded-xl border object-contain bg-white shadow-sm" alt="main" />}
+                  </div>
+                  
+                  <div className="flex items-center gap-4">
+                    <label className={`flex-1 cursor-pointer ${formData.images.length >= 3 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                      <div className="border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center justify-center gap-2 bg-gray-50 hover:border-blue-900 transition-all">
+                        <Plus className="text-gray-400 w-5 h-5" />
+                        <span className="text-sm font-bold text-gray-400">Thêm ảnh phụ ({formData.images.length}/3)</span>
+                      </div>
+                      <input type="file" disabled={formData.images.length >= 3} className="hidden" accept="image/*" onChange={(e) => handleFileChange(e, false)} />
+                    </label>
+                    <div className="flex gap-2">
+                      {formData.images.map((img, idx) => (
+                        <div key={idx} className="relative group">
+                          <img src={img} className="w-16 h-16 rounded-xl border object-contain bg-white shadow-sm" alt="sub" />
+                          <button 
+                            type="button"
+                            onClick={() => setFormData({ ...formData, images: formData.images.filter((_, i) => i !== idx) })}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      ))}
                     </div>
-                    <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
-                  </label>
-                  {formData.image && <img src={formData.image} className="w-12 h-12 rounded-lg border object-cover shadow-sm" alt="p" />}
+                  </div>
                 </div>
               </div>
            </div>
@@ -751,7 +810,7 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
           {items.map(item => (
             <div key={item.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:border-blue-900 transition-all group">
               <div className="w-20 h-20 bg-gray-50 rounded-xl overflow-hidden shrink-0 border border-gray-50">
-                <img src={item.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="P" />
+                <img src={item.image} className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-500" alt="P" />
               </div>
               <div className="flex-1">
                 <h4 className="font-bold text-blue-900 leading-tight mb-1 line-clamp-1">{item.title}</h4>
@@ -1282,6 +1341,186 @@ const VideoManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, 
           </div>
         ))}
         {items.length === 0 && <div className="col-span-full py-20 text-center text-gray-300 font-bold italic uppercase tracking-widest">Chưa có video nào.</div>}
+      </div>
+    </div>
+  );
+};
+
+const SettingsManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, onError: (m: string) => void }) => {
+  const [bankSettings, setBankSettings] = useState({ bank_name: '', account_name: '', account_number: '', branch: '' });
+  const [loading, setLoading] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
+  const [importLoading, setImportLoading] = useState(false);
+
+  useEffect(() => {
+    dataService.get<any>('business_settings', 'main').then(res => {
+      if (res) setBankSettings({
+        bank_name: res.bank_name || '',
+        account_name: res.account_name || '',
+        account_number: res.account_number || '',
+        branch: res.branch || ''
+      });
+    });
+  }, []);
+
+  const handleSaveBank = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await dataService.update('business_settings', 'main', bankSettings);
+      onSuccess("Đã lưu thông tin tài khoản!");
+    } catch (err: any) {
+      if (err.message?.includes('404') || err.message?.includes('not found')) {
+        await dataService.create('business_settings', { id: 'main', ...bankSettings });
+        onSuccess("Đã khởi tạo và lưu thông tin tài khoản!");
+      } else {
+        onError(err.message || "Lỗi lưu cấu hình");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleExport = async () => {
+    setExportLoading(true);
+    try {
+      const tables = ['news', 'products', 'brands', 'jobs', 'distributors', 'pages', 'videos', 'business_settings'];
+      const backupData: any = {};
+      for (const table of tables) {
+        backupData[table] = await dataService.list(table);
+      }
+      
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `nyna_backup_${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      onSuccess("Đã xuất dữ liệu sao lưu!");
+    } catch (err: any) {
+      onError("Lỗi xuất dữ liệu: " + err.message);
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!confirm("CẢNH BÁO: Khôi phục dữ liệu có thể tạo ra các bản ghi trùng lặp hoặc ghi đè dữ liệu hiện tại. Bạn có chắc muốn tiếp tục?")) return;
+
+    setImportLoading(true);
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const data = JSON.parse(reader.result as string);
+        for (const table in data) {
+          const records = data[table];
+          if (Array.isArray(records)) {
+            for (const record of records) {
+              const { id, created_at, ...cleanRecord } = record;
+              try {
+                if (id) {
+                   // Try to update first, if fail create
+                   await dataService.update(table, id, cleanRecord);
+                } else {
+                   await dataService.create(table, cleanRecord);
+                }
+              } catch (err) {
+                 await dataService.create(table, cleanRecord);
+              }
+            }
+          }
+        }
+        onSuccess("Đã khôi phục dữ liệu thành công! Hãy tải lại trang.");
+        window.location.reload();
+      } catch (err: any) {
+        onError("Lỗi nhập dữ liệu: " + err.message);
+      } finally {
+        setImportLoading(false);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  return (
+    <div className="space-y-8 pb-20">
+      <div className="flex justify-between items-center bg-white p-8 rounded-[32px] shadow-xl border border-blue-50">
+        <div>
+          <h2 className="text-2xl font-black text-blue-900 uppercase">Sao lưu & Khôi phục</h2>
+          <p className="text-gray-400 font-bold text-sm">Quản lý toàn bộ dữ liệu hệ thống</p>
+        </div>
+        <div className="flex gap-4">
+          <button 
+            onClick={handleExport}
+            disabled={exportLoading}
+            className="bg-emerald-500 text-white px-8 py-3 rounded-full font-black text-xs uppercase tracking-widest flex items-center gap-3 hover:bg-emerald-600 transition-all shadow-xl shadow-emerald-500/20 disabled:opacity-50"
+          >
+            {exportLoading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <Download size={18} />}
+            Xuất Sao Lưu (.json)
+          </button>
+          <label className={`bg-blue-600 text-white px-8 py-3 rounded-full font-black text-xs uppercase tracking-widest flex items-center gap-3 cursor-pointer hover:bg-blue-700 transition-all shadow-xl shadow-blue-600/20 ${importLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+             {importLoading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <Upload size={18} />}
+             Khôi Phục Dữ Liệu
+             <input type="file" disabled={importLoading} className="hidden" accept=".json" onChange={handleImport} />
+          </label>
+        </div>
+      </div>
+
+      <div className="bg-white p-10 md:p-12 rounded-[48px] shadow-2xl border border-blue-50 relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-12 opacity-[0.03] pointer-events-none">
+          <CreditCard size={200} />
+        </div>
+        
+        <div className="flex items-center gap-4 mb-10">
+           <div className="w-14 h-14 bg-pink-50 rounded-2xl flex items-center justify-center text-pink-500 shadow-sm border border-pink-100">
+              <CreditCard size={28} />
+           </div>
+           <div>
+              <h3 className="text-xl font-black text-blue-900 uppercase tracking-tight">Cấu hình thanh toán</h3>
+              <p className="text-gray-400 font-bold text-xs uppercase tracking-widest">Thông tin chuyển khoản doanh nghiệp trong giỏ hàng</p>
+           </div>
+        </div>
+
+        <form onSubmit={handleSaveBank} className="grid md:grid-cols-2 gap-8">
+           <div>
+             <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">Ngân hàng</label>
+             <input required className="w-full p-4 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-2xl outline-none transition-all font-bold text-blue-900" value={bankSettings.bank_name} onChange={e=>setBankSettings({...bankSettings, bank_name: e.target.value})} placeholder="VD: Vietcombank, Techcombank..." />
+           </div>
+           <div>
+             <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">Chủ tài khoản</label>
+             <input required className="w-full p-4 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-2xl outline-none transition-all font-bold text-blue-900 uppercase" value={bankSettings.account_name} onChange={e=>setBankSettings({...bankSettings, account_name: e.target.value})} placeholder="VD: CONG TY TNHH NYNA" />
+           </div>
+           <div>
+             <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">Số tài khoản</label>
+             <input required className="w-full p-4 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-2xl outline-none transition-all font-bold text-blue-900" value={bankSettings.account_number} onChange={e=>setBankSettings({...bankSettings, account_number: e.target.value})} placeholder="VD: 123456789" />
+           </div>
+           <div>
+             <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-2">Chi nhánh</label>
+             <input className="w-full p-4 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-2xl outline-none transition-all font-bold text-blue-900" value={bankSettings.branch} onChange={e=>setBankSettings({...bankSettings, branch: e.target.value})} placeholder="VD: Chi nhánh Hà Nội" />
+           </div>
+           
+           <div className="md:col-span-2 pt-4">
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="bg-blue-900 text-white px-12 py-4 rounded-2xl font-black uppercase text-sm tracking-widest hover:bg-pink-500 transition-all shadow-2xl shadow-blue-900/20 flex items-center gap-3 disabled:opacity-50"
+              >
+                {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <Save size={20} />}
+                Lưu cấu hình doanh nghiệp
+              </button>
+           </div>
+        </form>
+      </div>
+      
+      <div className="bg-emerald-50/50 p-8 rounded-3xl border border-emerald-100 flex items-start gap-4">
+         <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-emerald-500 shadow-sm shrink-0 mt-1">
+            <Database size={20} />
+         </div>
+         <div>
+            <h4 className="font-black text-emerald-900 uppercase text-sm mb-2">Hệ thống đang hoạt động tốt</h4>
+            <p className="text-emerald-700/70 text-xs font-medium leading-relaxed">Bộ máy dữ liệu NYNA được bảo mật và tối ưu hóa cho trải nghiệm khách hàng. Định kỳ hàng tuần bạn nên xuất sao lưu dữ liệu để đề phòng các sự cố máy chủ.</p>
+         </div>
       </div>
     </div>
   );

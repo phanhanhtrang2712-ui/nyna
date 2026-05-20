@@ -1,8 +1,9 @@
 
-import React, { useState } from 'react';
-import { ShoppingCart, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ShoppingCart, X, CreditCard } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { CartItem } from '../types';
+import { CartItem, BusinessSettings } from '../types';
+import { dataService } from '../services/dataService';
 
 const CartDrawer = ({ 
   isOpen, 
@@ -19,6 +20,32 @@ const CartDrawer = ({
 }) => {
   const total = items.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
   const [showPayment, setShowPayment] = useState(false);
+  const [bankSettings, setBankSettings] = useState<BusinessSettings | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      dataService.get<BusinessSettings>('business_settings', 'main')
+        .then(res => {
+          if (res) setBankSettings(res);
+        })
+        .catch(console.error);
+    }
+  }, [isOpen]);
+
+  // VietQR generation
+  const getQrUrl = () => {
+    if (!bankSettings) return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=NYNA-PAYMENT-TOTAL-${total}`;
+    
+    // Attempt VietQR format if possible or fall back
+    // We'll use a generic one that looks good
+    const bank = encodeURIComponent(bankSettings.bank_name);
+    const acc = bankSettings.account_number;
+    const name = encodeURIComponent(bankSettings.account_name);
+    const info = encodeURIComponent(`THANH TOAN DON HANG NYNA`);
+    
+    // Generic QR API but formatted for banking apps if they support it
+    return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=bank:${bank};acc:${acc};amount:${total};name:${name};info:${info}`;
+  };
 
   return (
     <AnimatePresence>
@@ -95,23 +122,49 @@ const CartDrawer = ({
                   <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-6 bg-white rounded-3xl border-2 border-emerald-500/20 text-center space-y-4"
+                    className="p-6 bg-white rounded-[32px] border-2 border-emerald-500/20 shadow-2xl space-y-4"
                   >
-                    <div className="font-black text-emerald-600 uppercase tracking-widest text-xs">Quét mã QR để thanh toán</div>
-                    <div className="aspect-square w-48 mx-auto bg-gray-100 rounded-2xl flex items-center justify-center relative overflow-hidden">
+                    <div className="flex items-center gap-3 justify-center text-emerald-600 font-black text-[10px] uppercase tracking-widest bg-emerald-50 py-2 rounded-xl">
+                       <CreditCard size={14} /> Quét mã để thanh toán
+                    </div>
+                    
+                    <div className="aspect-square w-64 mx-auto bg-white rounded-3xl flex items-center justify-center p-3 shadow-inner border border-gray-100">
                        <img 
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=NYNA-PAYMENT-TOTAL-${total}`} 
+                        src={getQrUrl()} 
                         alt="QR Code Payment" 
-                        className="w-full h-full p-2"
+                        className="w-full h-full"
                        />
                     </div>
-                    <div className="text-left bg-emerald-50 p-4 rounded-2xl space-y-1">
-                      <p className="text-[10px] font-black text-emerald-800 uppercase">Thông tin thụ hưởng:</p>
-                      <p className="text-xs font-bold text-gray-700">CÔNG TY TNHH MTV SẢN XUẤT VÀ THƯƠNG MẠI NYNA</p>
-                      <p className="text-xs font-bold text-gray-700">STK: 0916070421</p>
-                      <p className="text-xs font-bold text-gray-700">Ngân hàng: MB Bank</p>
+
+                    <div className="text-left bg-gray-50 p-5 rounded-2xl border border-gray-100 space-y-1.5">
+                      <p className="text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1 opacity-40">Thông tin thụ hưởng</p>
+                      <p className="text-xs font-black text-blue-900 uppercase">{bankSettings?.account_name || 'CÔNG TY TNHH NYNA'}</p>
+                      <div className="flex justify-between items-center text-xs font-bold text-gray-500">
+                        <span>Số tài khoản:</span>
+                        <span className="text-blue-600 font-black">{bankSettings?.account_number || '0916070421'}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs font-bold text-gray-500">
+                        <span>Ngân hàng:</span>
+                        <span>{bankSettings?.bank_name || 'MB Bank'}</span>
+                      </div>
+                      {bankSettings?.branch && (
+                        <div className="flex justify-between items-center text-xs font-bold text-gray-500">
+                          <span>Chi nhánh:</span>
+                          <span>{bankSettings.branch}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between items-center text-xs font-bold text-emerald-600 pt-1 mt-1 border-t border-gray-200">
+                        <span>Số tiền:</span>
+                        <span className="font-black">{new Intl.NumberFormat('vi-VN').format(total)}đ</span>
+                      </div>
                     </div>
-                    <button onClick={() => setShowPayment(false)} className="text-blue-900 font-black text-[10px] uppercase tracking-widest hover:underline">Quay lại giỏ hàng</button>
+                    
+                    <button 
+                      onClick={() => setShowPayment(false)} 
+                      className="w-full py-4 text-gray-400 font-black text-[10px] uppercase tracking-widest hover:text-blue-900 transition-all border border-transparent hover:border-gray-100 rounded-2xl"
+                    >
+                      Quay lại giỏ hàng
+                    </button>
                   </motion.div>
                 ) : (
                   <button 

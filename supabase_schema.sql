@@ -26,6 +26,21 @@ ALTER TABLE public.brands ADD COLUMN IF NOT EXISTS image TEXT;
 ALTER TABLE public.brands ADD COLUMN IF NOT EXISTS content TEXT;
 ALTER TABLE public.brands ADD COLUMN IF NOT EXISTS slug TEXT;
 
+-- 5. Cập nhật bảng Sản phẩm (Products) cho nhiều ảnh và giá gốc
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS images TEXT[]; -- Mảng chứa tối đa 3 ảnh
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS original_price NUMERIC;
+
+-- 6. Bảng cấu hình doanh nghiệp (Bank info, v.v.)
+CREATE TABLE IF NOT EXISTS public.business_settings (
+    id TEXT PRIMARY KEY,
+    bank_name TEXT,
+    account_name TEXT,
+    account_number TEXT,
+    branch TEXT,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+ALTER TABLE public.business_settings DISABLE ROW LEVEL SECURITY;
+
 -- DƯỚI ĐÂY LÀ TOÀN BỘ CẤU TRÚC (Nếu tạo mới từ đầu):
 -- Nếu bạn đã chạy các lệnh trên thì không cần chạy phần dưới này.
 
