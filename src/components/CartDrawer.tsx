@@ -53,7 +53,27 @@ const CartDrawer = ({
     return `https://img.vietqr.io/image/${bankId}-${acc}-compact.png?amount=${amount}&addInfo=${addInfo}&accountName=${accountName}`;
   };
 
-  const handleConfirmPayment = () => {
+  const handleConfirmPayment = async () => {
+    try {
+      // Lưu đơn hàng vào database để phục vụ báo cáo bán hàng
+      const orderData = {
+        total_amount: total,
+        payment_method: 'Chuyển khoản',
+        status: 'Hoàn thành',
+        items: items.map(it => ({
+          id: it.id,
+          title: it.title,
+          price: it.price,
+          quantity: it.quantity,
+          brand: it.brand,
+          category: it.category || 'Chưa phân loại'
+        }))
+      };
+      await dataService.create('orders', orderData);
+    } catch (err) {
+      console.error("Lỗi khi lưu đơn hàng:", err);
+    }
+
     setIsSuccess(true);
     onClear();
     setShowPayment(false);

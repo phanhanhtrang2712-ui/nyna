@@ -141,3 +141,17 @@ CREATE TABLE IF NOT EXISTS public.videos (
     tag TEXT DEFAULT 'SỰ KIỆN'
 );
 ALTER TABLE public.videos DISABLE ROW LEVEL SECURITY;
+
+-- 9. Bảng Đơn hàng (orders) để lưu trữ giao dịch phục vụ báo cáo bán hàng
+CREATE TABLE IF NOT EXISTS public.orders (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    customer_name TEXT DEFAULT 'Khách hàng vãng lai',
+    customer_phone TEXT,
+    customer_address TEXT,
+    payment_method TEXT DEFAULT 'Chuyển khoản',
+    status TEXT DEFAULT 'Hoàn thành',
+    total_amount NUMERIC DEFAULT 0,
+    items JSONB DEFAULT '[]'::jsonb -- Lưu danh sách sản phẩm mua dạng [{id, title, price, quantity, category, brand}]
+);
+ALTER TABLE public.orders DISABLE ROW LEVEL SECURITY;

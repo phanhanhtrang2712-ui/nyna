@@ -50,6 +50,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         price: product.price || 0, 
         image: product.image,
         brand: product.brand,
+        category: product.category || 'Chưa phân loại',
         quantity: 1 
       }];
     });

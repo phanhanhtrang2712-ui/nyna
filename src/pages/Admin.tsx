@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, Newspaper, Package, Briefcase, 
   MapPin, LogOut, Plus, Trash2, Edit, Save, X, Image as ImageIcon, FileText, ShieldCheck,
-  PlayCircle, Settings, Download, Upload, Database, CreditCard
+  PlayCircle, Settings, Download, Upload, Database, CreditCard,
+  Calendar, TrendingUp, BarChart3, Filter
 } from 'lucide-react';
 import { auth, signInWithGoogle, logout } from '../lib/firebase';
 import { dataService } from '../services/dataService';
 import { onAuthStateChanged, type User } from 'firebase/auth';
-import { VideoItem } from '../types';
+import { VideoItem, OrderItem, ProductItem, BrandItem } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { getYoutubeThumbnail } from '../lib/youtube';
 
@@ -35,7 +36,7 @@ const AdminPage = () => {
     }
   }, [isAuthenticated]);
 
-  const [activeTab, setActiveTab] = useState<'news' | 'products' | 'jobs' | 'distributors' | 'pages' | 'videos' | 'settings'>('news');
+  const [activeTab, setActiveTab] = useState<'news' | 'products' | 'jobs' | 'distributors' | 'pages' | 'videos' | 'settings' | 'sales_report'>('news');
   const [loginData, setLoginData] = useState({ username: '', password: '' });
   const [loginError, setLoginError] = useState('');
 
@@ -143,6 +144,7 @@ const AdminPage = () => {
           {[
             { id: 'news', icon: <Newspaper size={20} />, label: 'Quản lý Tin tức' },
             { id: 'products', icon: <Package size={20} />, label: 'Quản lý Sản phẩm' },
+            { id: 'sales_report', icon: <BarChart3 size={20} />, label: 'Báo cáo Bán hàng' },
             { id: 'videos', icon: <PlayCircle size={20} />, label: 'Thư viện Video' },
             { id: 'jobs', icon: <Briefcase size={20} />, label: 'Quản lý Tuyển dụng' },
             { id: 'distributors', icon: <MapPin size={20} />, label: 'Nhà phân phối' },
@@ -186,6 +188,7 @@ const AdminPage = () => {
         <div className="max-w-5xl mx-auto">
           {activeTab === 'news' && <NewsManager onSuccess={showSuccess} onError={showError} />}
           {activeTab === 'products' && <ProductManager onSuccess={showSuccess} onError={showError} />}
+          {activeTab === 'sales_report' && <SalesReportManager onSuccess={showSuccess} onError={showError} />}
           {activeTab === 'videos' && <VideoManager onSuccess={showSuccess} onError={showError} />}
           {activeTab === 'jobs' && <JobManager onSuccess={showSuccess} onError={showError} />}
           {activeTab === 'distributors' && <DistributorManager onSuccess={showSuccess} onError={showError} />}
@@ -1540,6 +1543,585 @@ const SettingsManager = ({ onSuccess, onError }: { onSuccess: (m: string) => voi
             <p className="text-emerald-700/70 text-xs font-medium leading-relaxed">Bộ máy dữ liệu NYNA được bảo mật và tối ưu hóa cho trải nghiệm khách hàng. Định kỳ hàng tuần bạn nên xuất sao lưu dữ liệu để đề phòng các sự cố máy chủ.</p>
          </div>
       </div>
+    </div>
+  );
+};
+
+// ==========================================
+// BÁO CÁO BÁN HÀNG MANAGER COMPONENT
+// ==========================================
+const SalesReportManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, onError: (m: string) => void }) => {
+  const [orders, setOrders] = useState<OrderItem[]>([]);
+  const [products, setProducts] = useState<ProductItem[]>([]);
+  const [brands, setBrands] = useState<BrandItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // States for filters
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  const [selectedProduct, setSelectedProduct] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [selectedBrand, setSelectedBrand] = useState<string>('');
+
+  // Tải dữ liệu từ database
+  const loadReportData = async () => {
+    setLoading(true);
+    try {
+      const [ordersList, productsList, brandsList] = await Promise.all([
+        dataService.list<OrderItem>('orders'),
+        dataService.list<ProductItem>('products'),
+        dataService.list<BrandItem>('brands'),
+      ]);
+      setOrders(ordersList || []);
+      setProducts(productsList || []);
+      setBrands(brandsList || []);
+    } catch (err) {
+      console.error("Lỗi khi tải dữ liệu báo cáo:", err);
+      onError("Không thể kết nối dịch vụ để kết xuất báo cáo!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadReportData();
+  }, []);
+
+  // Danh mục nhóm hàng duy nhất
+  const uniqueCategories = React.useMemo(() => {
+    const list = new Set<string>();
+    products.forEach(p => { if (p.category) list.add(p.category); });
+    orders.forEach(o => {
+      (o.items || []).forEach(it => { if (it.category) list.add(it.category); });
+    });
+    return Array.from(list);
+  }, [products, orders]);
+
+  // Tạo dữ liệu giao dịch mẫu để chạy thử nghiệm bộ lọc
+  const handleGenerateDemoData = async () => {
+    try {
+      setLoading(true);
+      const demoOrders = [
+        {
+          created_at: new Date(Date.now() - 0.2 * 24 * 60 * 60 * 1000).toISOString(), // Vừa mới mua hôm nay
+          customer_name: 'Phan Anh Trúc',
+          payment_method: 'Chuyển khoản',
+          status: 'Hoàn thành',
+          total_amount: 375000,
+          items: [
+            { id: '1', title: 'Tã dán người lớn NYNA M-L-XL', price: 125000, quantity: 3, brand: 'NYNA', category: 'Tã bỉm người lớn' }
+          ]
+        },
+        {
+          created_at: new Date(Date.now() - 1.5 * 24 * 60 * 60 * 1000).toISOString(), // Hôm qua
+          customer_name: 'Nguyễn Văn Hùng',
+          payment_method: 'Chuyển khoản',
+          status: 'Hoàn thành',
+          total_amount: 750000,
+          items: [
+            { id: '1', title: 'Tã dán người lớn NYNA M-L-XL', price: 125000, quantity: 4, brand: 'NYNA', category: 'Tã bỉm người lớn' },
+            { id: '2', title: 'Sữa hạt dinh dưỡng NYNA Gold', price: 250000, quantity: 2, brand: 'NYNA', category: 'Sữa dinh dưỡng' }
+          ]
+        },
+        {
+          created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), // 4 ngày trước
+          customer_name: 'Lê Thị Thuỷ',
+          payment_method: 'Chuyển khoản',
+          status: 'Hoàn thành',
+          total_amount: 450000,
+          items: [
+            { id: '3', title: 'Tã quần trẻ em NYNA Premium L', price: 150000, quantity: 3, brand: 'MOMMY', category: 'Tã bỉm trẻ em' }
+          ]
+        },
+        {
+          created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(), // 15 ngày trước
+          customer_name: 'Trần Văn Long',
+          payment_method: 'Chuyển khoản',
+          status: 'Hoàn thành',
+          total_amount: 1000000,
+          items: [
+            { id: '2', title: 'Sữa hạt dinh dưỡng NYNA Gold', price: 250000, quantity: 4, brand: 'NYNA', category: 'Sữa dinh dưỡng' }
+          ]
+        }
+      ];
+
+      for (const order of demoOrders) {
+        await dataService.create('orders', order);
+      }
+      
+      onSuccess("Tạo thành công dữ liệu mẫu mô phỏng bán hàng!");
+      loadReportData();
+    } catch (err) {
+      console.error("Lỗi khi tạo dữ liệu mẫu:", err);
+      onError("Gặp lỗi khi ghi thông tin đơn hàng mẫu!");
+      setLoading(false);
+    }
+  };
+
+  // Làm sạch các bộ lọc
+  const handleResetFilters = () => {
+    setStartDate('');
+    setEndDate('');
+    setSelectedProduct('');
+    setSelectedCategory('');
+    setSelectedBrand('');
+  };
+
+  // Lọc luồng dữ liệu bán hàng
+  const filteredSalesRows = React.useMemo(() => {
+    const rows: any[] = [];
+    
+    orders.forEach(order => {
+      // 1. Lọc theo thời gian (Từ ngày - Đến ngày)
+      if (order.created_at) {
+        const orderDate = new Date(order.created_at);
+        
+        if (startDate) {
+          const start = new Date(startDate);
+          start.setHours(0, 0, 0, 0);
+          if (orderDate < start) return;
+        }
+        
+        if (endDate) {
+          const end = new Date(endDate);
+          end.setHours(23, 59, 59, 999);
+          if (orderDate > end) return;
+        }
+      }
+      
+      // 2. Bung các sản phẩm bên trong đơn hàng để tính toán lọc chi tiết
+      const orderItems = order.items || [];
+      orderItems.forEach(item => {
+        const itemCategory = item.category || 'Chưa phân loại';
+        const itemBrand = item.brand || 'Khác';
+        
+        // Lọc theo thương hiệu
+        if (selectedBrand && itemBrand !== selectedBrand) return;
+        
+        // Lọc theo nhóm hàng / phân loại
+        if (selectedCategory && itemCategory !== selectedCategory) return;
+        
+        // Lọc theo mặt hàng
+        if (selectedProduct && item.id !== selectedProduct && item.title !== selectedProduct) return;
+        
+        rows.push({
+          orderId: order.id,
+          createdAt: order.created_at || new Date().toISOString(),
+          customerName: order.customer_name || 'Khách vãng lai',
+          itemId: item.id,
+          title: item.title,
+          price: item.price || 0,
+          quantity: item.quantity || 1,
+          brand: itemBrand,
+          category: itemCategory,
+          total: (item.price || 0) * (item.quantity || 1)
+        });
+      });
+    });
+    
+    return rows;
+  }, [orders, startDate, endDate, selectedProduct, selectedCategory, selectedBrand]);
+
+  // Tính toán số liệu tổng quan
+  const stats = React.useMemo(() => {
+    const revenue = filteredSalesRows.reduce((sum, r) => sum + r.total, 0);
+    const qty = filteredSalesRows.reduce((sum, r) => sum + r.quantity, 0);
+    const uniqueOrders = new Set(filteredSalesRows.map(r => r.orderId)).size;
+    return { revenue, qty, uniqueOrders };
+  }, [filteredSalesRows]);
+
+  // Phân tích Mặt hàng bán chạy nhất
+  const productSales = React.useMemo(() => {
+    const map: Record<string, { title: string; quantity: number; revenue: number; brand: string; category: string }> = {};
+    filteredSalesRows.forEach(row => {
+      const key = row.title;
+      if (!map[key]) {
+        map[key] = { title: row.title, quantity: 0, revenue: 0, brand: row.brand, category: row.category };
+      }
+      map[key].quantity += row.quantity;
+      map[key].revenue += row.total;
+    });
+    return Object.values(map).sort((a, b) => b.revenue - a.revenue);
+  }, [filteredSalesRows]);
+
+  // Phân tích Thương hiệu đóng góp nhiều doanh thu nhất
+  const brandSales = React.useMemo(() => {
+    const map: Record<string, { brand: string; quantity: number; revenue: number }> = {};
+    filteredSalesRows.forEach(row => {
+      const key = row.brand;
+      if (!map[key]) {
+        map[key] = { brand: key, quantity: 0, revenue: 0 };
+      }
+      map[key].quantity += row.quantity;
+      map[key].revenue += row.total;
+    });
+    return Object.values(map).sort((a, b) => b.revenue - a.revenue);
+  }, [filteredSalesRows]);
+
+  // Phân tích Nhóm hàng/Phân loại đóng góp nhiều doanh thu nhất
+  const categorySales = React.useMemo(() => {
+    const map: Record<string, { category: string; quantity: number; revenue: number }> = {};
+    filteredSalesRows.forEach(row => {
+      const key = row.category;
+      if (!map[key]) {
+        map[key] = { category: key, quantity: 0, revenue: 0 };
+      }
+      map[key].quantity += row.quantity;
+      map[key].revenue += row.total;
+    });
+    return Object.values(map).sort((a, b) => b.revenue - a.revenue);
+  }, [filteredSalesRows]);
+
+  return (
+    <div className="space-y-8 animate-fade-in">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest block mb-2">BÁO CÁO ĐO LƯỜNG CHỈ SỐ DOANH NGHIỆP</span>
+          <h1 className="text-4xl font-black text-blue-900 uppercase tracking-tight">Báo cáo bán hàng</h1>
+        </div>
+        
+        <div className="flex gap-3">
+          <button 
+            onClick={loadReportData}
+            className="px-5 py-3 tracking-wide bg-white text-blue-900 border border-gray-200 hover:border-blue-900 rounded-xl transition-all font-bold text-xs uppercase"
+          >
+            Làm mới dữ liệu
+          </button>
+          
+          <button 
+            onClick={handleGenerateDemoData}
+            title="Tạo lịch sử giao dịch mẫu để kiểm thử bộ lọc nhanh chóng"
+            className="px-5 py-3 tracking-wide bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-all font-bold text-xs uppercase shadow-lg shadow-emerald-50 shadow-emerald-600/10"
+          >
+            Tạo dữ liệu mẫu thử nghiệm
+          </button>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="h-96 bg-white rounded-3xl flex flex-col items-center justify-center p-8 shadow-sm border border-gray-100">
+          <div className="w-12 h-12 border-4 border-blue-900/10 border-t-blue-900 rounded-full animate-spin mb-4"></div>
+          <p className="text-gray-400 font-bold text-xs uppercase tracking-widest">Đang tính toán số liệu kinh doanh...</p>
+        </div>
+      ) : (
+        <>
+          {/* Bộ lọc tinh gọn */}
+          <div className="p-8 bg-white rounded-3xl shadow-sm border border-gray-100 space-y-6">
+            <h3 className="text-xs font-black text-blue-900 uppercase tracking-widest flex items-center gap-2">
+              <Filter size={16} className="text-blue-500" />
+              Bộ lọc báo cáo kinh doanh
+            </h3>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+              {/* Ngày bắt đầu */}
+              <div>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2.5 ml-1">Từ ngày</label>
+                <div className="relative">
+                  <input 
+                    type="date" 
+                    value={startDate}
+                    onChange={e => setStartDate(e.target.value)}
+                    className="w-full p-3 bg-gray-50 hover:bg-gray-100 border border-transparent focus:border-blue-500 focus:bg-white rounded-xl outline-none transition-all font-bold text-xs text-blue-900 cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              {/* Ngày kết thúc */}
+              <div>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2.5 ml-1">Đến ngày</label>
+                <div>
+                  <input 
+                    type="date" 
+                    value={endDate}
+                    onChange={e => setEndDate(e.target.value)}
+                    className="w-full p-3 bg-gray-50 hover:bg-gray-100 border border-transparent focus:border-blue-500 focus:bg-white rounded-xl outline-none transition-all font-bold text-xs text-blue-900 cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              {/* Phân loại mặt hàng */}
+              <div>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2.5 ml-1">Nhóm hàng</label>
+                <select 
+                  value={selectedCategory}
+                  onChange={e => setSelectedCategory(e.target.value)}
+                  className="w-full p-3 bg-gray-50 hover:bg-gray-100 border border-transparent focus:border-blue-500 focus:bg-white rounded-xl outline-none transition-all font-bold text-xs text-blue-900 cursor-pointer"
+                >
+                  <option value="">Tất cả nhóm</option>
+                  {uniqueCategories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Thương hiệu */}
+              <div>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2.5 ml-1">Thương hiệu</label>
+                <select 
+                  value={selectedBrand}
+                  onChange={e => setSelectedBrand(e.target.value)}
+                  className="w-full p-3 bg-gray-50 hover:bg-gray-100 border border-transparent focus:border-blue-500 focus:bg-white rounded-xl outline-none transition-all font-bold text-xs text-blue-900 cursor-pointer"
+                >
+                  <option value="">Tất cả thương hiệu</option>
+                  {brands.map(brand => (
+                    <option key={brand.id} value={brand.name}>{brand.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Tên mặt hàng cụ thể */}
+              <div>
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2.5 ml-1">Mặt hàng chi tiết</label>
+                <select 
+                  value={selectedProduct}
+                  onChange={e => setSelectedProduct(e.target.value)}
+                  className="w-full p-3 bg-gray-50 hover:bg-gray-100 border border-transparent focus:border-blue-500 focus:bg-white rounded-xl outline-none transition-all font-bold text-xs text-blue-900 cursor-pointer"
+                >
+                  <option value="">Tất cả mặt hàng</option>
+                  {products.map(p => (
+                    <option key={p.id} value={p.id || p.title}>{p.title}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {(startDate || endDate || selectedCategory || selectedBrand || selectedProduct) && (
+              <div className="flex justify-end pt-2">
+                <button 
+                  onClick={handleResetFilters}
+                  className="text-xs font-black text-rose-500 uppercase tracking-widest hover:text-rose-600 transition-colors"
+                >
+                  HỦY BỘ LỌC XEM TOÀN BỘ
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Metric Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Doanh thu */}
+            <div className="p-8 bg-white border border-gray-100 rounded-3xl shadow-sm flex items-center justify-between relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-[40px] transition-transform group-hover:scale-125"></div>
+              <div>
+                <span className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">TỔNG DOANH THU THU HOẠCH</span>
+                <h4 className="text-3xl font-black text-blue-900 mt-2 tracking-tight">
+                  {new Intl.NumberFormat('vi-VN').format(stats.revenue)}đ
+                </h4>
+                <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 mt-2">
+                  <TrendingUp size={14} /> Điểm ghi nhận thanh toán thành công
+                </div>
+              </div>
+              <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shadow-sm">
+                <CreditCard size={24} />
+              </div>
+            </div>
+
+            {/* Sản lượng */}
+            <div className="p-8 bg-white border border-gray-100 rounded-3xl shadow-sm flex items-center justify-between relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/5 rounded-full blur-[40px] transition-transform group-hover:scale-125"></div>
+              <div>
+                <span className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">SẢN LƯỢNG TIÊU THỤ</span>
+                <h4 className="text-3xl font-black text-blue-900 mt-2 tracking-tight">
+                  {new Intl.NumberFormat('vi-VN').format(stats.qty)} sản phẩm
+                </h4>
+                <div className="text-xs font-bold text-gray-400 mt-2">
+                  Tổng lượng hàng hóa giao thành công
+                </div>
+              </div>
+              <div className="w-14 h-14 bg-pink-50 text-pink-500 rounded-2xl flex items-center justify-center shadow-sm">
+                <Package size={24} />
+              </div>
+            </div>
+
+            {/* Số đơn hàng */}
+            <div className="p-8 bg-white border border-gray-100 rounded-3xl shadow-sm flex items-center justify-between relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-[40px] transition-transform group-hover:scale-125"></div>
+              <div>
+                <span className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">LƯỢT GIAO DỊCH</span>
+                <h4 className="text-3xl font-black text-blue-900 mt-2 tracking-tight">
+                  {stats.uniqueOrders} hóa đơn
+                </h4>
+                <div className="text-xs font-bold text-blue-500 mt-2">
+                  Hoàn tất quá trình quét mã ngân hàng
+                </div>
+              </div>
+              <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shadow-sm">
+                <FileText size={24} />
+              </div>
+            </div>
+          </div>
+
+          {/* Biểu đồ phân tích doanh thu bằng CSS Progress bar */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            {/* Phân tích Sản phẩm */}
+            <div className="p-8 bg-white border border-gray-100 rounded-3xl shadow-sm space-y-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-sm font-black text-blue-900 uppercase tracking-widest">Doanh thu theo mặt hàng</h3>
+                <span className="text-[10px] bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold uppercase">Xếp hạng cao nhất</span>
+              </div>
+              
+              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 scrollbar-hide">
+                {productSales.length === 0 ? (
+                  <p className="text-xs font-bold text-gray-400 text-center py-12">Không có số liệu kinh doanh phù hợp</p>
+                ) : (
+                  productSales.map((p, idx) => {
+                    const percentage = stats.revenue > 0 ? (p.revenue / stats.revenue) * 100 : 0;
+                    return (
+                      <div key={p.title} className="space-y-1.5">
+                        <div className="flex justify-between text-xs font-black text-blue-900">
+                          <div className="truncate max-w-[280px]">
+                            <span className="text-blue-400 inline-block mr-2">#{idx + 1}</span>
+                            {p.title}
+                          </div>
+                          <div>{new Intl.NumberFormat('vi-VN').format(p.revenue)}đ</div>
+                        </div>
+                        <div className="flex items-center gap-3 text-[10px] font-bold text-gray-400">
+                          <span>Sản lượng: {p.quantity} chiếc</span>
+                          <span>•</span>
+                          <span>Đầu phân phối: {p.brand}</span>
+                        </div>
+                        <div className="h-2 w-full bg-gray-50 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-blue-900 rounded-full transition-all duration-1000"
+                            style={{ width: `${percentage}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Phân tích Thương hiệu & Phân loại */}
+            <div className="space-y-8">
+              {/* Theo thương hiệu */}
+              <div className="p-8 bg-white border border-gray-100 rounded-3xl shadow-sm space-y-6">
+                <h3 className="text-sm font-black text-blue-900 uppercase tracking-widest">Thương hiệu phân phối</h3>
+                
+                <div className="space-y-4">
+                  {brandSales.length === 0 ? (
+                    <p className="text-xs font-bold text-gray-400 text-center py-6">Chưa ghi nhận đối tác bán hàng</p>
+                  ) : (
+                    brandSales.map((b) => {
+                      const percentage = stats.revenue > 0 ? (b.revenue / stats.revenue) * 100 : 0;
+                      return (
+                        <div key={b.brand} className="space-y-1.5">
+                          <div className="flex justify-between text-xs font-black text-blue-900">
+                            <div>Thương hiệu {b.brand}</div>
+                            <div>{new Intl.NumberFormat('vi-VN').format(b.revenue)}đ ({percentage.toFixed(1)}%)</div>
+                          </div>
+                          <div className="h-2 w-full bg-gray-50 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-emerald-500 rounded-full transition-all duration-1000"
+                              style={{ width: `${percentage}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
+              {/* Theo nhóm hàng */}
+              <div className="p-8 bg-white border border-gray-100 rounded-3xl shadow-sm space-y-6">
+                <h3 className="text-sm font-black text-blue-900 uppercase tracking-widest">Cơ cấu Nhóm hàng</h3>
+                
+                <div className="space-y-4">
+                  {categorySales.length === 0 ? (
+                    <p className="text-xs font-bold text-gray-400 text-center py-6">Chưa có phân loại bán hàng</p>
+                  ) : (
+                    categorySales.map((c) => {
+                      const percentage = stats.revenue > 0 ? (c.revenue / stats.revenue) * 100 : 0;
+                      return (
+                        <div key={c.category} className="space-y-1.5">
+                          <div className="flex justify-between text-xs font-black text-blue-900">
+                            <div>Phân khúc {c.category}</div>
+                            <div>{new Intl.NumberFormat('vi-VN').format(c.revenue)}đ ({percentage.toFixed(1)}%)</div>
+                          </div>
+                          <div className="h-2 w-full bg-gray-50 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-indigo-500 rounded-full transition-all duration-1000"
+                              style={{ width: `${percentage}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Bảng Chi tiết phiên Giao dịch bán hàng */}
+          <div className="p-8 bg-white border border-gray-100 rounded-3xl shadow-sm space-y-6">
+            <h3 className="text-sm font-black text-blue-900 uppercase tracking-widest">Danh sách giao dịch chi tiết</h3>
+            
+            <div className="overflow-x-auto pr-1">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                    <th className="pb-4">Thời gian</th>
+                    <th className="pb-4">Khách mua</th>
+                    <th className="pb-4">Sản phẩm</th>
+                    <th className="pb-4">Phân loại / Thương hiệu</th>
+                    <th className="pb-4 text-center">SL</th>
+                    <th className="pb-4 text-right">Đơn giá</th>
+                    <th className="pb-4 text-right">Thành tiền</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50 text-xs font-bold text-gray-600">
+                  {filteredSalesRows.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="py-12 text-center text-gray-400 font-bold uppercase tracking-widest">
+                        Chưa có lịch sử giao dịch bán hàng cho kỳ này
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredSalesRows.map((row, idx) => (
+                      <tr key={`${row.orderId}-${row.itemId}-${idx}`} className="hover:bg-gray-50/50 transition-colors">
+                        <td className="py-4 font-normal text-gray-400 whitespace-nowrap">
+                          {new Date(row.createdAt).toLocaleString('vi-VN', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </td>
+                        <td className="py-4 text-blue-900 font-black">{row.customerName}</td>
+                        <td className="py-4 font-black text-blue-900 truncate max-w-[200px]" title={row.title}>
+                          {row.title}
+                        </td>
+                        <td className="py-4">
+                          <span className="text-[10px] font-black uppercase tracking-wider bg-gray-100 text-gray-600 px-2.5 py-1 rounded-md block w-fit mb-1">
+                            {row.category}
+                          </span>
+                          <span className="text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-600 px-2.5 py-1 rounded-md block w-fit">
+                            {row.brand}
+                          </span>
+                        </td>
+                        <td className="py-4 text-center text-blue-900 font-black">{row.quantity}</td>
+                        <td className="py-4 text-right font-bold text-gray-500 whitespace-nowrap">
+                          {new Intl.NumberFormat('vi-VN').format(row.price)}đ
+                        </td>
+                        <td className="py-4 text-right text-blue-900 font-black whitespace-nowrap">
+                          {new Intl.NumberFormat('vi-VN').format(row.total)}đ
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

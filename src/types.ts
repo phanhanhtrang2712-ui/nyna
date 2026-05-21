@@ -48,6 +48,7 @@ export interface CartItem {
   image: string;
   quantity: number;
   brand: string;
+  category?: string;
 }
 
 export interface PageItem {
@@ -83,3 +84,16 @@ export interface BusinessSettings {
   account_number: string;
   branch: string;
 }
+
+export interface OrderItem {
+  id?: string;
+  created_at?: string;
+  customer_name?: string;
+  customer_phone?: string;
+  customer_address?: string;
+  payment_method?: string;
+  status?: string; // 'Hoàn thành' | 'Chờ xử lý' | 'Đã hủy'
+  total_amount: number;
+  items: CartItem[];
+}
+
