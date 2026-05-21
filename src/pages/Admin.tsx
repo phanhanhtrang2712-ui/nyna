@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Newspaper, Package, Briefcase, 
   MapPin, LogOut, Plus, Trash2, Edit, Save, X, Image as ImageIcon, FileText, ShieldCheck,
   PlayCircle, Settings, Download, Upload, Database, CreditCard,
-  Calendar, TrendingUp, BarChart3, Filter, Mail, MessageSquare
+  Calendar, TrendingUp, BarChart3, Filter, Mail, MessageSquare, Menu
 } from 'lucide-react';
 import { getSupabase } from '../lib/supabase';
 import { dataService } from '../services/dataService';
@@ -16,6 +16,7 @@ const AdminPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [dbStatus, setDbStatus] = useState<'checking' | 'connected' | 'error'>('checking');
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
 
@@ -212,7 +213,117 @@ const AdminPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+      {/* Mobile Header */}
+      <header className="md:hidden bg-blue-900 text-white px-6 py-4 flex items-center justify-between shadow-md sticky top-0 z-45">
+        <h2 className="text-xl font-black tracking-tighter uppercase mb-0">NYNA CMS</h2>
+        <button 
+          onClick={() => setIsMobileSidebarOpen(true)}
+          className="p-2 hover:bg-white/10 rounded-xl transition-all"
+        >
+          <Menu size={24} />
+        </button>
+      </header>
+
+      {/* Mobile Sidebar (Drawer) */}
+      <AnimatePresence>
+        {isMobileSidebarOpen && (
+          <div className="fixed inset-0 z-50 md:hidden flex">
+            {/* Backdrop */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileSidebarOpen(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            
+            {/* Sidebar Content */}
+            <motion.aside 
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+              className="relative w-80 bg-blue-900 text-white p-6 flex flex-col h-full z-10 overflow-y-auto"
+            >
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-2xl font-black tracking-tighter uppercase">NYNA CMS</h2>
+                <button 
+                  onClick={() => setIsMobileSidebarOpen(false)}
+                  className="p-2 bg-white/5 hover:bg-white/15 rounded-xl transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="px-4 py-2 rounded-xl bg-white/5 flex items-center gap-2 mb-6 w-fit">
+                <div className={`w-2 h-2 rounded-full ${dbStatus === 'connected' ? 'bg-emerald-500 animate-pulse' : dbStatus === 'error' ? 'bg-red-500' : 'bg-yellow-500'}`}></div>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-blue-200">
+                  {dbStatus === 'connected' ? 'Database Online' : dbStatus === 'error' ? 'Database Offline' : 'Connecting...'}
+                </span>
+              </div>
+
+              <nav className="flex-1 space-y-2">
+                {[
+                  { id: 'news', icon: <Newspaper size={18} />, label: 'Quản lý Tin tức' },
+                  { id: 'products', icon: <Package size={18} />, label: 'Quản lý Sản phẩm' },
+                  { id: 'sales_report', icon: <BarChart3 size={18} />, label: 'Báo cáo Bán hàng' },
+                  { id: 'videos', icon: <PlayCircle size={18} />, label: 'Thư viện Video' },
+                  { id: 'jobs', icon: <Briefcase size={18} />, label: 'Quản lý Tuyển dụng' },
+                  { id: 'distributors', icon: <MapPin size={18} />, label: 'Nhà phân phối' },
+                  { id: 'pages', icon: <FileText size={18} />, label: 'Nội dung trang' },
+                  { id: 'contacts', icon: <Mail size={18} />, label: 'Tin nhắn liên hệ' },
+                  ...(currentUser?.role === 'quản trị' ? [{ id: 'cms_users', icon: <ShieldCheck size={18} />, label: 'Phân quyền CMS' }] : []),
+                  { id: 'settings', icon: <Settings size={18} />, label: 'Cấu hình & Backup' },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => {
+                      setActiveTab(tab.id as any);
+                      setIsMobileSidebarOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-3.5 px-5 py-3 border border-transparent rounded-2xl transition-all duration-300 text-left ${
+                      activeTab === tab.id ? 'bg-white text-blue-900 shadow-xl shadow-black/10 font-bold' : 'hover:bg-white/10 text-blue-100 font-semibold'
+                    }`}
+                  >
+                    {tab.icon}
+                    <span className="text-xs tracking-wide">{tab.label}</span>
+                  </button>
+                ))}
+              </nav>
+
+              <div className="mt-8 pt-6 border-t border-white/10">
+                <div className="flex items-center gap-3 mb-6 bg-white/5 p-3.5 rounded-2xl">
+                  <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center font-black text-white shadow-lg text-xs">
+                    {currentUser?.fullName 
+                      ? currentUser.fullName.split(' ').pop()?.slice(0, 2).toUpperCase() 
+                      : currentUser?.email?.slice(0, 2).toUpperCase() || 'AD'}
+                  </div>
+                  <div>
+                    <div className="text-[12px] font-black tracking-tight truncate max-w-[150px]" title={currentUser?.fullName || currentUser?.email}>
+                      {currentUser?.fullName || currentUser?.email}
+                    </div>
+                    <div className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest">
+                      {currentUser?.role === 'quản trị' ? 'Quản trị viên' : 'Nhân viên CMS'}
+                    </div>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => {
+                    handleLogout();
+                    setIsMobileSidebarOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3.5 px-5 py-3 rounded-2xl bg-red-500/10 hover:bg-red-500 text-red-300 hover:text-white transition-all duration-300"
+                >
+                  <LogOut size={18} />
+                  <span className="font-bold text-xs uppercase tracking-wider">Đăng xuất</span>
+                </button>
+              </div>
+            </motion.aside>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Sidebar */}
       <aside className="w-72 bg-blue-900 text-white p-8 hidden md:flex flex-col border-r border-white/5">
         <h2 className="text-3xl font-black mb-12 tracking-tighter uppercase">NYNA</h2>
