@@ -122,11 +122,11 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
           >
             <div className="mb-10">
               <span className="text-pink-500 font-black uppercase tracking-[0.4em] text-xs mb-4 block">{product.category}</span>
-              <h1 className="text-4xl md:text-5xl font-black text-blue-900 mb-6 uppercase tracking-tight leading-[1.1]">
+              <h1 className="text-2xl md:text-5xl font-black text-blue-900 mb-6 uppercase tracking-tight leading-[1.1]">
                 {product.title}
               </h1>
               <div className="flex items-center gap-6">
-                <div className="text-4xl md:text-5xl font-black text-blue-900 italic">
+                <div className="text-2xl md:text-5xl font-black text-blue-900 italic">
                   {new Intl.NumberFormat('vi-VN').format(product.price || 0)}đ
                 </div>
                 {product.original_price && product.original_price > (product.price || 0) && (
@@ -165,11 +165,10 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
                </button>
             </div>
 
-            <div className="grid grid-cols-3 gap-6 pt-12 border-t border-gray-100">
+            <div className="grid grid-cols-2 gap-6 pt-12 border-t border-gray-100">
                {[
                  { icon: <ShieldCheck className="text-emerald-500" />, text: "Chính hãng 100%" },
                  { icon: <CheckCircle2 className="text-blue-500" />, text: "Đã kiểm định y tế" },
-                 { icon: <Zap className="text-pink-500" />, text: "Giao hàng từ 2-4h" },
                ].map((item, i) => (
                  <div key={i} className="text-center space-y-2">
                     <div className="flex justify-center">{item.icon}</div>
