@@ -18,6 +18,7 @@ const Header = ({ cartCount, onOpenCart }: { cartCount: number; onOpenCart: () =
   const navItems = [
     { name: 'TRANG CHỦ', path: '/' },
     { name: 'GIỚI THIỆU', path: '/gioi-thieu' },
+    { name: 'SẢN PHẨM', path: '/#san-pham' },
     { name: 'THƯƠNG HIỆU', path: '/thuong-hieu' },
     { name: 'TIN TỨC', path: '/tin-tuc' },
     { name: 'VIDEO', path: '/video' },

@@ -5,7 +5,7 @@ import {
   Search, ChevronRight, 
   Filter, X, LayoutGrid, List, SlidersHorizontal, ArrowRight, Zap, ShieldCheck
 } from 'lucide-react';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, useLocation } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import { dataService } from '../services/dataService';
 import { useDataList } from '../hooks/useDataList';
@@ -63,6 +63,7 @@ const CategorySection = ({ group, items, onAddToCart }: { group: string; items: 
 const Home = ({ onAddToCart: propsOnAddToCart }: HomeProps) => {
   const context = useOutletContext<{ onAddToCart?: (p: any) => void }>();
   const onAddToCart = propsOnAddToCart || context?.onAddToCart;
+  const location = useLocation();
 
   const { data: fetchedProducts, loading } = useDataList<ProductItem>('products');
   const [products, setProducts] = useState<ProductItem[]>([]);
@@ -78,6 +79,18 @@ const Home = ({ onAddToCart: propsOnAddToCart }: HomeProps) => {
   useEffect(() => {
     setProducts(fetchedProducts);
   }, [fetchedProducts]);
+
+  // Handle smooth scroll when navigating via #san-pham hash
+  useEffect(() => {
+    if (window.location.hash === '#san-pham') {
+      const element = document.getElementById('san-pham');
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 150);
+      }
+    }
+  }, [location.hash, products]);
 
   useEffect(() => {
     let result = products;
@@ -130,7 +143,7 @@ const Home = ({ onAddToCart: propsOnAddToCart }: HomeProps) => {
         <div className="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 bg-blue-400/10 rounded-full blur-[50px] md:blur-[80px]"></div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-6 -mt-8 md:-mt-16 pb-24 relative z-10">
+      <div id="san-pham" className="max-w-7xl mx-auto px-6 -mt-8 md:-mt-16 pb-24 relative z-10 scroll-mt-24">
         <div className="flex flex-col lg:flex-row gap-8">
           
           {/* Sidebar Area */}
