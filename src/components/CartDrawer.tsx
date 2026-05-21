@@ -54,12 +54,13 @@ const CartDrawer = ({
   };
 
   const handleConfirmPayment = () => {
-    onClear();
     setIsSuccess(true);
+    onClear();
+    setShowPayment(false);
     setTimeout(() => {
       setIsSuccess(false);
       onClose();
-    }, 3000);
+    }, 4000);
   };
 
   return (
@@ -93,11 +94,11 @@ const CartDrawer = ({
             <div className="flex-1 overflow-y-auto p-8 scrollbar-hide">
               {isSuccess ? (
                 <div className="h-full flex flex-col items-center justify-center text-center">
-                  <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-6 animate-bounce">
+                  <div className="w-24 h-24 bg-emerald-500 text-white rounded-[32px] flex items-center justify-center mb-8 shadow-2xl shadow-emerald-500/40 animate-bounce">
                     <CreditCard size={40} />
                   </div>
-                  <h3 className="text-xl font-black text-blue-900 uppercase mb-2">Thanh toán thành công!</h3>
-                  <p className="text-gray-500 font-bold text-sm">Cảm ơn bạn đã tin dùng sản phẩm của NYNA.</p>
+                  <h3 className="text-2xl font-black text-blue-900 uppercase mb-3">Thanh toán hoàn tất!</h3>
+                  <p className="text-gray-500 font-bold text-sm leading-relaxed max-w-[200px] mx-auto">Cảm ơn bạn đã tin dùng sản phẩm của NYNA. Đơn hàng đang được xử lý.</p>
                 </div>
               ) : items.length > 0 ? (
                 <div className="space-y-8">
@@ -195,12 +196,21 @@ const CartDrawer = ({
                     </button>
                   </motion.div>
                 ) : (
-                  <button 
-                    onClick={() => setShowPayment(true)}
-                    className="w-full bg-blue-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-pink-500 transition-all shadow-xl shadow-blue-900/10"
-                  >
-                    Thanh toán ngay
-                  </button>
+                  <div className="space-y-3">
+                    <button 
+                      onClick={() => setShowPayment(true)}
+                      className="w-full bg-blue-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-blue-800 transition-all shadow-xl shadow-blue-900/10 flex items-center justify-center gap-3"
+                    >
+                      <CreditCard size={18} />
+                      Thanh toán ngay
+                    </button>
+                    <button 
+                      onClick={handleConfirmPayment}
+                      className="w-full bg-emerald-50 text-emerald-600 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-emerald-100 transition-all border border-emerald-100"
+                    >
+                      Đã thanh toán (Xóa giỏ hàng)
+                    </button>
+                  </div>
                 )}
               </div>
             )}
