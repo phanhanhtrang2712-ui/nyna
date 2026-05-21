@@ -147,12 +147,10 @@ const CartDrawer = ({
                         <span>Ngân hàng:</span>
                         <span>{bankSettings?.bank_name || 'MB Bank'}</span>
                       </div>
-                      {bankSettings?.branch && (
-                        <div className="flex justify-between items-center text-xs font-bold text-gray-500">
-                          <span>Chi nhánh:</span>
-                          <span>{bankSettings.branch}</span>
-                        </div>
-                      )}
+                      <div className="flex justify-between items-center text-xs font-bold text-gray-500">
+                        <span>Chi nhánh:</span>
+                        <span>{bankSettings?.branch || 'Chi nhánh mặc định'}</span>
+                      </div>
                       <div className="flex justify-between items-center text-xs font-bold text-emerald-600 pt-1 mt-1 border-t border-gray-200">
                         <span>Số tiền:</span>
                         <span className="font-black">{new Intl.NumberFormat('vi-VN').format(total)}đ</span>

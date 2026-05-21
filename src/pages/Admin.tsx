@@ -1367,15 +1367,33 @@ const SettingsManager = ({ onSuccess, onError }: { onSuccess: (m: string) => voi
     e.preventDefault();
     setLoading(true);
     try {
-      await dataService.update('business_settings', 'main', bankSettings);
+      // Use get first to check existence
+      let exists = false;
+      try {
+        const check = await dataService.get('business_settings', 'main');
+        if (check) exists = true;
+      } catch (e) {
+        exists = false;
+      }
+
+      if (exists) {
+        await dataService.update('business_settings', 'main', bankSettings);
+      } else {
+        await dataService.create('business_settings', { id: 'main', ...bankSettings });
+      }
+      
+      // Reload to ensure state is in sync
+      const updated = await dataService.get<any>('business_settings', 'main');
+      if (updated) setBankSettings({
+        bank_name: updated.bank_name || '',
+        account_name: updated.account_name || '',
+        account_number: updated.account_number || '',
+        branch: updated.branch || ''
+      });
+
       onSuccess("Đã lưu thông tin tài khoản!");
     } catch (err: any) {
-      if (err.message?.includes('404') || err.message?.includes('not found')) {
-        await dataService.create('business_settings', { id: 'main', ...bankSettings });
-        onSuccess("Đã khởi tạo và lưu thông tin tài khoản!");
-      } else {
-        onError(err.message || "Lỗi lưu cấu hình");
-      }
+      onError(err.message || "Lỗi lưu cấu hình");
     } finally {
       setLoading(false);
     }
