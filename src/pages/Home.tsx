@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
-import BrandTicker from '../components/BrandTicker';
 import { dataService } from '../services/dataService';
 import { ProductItem } from '../types';
 
@@ -134,8 +133,6 @@ const Home = ({ onAddToCart: propsOnAddToCart }: HomeProps) => {
         <div className="absolute -bottom-20 -left-20 w-64 h-64 md:w-96 md:h-96 bg-pink-500/10 rounded-full blur-[60px] md:blur-[100px]"></div>
         <div className="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 bg-blue-400/10 rounded-full blur-[50px] md:blur-[80px]"></div>
       </section>
-
-      <BrandTicker />
 
       <div className="max-w-7xl mx-auto px-6 -mt-8 md:-mt-16 pb-24 relative z-10">
         <div className="flex flex-col lg:flex-row gap-8">

@@ -1,7 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import Header from './Header';
-import BrandTicker from './BrandTicker';
 import Footer from './Footer';
 import CartDrawer from './CartDrawer';
 import { CartItem } from '../types';
