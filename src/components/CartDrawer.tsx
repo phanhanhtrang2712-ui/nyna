@@ -182,17 +182,17 @@ const CartDrawer = ({
                     </div>
                     
                     <button 
-                      onClick={handleConfirmPayment}
-                      className="w-full py-4 bg-emerald-600 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-emerald-600/20 hover:bg-emerald-700 transition-all"
-                    >
-                      Xác nhận đã thanh toán
-                    </button>
-
-                    <button 
                       onClick={() => setShowPayment(false)} 
                       className="w-full py-4 text-gray-400 font-black text-[10px] uppercase tracking-widest hover:text-blue-900 transition-all border border-transparent hover:border-gray-100 rounded-2xl"
                     >
                       Quay lại giỏ hàng
+                    </button>
+
+                    <button 
+                      onClick={handleConfirmPayment}
+                      className="w-full py-4 bg-emerald-600 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-emerald-600/20 hover:bg-emerald-700 transition-all"
+                    >
+                      XÁC NHẬN ĐÃ THANH TOÁN
                     </button>
                   </motion.div>
                 ) : (
@@ -203,12 +203,6 @@ const CartDrawer = ({
                     >
                       <CreditCard size={18} />
                       Thanh toán ngay
-                    </button>
-                    <button 
-                      onClick={handleConfirmPayment}
-                      className="w-full bg-emerald-50 text-emerald-600 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-emerald-100 transition-all border border-emerald-100"
-                    >
-                      Đã thanh toán (Xóa giỏ hàng)
                     </button>
                   </div>
                 )}
