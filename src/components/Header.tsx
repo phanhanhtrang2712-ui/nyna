@@ -118,23 +118,50 @@ const Header = ({ cartCount, onOpenCart }: { cartCount: number; onOpenCart: () =
                 <X className="w-6 h-6" />
               </button>
             </div>
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-5">
               {navItems.map(item => (
                 <Link 
                   key={item.path} 
                   to={item.path}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`text-2xl font-black text-left uppercase tracking-tighter ${location.pathname === item.path ? 'text-pink-500' : 'text-blue-900'}`}
+                  className={`text-[16px] font-extrabold text-left uppercase tracking-tight py-1 border-b border-gray-50 flex justify-between items-center ${location.pathname === item.path ? 'text-pink-500 border-pink-100' : 'text-blue-900'}`}
                 >
-                  {item.name}
+                  <span>{item.name}</span>
+                  <ChevronRight size={14} className={location.pathname === item.path ? 'text-pink-500' : 'text-blue-900/40'} />
                 </Link>
               ))}
               <button 
                 onClick={() => { setMobileMenuOpen(false); onOpenCart(); }}
-                className="text-2xl font-black text-pink-500 text-left uppercase tracking-tighter flex items-center gap-3"
+                className="text-[16px] font-extrabold text-pink-500 text-left uppercase tracking-tight py-2 flex items-center justify-between border-b border-gray-50"
               >
-                GIỎ HÀNG ({cartCount})
+                <span>GIỎ HÀNG</span>
+                <span className="bg-pink-100 text-pink-600 px-3 py-1 rounded-full text-xs font-black">
+                  {cartCount} sản phẩm
+                </span>
               </button>
+
+              {/* Extras inside mobile menu */}
+              <div className="mt-6 pt-6 border-t border-gray-100 space-y-4">
+                <Link 
+                  to="/he-thong" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block text-xs font-black text-emerald-600 uppercase tracking-wider bg-emerald-50 px-4 py-2.5 rounded-lg text-center"
+                >
+                  Hệ thống phân phối
+                </Link>
+                <Link 
+                  to="/tuyen-dung" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block text-xs font-black text-blue-900 uppercase tracking-wider bg-blue-50 px-4 py-2.5 rounded-lg text-center"
+                >
+                  Tuyển dụng nhân tài
+                </Link>
+                
+                <div className="pt-4 text-center space-y-1.5 text-gray-500 text-[11px] font-medium leading-relaxed">
+                  <p>Hotline: <strong>0916 070 421 - 0916 070 422</strong></p>
+                  <p>Email: <strong>info@nyna.com.vn</strong></p>
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
