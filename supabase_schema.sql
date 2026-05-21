@@ -142,16 +142,18 @@ CREATE TABLE IF NOT EXISTS public.videos (
 );
 ALTER TABLE public.videos DISABLE ROW LEVEL SECURITY;
 
--- 9. Bảng Đơn hàng (orders) để lưu trữ giao dịch phục vụ báo cáo bán hàng
-CREATE TABLE IF NOT EXISTS public.orders (
+-- 10. Bảng Danh sách phân quyền CMS (cms_users)
+CREATE TABLE IF NOT EXISTS public.cms_users (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     created_at TIMESTAMPTZ DEFAULT now(),
-    customer_name TEXT DEFAULT 'Khách hàng vãng lai',
-    customer_phone TEXT,
-    customer_address TEXT,
-    payment_method TEXT DEFAULT 'Chuyển khoản',
-    status TEXT DEFAULT 'Hoàn thành',
-    total_amount NUMERIC DEFAULT 0,
-    items JSONB DEFAULT '[]'::jsonb -- Lưu danh sách sản phẩm mua dạng [{id, title, price, quantity, category, brand}]
+    email TEXT UNIQUE NOT NULL,
+    full_name TEXT,
+    role TEXT DEFAULT 'nhân viên' -- 'quản trị' | 'nhân viên'
 );
-ALTER TABLE public.orders DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.cms_users DISABLE ROW LEVEL SECURITY;
+
+-- Thêm quyền mặc định cho admin chính để tránh bị mất quyền truy cập
+INSERT INTO public.cms_users (email, full_name, role) 
+VALUES ('phanhanhtrang2712@gmail.com', 'Phan Thái Bình', 'quản trị') 
+ON CONFLICT (email) DO NOTHING;
+

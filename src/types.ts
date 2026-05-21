@@ -97,3 +97,12 @@ export interface OrderItem {
   items: CartItem[];
 }
 
+export interface CmsUser {
+  id?: string;
+  created_at?: string;
+  email: string;
+  full_name?: string;
+  role: string; // 'quản trị' | 'nhân viên'
+}
+
+

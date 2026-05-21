@@ -5,18 +5,17 @@ import {
   PlayCircle, Settings, Download, Upload, Database, CreditCard,
   Calendar, TrendingUp, BarChart3, Filter
 } from 'lucide-react';
-import { auth, signInWithGoogle, logout } from '../lib/firebase';
+import { getSupabase } from '../lib/supabase';
 import { dataService } from '../services/dataService';
-import { onAuthStateChanged, type User } from 'firebase/auth';
-import { VideoItem, OrderItem, ProductItem, BrandItem } from '../types';
+import { VideoItem, OrderItem, ProductItem, BrandItem, CmsUser } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { getYoutubeThumbnail } from '../lib/youtube';
 
 const AdminPage = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return sessionStorage.getItem('nyna_admin_auth') === 'true';
-  });
-  const [loading, setLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{ email: string; fullName: string; role: string } | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [dbStatus, setDbStatus] = useState<'checking' | 'connected' | 'error'>('checking');
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
 
@@ -30,30 +29,105 @@ const AdminPage = () => {
   const showSuccess = (msg: string) => setNotification({ message: msg, type: 'success' });
   const showError = (msg: string) => setNotification({ message: msg, type: 'error' });
 
+  // Check existing session on boot
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const supabase = getSupabase();
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session && session.user && session.user.email) {
+          const { data, error } = await supabase
+            .from('cms_users')
+            .select('*')
+            .eq('email', session.user.email)
+            .maybeSingle();
+
+          if (data) {
+            setCurrentUser({
+              email: session.user.email,
+              fullName: data.full_name || 'Quản trị viên',
+              role: data.role || 'nhân viên'
+            });
+            setIsAuthenticated(true);
+          } else {
+            // Logged in but not in cms_users. Sign out.
+            await supabase.auth.signOut();
+            setIsAuthenticated(false);
+          }
+        }
+      } catch (err) {
+        console.error("Lỗi kiểm tra phiên đăng nhập:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkSession();
+  }, []);
+
   useEffect(() => {
     if (isAuthenticated) {
       dataService.list('news').then(() => setDbStatus('connected')).catch(() => setDbStatus('error'));
     }
   }, [isAuthenticated]);
 
-  const [activeTab, setActiveTab] = useState<'news' | 'products' | 'jobs' | 'distributors' | 'pages' | 'videos' | 'settings' | 'sales_report'>('news');
+  const [activeTab, setActiveTab] = useState<'news' | 'products' | 'jobs' | 'distributors' | 'pages' | 'videos' | 'settings' | 'sales_report' | 'cms_users'>('news');
   const [loginData, setLoginData] = useState({ username: '', password: '' });
   const [loginError, setLoginError] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loginData.username === 'admin' && loginData.password === '123456123456') {
-      setIsAuthenticated(true);
-      sessionStorage.setItem('nyna_admin_auth', 'true');
-      setLoginError('');
-    } else {
-      setLoginError('Tài khoản hoặc mật khẩu không đúng');
+    setLoginError('');
+    setIsLoggingIn(true);
+    try {
+      const supabase = getSupabase();
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: loginData.username, // Username input receives email
+        password: loginData.password,
+      });
+
+      if (error) {
+        setLoginError(error.message === 'Invalid login credentials' ? 'Email hoặc mật khẩu không chính xác' : error.message);
+        setIsLoggingIn(false);
+        return;
+      }
+
+      if (data && data.user && data.user.email) {
+        const { data: userData, error: userError } = await supabase
+          .from('cms_users')
+          .select('*')
+          .eq('email', data.user.email)
+          .maybeSingle();
+
+        if (userData) {
+          setCurrentUser({
+            email: data.user.email,
+            fullName: userData.full_name || 'Quản trị viên',
+            role: userData.role || 'nhân viên'
+          });
+          setIsAuthenticated(true);
+          showSuccess(`Xin chào ${userData.full_name || data.user.email}!`);
+        } else {
+          await supabase.auth.signOut();
+          setLoginError('Tài khoản này chưa được cấp quyền truy cập hệ thống CMS. Vui lòng liên hệ quản trị viên.');
+        }
+      }
+    } catch (err: any) {
+      setLoginError(err.message || 'Lỗi đăng nhập hệ thống.');
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      const supabase = getSupabase();
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error(err);
+    }
     setIsAuthenticated(false);
-    sessionStorage.removeItem('nyna_admin_auth');
+    setCurrentUser(null);
   };
 
   if (loading) {
@@ -78,12 +152,13 @@ const AdminPage = () => {
           
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Tài khoản</label>
+              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Email đăng nhập</label>
               <input 
-                type="text"
+                type="email"
                 required
-                className="w-full bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-2xl py-4 px-6 outline-none transition-all font-medium"
-                placeholder="Nhập tài khoản"
+                disabled={isLoggingIn}
+                className="w-full bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-2xl py-4 px-6 outline-none transition-all font-medium disabled:opacity-50"
+                placeholder="VD: admin@example.com"
                 value={loginData.username}
                 onChange={e => setLoginData({...loginData, username: e.target.value})}
               />
@@ -93,7 +168,8 @@ const AdminPage = () => {
               <input 
                 type="password"
                 required
-                className="w-full bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-2xl py-4 px-6 outline-none transition-all font-medium"
+                disabled={isLoggingIn}
+                className="w-full bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-2xl py-4 px-6 outline-none transition-all font-medium disabled:opacity-50"
                 placeholder="Nhập mật khẩu"
                 value={loginData.password}
                 onChange={e => setLoginData({...loginData, password: e.target.value})}
@@ -108,9 +184,15 @@ const AdminPage = () => {
 
             <button 
               type="submit"
-              className="w-full bg-blue-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center shadow-xl shadow-blue-900/20 hover:scale-[1.02] active:scale-[0.98] transition-all uppercase tracking-wider mt-4"
+              disabled={isLoggingIn}
+              className="w-full bg-blue-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center shadow-xl shadow-blue-900/20 hover:scale-[1.02] active:scale-[0.98] transition-all uppercase tracking-wider mt-4 disabled:bg-blue-950 disabled:scale-100 disabled:opacity-80"
             >
-              ĐĂNG NHẬP HỆ THỐNG
+              {isLoggingIn ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  ĐANG ĐĂNG NHẬP...
+                </span>
+              ) : 'ĐĂNG NHẬP HỆ THỐNG'}
             </button>
             
             <a 
@@ -149,6 +231,7 @@ const AdminPage = () => {
             { id: 'jobs', icon: <Briefcase size={20} />, label: 'Quản lý Tuyển dụng' },
             { id: 'distributors', icon: <MapPin size={20} />, label: 'Nhà phân phối' },
             { id: 'pages', icon: <FileText size={20} />, label: 'Nội dung trang' },
+            ...(currentUser?.role === 'quản trị' ? [{ id: 'cms_users', icon: <ShieldCheck size={20} />, label: 'Phân quyền CMS' }] : []),
             { id: 'settings', icon: <Settings size={20} />, label: 'Cấu hình & Backup' },
           ].map((tab) => (
             <button
@@ -165,12 +248,18 @@ const AdminPage = () => {
         </nav>
         <div className="mt-auto pt-8 border-t border-white/10">
           <div className="flex items-center gap-4 mb-8 bg-white/5 p-4 rounded-2xl">
-            <div className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center font-black text-white shadow-lg">
-              AD
+            <div className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center font-black text-white shadow-lg text-sm">
+              {currentUser?.fullName 
+                ? currentUser.fullName.split(' ').pop()?.slice(0, 2).toUpperCase() 
+                : currentUser?.email?.slice(0, 2).toUpperCase() || 'AD'}
             </div>
             <div className="overflow-hidden">
-              <div className="text-[14px] font-black tracking-tight">Administrator</div>
-              <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">NYNA Manager</div>
+              <div className="text-[14px] font-black tracking-tight truncate max-w-[150px]" title={currentUser?.fullName || currentUser?.email}>
+                {currentUser?.fullName || currentUser?.email}
+              </div>
+              <div className="text-[10px] text-emerald-400 font-bold uppercase tracking-widest">
+                {currentUser?.role === 'quản trị' ? 'Quản trị viên' : 'Nhân viên CMS'}
+              </div>
             </div>
           </div>
           <button 
@@ -193,6 +282,7 @@ const AdminPage = () => {
           {activeTab === 'jobs' && <JobManager onSuccess={showSuccess} onError={showError} />}
           {activeTab === 'distributors' && <DistributorManager onSuccess={showSuccess} onError={showError} />}
           {activeTab === 'pages' && <PageManager onSuccess={showSuccess} onError={showError} />}
+          {activeTab === 'cms_users' && currentUser?.role === 'quản trị' && <CmsUserManager onSuccess={showSuccess} onError={showError} />}
           {activeTab === 'settings' && <SettingsManager onSuccess={showSuccess} onError={showError} />}
         </div>
       </main>
@@ -2113,6 +2203,300 @@ const SalesReportManager = ({ onSuccess, onError }: { onSuccess: (m: string) => 
             </div>
           </div>
         </>
+      )}
+    </div>
+  );
+};
+
+// ==========================================
+// THÀNH VIÊN & PHÂN QUYỀN CMS MANAGER COMPONENT
+// ==========================================
+const CmsUserManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, onError: (m: string) => void }) => {
+  const [users, setUsers] = useState<CmsUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  // Form states
+  const [formData, setFormData] = useState({
+    email: '',
+    full_name: '',
+    role: 'nhân viên'
+  });
+
+  const loadUsers = async () => {
+    setLoading(true);
+    try {
+      const supabase = getSupabase();
+      const { data, error } = await supabase
+        .from('cms_users')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setUsers(data || []);
+    } catch (err: any) {
+      console.error("Lỗi khi tải danh sách phân quyền:", err);
+      if (err.code === 'PGS01' || err.message?.includes('does not exist')) {
+        onError("Lỗi: Thiếu bảng 'cms_users' trong Database. Vui lòng copy nội dung file 'supabase_schema.sql' vào SQL Editor trên Supabase Dashboard và click RUN để khởi tạo.");
+      } else {
+        onError("Không thể kết nối dịch vụ để tải danh sách thành viên!");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.email) return;
+
+    try {
+      const supabase = getSupabase();
+      if (editingId) {
+        const { error } = await supabase
+          .from('cms_users')
+          .update({
+            email: formData.email.trim().toLowerCase(),
+            full_name: formData.full_name.trim(),
+            role: formData.role
+          })
+          .eq('id', editingId);
+
+        if (error) throw error;
+        onSuccess("Cập nhật quyền thành viên thành công!");
+      } else {
+        const { error } = await supabase
+          .from('cms_users')
+          .insert([{
+            email: formData.email.trim().toLowerCase(),
+            full_name: formData.full_name.trim(),
+            role: formData.role
+          }]);
+
+        if (error) throw error;
+        onSuccess("Thêm danh sách cấp quyền truy cập thành công!");
+      }
+
+      setFormData({ email: '', full_name: '', role: 'nhân viên' });
+      setShowAddForm(false);
+      setEditingId(null);
+      loadUsers();
+    } catch (err: any) {
+      console.error("Lỗi khi lưu phân quyền:", err);
+      if (err.code === '23505') {
+        onError("Email này đã có trong danh sách phân quyền của hệ thống!");
+      } else {
+        onError("Có lỗi xảy ra khi lưu thông tin phân quyền thành viên!");
+      }
+    }
+  };
+
+  const handleEdit = (user: CmsUser) => {
+    setEditingId(user.id || null);
+    setFormData({
+      email: user.email,
+      full_name: user.full_name || '',
+      role: user.role
+    });
+    setShowAddForm(true);
+  };
+
+  const handleDelete = async (id: string, email: string) => {
+    if (confirm(`Bạn có chắc muốn thu hồi quyền truy cập hệ thống của email này không?\n👉 ${email}`)) {
+      try {
+        const supabase = getSupabase();
+        const { error } = await supabase
+          .from('cms_users')
+          .delete()
+          .eq('id', id);
+
+        if (error) throw error;
+        onSuccess("Thu hồi quyền truy cập thành công!");
+        loadUsers();
+      } catch (err) {
+        console.error("Lỗi khi xoá phân quyền:", err);
+        onError("Không thể thực hiện thu hồi quyền truy cập thành viên!");
+      }
+    }
+  };
+
+  return (
+    <div className="space-y-8 animate-fade-in">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest block mb-2">QUẢN TRỊ VIÊN BẢO MẬT HỆ THỐNG</span>
+          <h1 className="text-4xl font-black text-blue-900 uppercase tracking-tight">Cấp phép & Phân quyền</h1>
+        </div>
+        
+        <button 
+          onClick={() => {
+            setShowAddForm(!showAddForm);
+            if (showAddForm) {
+              setEditingId(null);
+              setFormData({ email: '', full_name: '', role: 'nhân viên' });
+            }
+          }}
+          className="px-5 py-3 tracking-wide bg-blue-900 text-white hover:bg-blue-950 rounded-xl transition-all font-bold text-xs uppercase shadow-lg shadow-blue-50 shadow-blue-900/10 flex items-center gap-2"
+        >
+          {showAddForm ? <X size={16} /> : <Plus size={16} />}
+          {showAddForm ? 'Hủy bỏ' : 'Cấp quyền thành viên'}
+        </button>
+      </div>
+
+      {/* Info Block */}
+      <div className="p-6 bg-blue-50/50 border border-blue-100 rounded-3xl text-xs text-blue-900 leading-relaxed font-semibold">
+        <h4 className="font-extrabold text-[13px] uppercase tracking-wide mb-2 block text-blue-900">💡 Quy trình cấp quyền bảo mật Supabase Auth:</h4>
+        <ol className="list-decimal list-inside space-y-1.5 text-blue-800">
+          <li><strong>Tạo tài khoản Auth:</strong> Quản trị viên truy cập trang quản trị <a href="https://supabase.com" target="_blank" rel="noopener noreferrer" className="underline font-black hover:text-blue-950">Supabase Console Dashboard</a>, chọn mục <strong>Auth &gt; Users &gt; Add User &gt; Create User</strong> để cấu hình thông tin đăng ký (Email &amp; Mật khẩu cho thành viên).</li>
+          <li><strong>Phân quyền hệ thống:</strong> Thêm Email đó vào danh sách phân quyền bên dưới kèm cấp độ truy cập (<strong>quyền quản trị</strong> hoặc <strong>nhân viên</strong>) để xác định quyền truy cập các tính năng phù hợp của CMS.</li>
+        </ol>
+      </div>
+
+      {showAddForm && (
+        <form onSubmit={handleSubmit} className="p-8 bg-white rounded-3xl shadow-sm border border-gray-100 space-y-6">
+          <h3 className="text-sm font-black text-blue-900 uppercase tracking-widest">
+            {editingId ? 'Chỉnh sửa thông tin phân quyền' : 'Khai báo cấp quyền truy cập mới'}
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Email đăng nhập Auth</label>
+              <input 
+                type="email"
+                required
+                className="w-full p-4 bg-gray-50 hover:bg-gray-100 border border-transparent focus:border-blue-500 focus:bg-white rounded-xl outline-none transition-all font-bold text-xs text-blue-900"
+                placeholder="VD: user@domain.com"
+                value={formData.email}
+                onChange={e => setFormData({ ...formData, email: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Họ tên thành viên</label>
+              <input 
+                type="text"
+                required
+                className="w-full p-4 bg-gray-50 hover:bg-gray-100 border border-transparent focus:border-blue-500 focus:bg-white rounded-xl outline-none transition-all font-bold text-xs text-blue-900"
+                placeholder="VD: Nguyễn Văn A"
+                value={formData.full_name}
+                onChange={e => setFormData({ ...formData, full_name: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 ml-1">Vai trò quyền hạn</label>
+              <select 
+                value={formData.role}
+                onChange={e => setFormData({ ...formData, role: e.target.value })}
+                className="w-full p-4 bg-gray-50 hover:bg-gray-100 border border-transparent focus:border-blue-500 focus:bg-white rounded-xl outline-none transition-all font-bold text-xs text-blue-900 cursor-pointer"
+              >
+                <option value="nhân viên">Nhân viên (CMS Thường)</option>
+                <option value="quản trị">Quản trị viên (Toàn quyền)</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-50">
+            <button 
+              type="button"
+              onClick={() => {
+                setShowAddForm(false);
+                setEditingId(null);
+                setFormData({ email: '', full_name: '', role: 'nhân viên' });
+              }}
+              className="px-5 py-3 border border-gray-200 hover:border-blue-900 transition-all text-blue-900 rounded-xl font-bold text-xs uppercase"
+            >
+              Hủy bỏ
+            </button>
+            <button 
+              type="submit"
+              className="px-5 py-3 bg-blue-900 hover:bg-blue-950 text-white rounded-xl font-bold text-xs uppercase shadow-md transition-all"
+            >
+              {editingId ? 'Cập nhật phân quyền' : 'Khai báo cấp quyền'}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {loading ? (
+        <div className="h-64 bg-white rounded-3xl flex flex-col items-center justify-center p-8 shadow-sm border border-gray-100">
+          <div className="w-10 h-10 border-4 border-blue-900/10 border-t-blue-900 rounded-full animate-spin mb-4"></div>
+          <p className="text-gray-400 font-bold text-[10px] uppercase tracking-widest">Đang tải danh sách tài khoản phân quyền...</p>
+        </div>
+      ) : (
+        <div className="p-8 bg-white border border-gray-100 rounded-3xl shadow-sm space-y-6">
+          <h3 className="text-sm font-black text-blue-900 uppercase tracking-widest">Danh sách nhân sự & cấp phép đăng nhập</h3>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                  <th className="pb-4">Họ và Tên</th>
+                  <th className="pb-4">Email liên quan</th>
+                  <th className="pb-4">Ngày cấp quyền</th>
+                  <th className="pb-4">Cấp độ truy cập</th>
+                  <th className="pb-4 text-right">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50 text-xs font-bold text-gray-600">
+                {users.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-12 text-center text-gray-400 font-bold uppercase tracking-widest">
+                      Chưa ghi nhận tài khoản phân quyền nào trên hệ thống
+                    </td>
+                  </tr>
+                ) : (
+                  users.map((u) => (
+                    <tr key={u.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="py-4 text-blue-900 font-black">{u.full_name || 'Chưa ghi nhận'}</td>
+                      <td className="py-4 text-gray-500 font-mono text-[11px]">{u.email}</td>
+                      <td className="py-4 font-normal text-gray-400">
+                        {u.created_at ? new Date(u.created_at).toLocaleString('vi-VN', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit'
+                        }) : '--/--/----'}
+                      </td>
+                      <td className="py-4">
+                        <span className={`text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-md ${
+                          u.role === 'quản trị' 
+                            ? 'bg-amber-100 text-amber-800' 
+                            : 'bg-blue-50 text-blue-700'
+                        }`}>
+                          {u.role === 'quản trị' ? 'Quản trị viên' : 'Nhân viên CMS'}
+                        </span>
+                      </td>
+                      <td className="py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button 
+                            onClick={() => handleEdit(u)}
+                            className="p-2 hover:bg-blue-50 text-blue-900 rounded-lg transition-colors"
+                            title="Sửa phân quyền"
+                          >
+                            <Edit size={16} />
+                          </button>
+                          <button 
+                            onClick={() => handleDelete(u.id!, u.email)}
+                            className="p-2 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors"
+                            title="Thu hồi quyền đăng nhập"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       )}
     </div>
   );
