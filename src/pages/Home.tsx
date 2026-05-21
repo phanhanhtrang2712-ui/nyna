@@ -42,13 +42,12 @@ const CategorySection = ({ group, items, onAddToCart }: { group: string; items: 
       </div>
       
       {/* Grid container for both mobile and desktop */}
-      <div className="grid grid-cols-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
         {items.map((item, index) => (
           <div 
             key={item.id} 
             className={`
-              ${!isExpanded && index >= 3 ? 'hidden md:block' : ''} 
-              ${!isExpanded && index >= 4 ? 'md:hidden' : ''}
+              ${!isExpanded && index >= 4 ? 'hidden' : ''}
               ${isExpanded ? 'block' : ''}
             `}
           >
@@ -264,7 +263,7 @@ const Home = ({ onAddToCart: propsOnAddToCart }: HomeProps) => {
             {/* Grouped Product Sections */}
             <div className="space-y-12">
                {loading ? (
-                 <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                 <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                     {Array.from({ length: 4 }).map((_, i) => (
                       <div key={i} className="bg-white rounded-[32px] h-[400px] animate-pulse border border-gray-100"></div>
                     ))}
