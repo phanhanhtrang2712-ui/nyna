@@ -32,7 +32,7 @@ const Header = ({ cartCount, onOpenCart }: { cartCount: number; onOpenCart: () =
           <div className="flex gap-6">
             <div className="flex items-center gap-1.5">
               <Phone className="w-3.5 h-3.5" />
-              <span>0916 070 421 - 0916 070 422</span>
+              <span>0923888885</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span>Thứ 2 - Thứ 7: 7:30 - 17:30</span>
