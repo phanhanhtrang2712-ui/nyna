@@ -34,6 +34,10 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     setCart(prev => prev.filter(item => item.id !== id));
   };
 
+  const clearCart = () => {
+    setCart([]);
+  };
+
   const handleAddToCart = (product: any) => {
     setCart(prev => {
       const existing = prev.find(item => item.id === (product.id || product.title));
@@ -85,6 +89,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         items={cart}
         onUpdateQuantity={updateQuantity}
         onRemove={removeFromCart}
+        onClear={clearCart}
       />
     </div>
   );

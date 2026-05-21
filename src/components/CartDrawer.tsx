@@ -10,20 +10,24 @@ const CartDrawer = ({
   onClose, 
   items, 
   onUpdateQuantity, 
-  onRemove 
+  onRemove,
+  onClear
 }: { 
   isOpen: boolean; 
   onClose: () => void; 
   items: CartItem[]; 
   onUpdateQuantity: (id: string, delta: number) => void;
   onRemove: (id: string) => void;
+  onClear: () => void;
 }) => {
   const total = items.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
   const [showPayment, setShowPayment] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [bankSettings, setBankSettings] = useState<BusinessSettings | null>(null);
 
   useEffect(() => {
     if (isOpen) {
+      if (!isSuccess) setShowPayment(false);
       dataService.get<BusinessSettings>('business_settings', 'main')
         .then(res => {
           if (res) setBankSettings(res);
@@ -47,6 +51,15 @@ const CartDrawer = ({
     const accountName = encodeURIComponent(bankSettings.account_name);
 
     return `https://img.vietqr.io/image/${bankId}-${acc}-compact.png?amount=${amount}&addInfo=${addInfo}&accountName=${accountName}`;
+  };
+
+  const handleConfirmPayment = () => {
+    onClear();
+    setIsSuccess(true);
+    setTimeout(() => {
+      setIsSuccess(false);
+      onClose();
+    }, 3000);
   };
 
   return (
@@ -78,7 +91,15 @@ const CartDrawer = ({
             </div>
 
             <div className="flex-1 overflow-y-auto p-8 scrollbar-hide">
-              {items.length > 0 ? (
+              {isSuccess ? (
+                <div className="h-full flex flex-col items-center justify-center text-center">
+                  <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-6 animate-bounce">
+                    <CreditCard size={40} />
+                  </div>
+                  <h3 className="text-xl font-black text-blue-900 uppercase mb-2">Thanh toán thành công!</h3>
+                  <p className="text-gray-500 font-bold text-sm">Cảm ơn bạn đã tin dùng sản phẩm của NYNA.</p>
+                </div>
+              ) : items.length > 0 ? (
                 <div className="space-y-8">
                   {items.map((item) => (
                     <div key={item.id} className="flex gap-4 group">
@@ -159,6 +180,13 @@ const CartDrawer = ({
                       </div>
                     </div>
                     
+                    <button 
+                      onClick={handleConfirmPayment}
+                      className="w-full py-4 bg-emerald-600 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-emerald-600/20 hover:bg-emerald-700 transition-all"
+                    >
+                      Xác nhận đã thanh toán
+                    </button>
+
                     <button 
                       onClick={() => setShowPayment(false)} 
                       className="w-full py-4 text-gray-400 font-black text-[10px] uppercase tracking-widest hover:text-blue-900 transition-all border border-transparent hover:border-gray-100 rounded-2xl"
