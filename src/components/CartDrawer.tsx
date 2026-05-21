@@ -34,17 +34,19 @@ const CartDrawer = ({
 
   // VietQR generation
   const getQrUrl = () => {
-    if (!bankSettings) return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=NYNA-PAYMENT-TOTAL-${total}`;
+    // If no settings, use a generic QR
+    if (!bankSettings) return `https://img.vietqr.io/image/970422-0916070421-compact.png?amount=${total}&addInfo=THANH%20TOAN%20NYNA&accountName=CONG%20TY%20NYNA`;
     
-    // Attempt VietQR format if possible or fall back
-    // We'll use a generic one that looks good
-    const bank = encodeURIComponent(bankSettings.bank_name);
+    // Attempt to normalize bank name to a potential ID for VietQR (e.g. "MB Bank" -> "MB")
+    // Note: img.vietqr.io works best with the bank BIN or short ID.
+    // We'll try to extract common IDs or just pass it as is.
+    const bankId = bankSettings.bank_name.split(' ')[0].toUpperCase();
     const acc = bankSettings.account_number;
-    const name = encodeURIComponent(bankSettings.account_name);
-    const info = encodeURIComponent(`THANH TOAN DON HANG NYNA`);
-    
-    // Generic QR API but formatted for banking apps if they support it
-    return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=bank:${bank};acc:${acc};amount:${total};name:${name};info:${info}`;
+    const amount = total;
+    const addInfo = encodeURIComponent('THANH TOAN DON HANG NYNA');
+    const accountName = encodeURIComponent(bankSettings.account_name);
+
+    return `https://img.vietqr.io/image/${bankId}-${acc}-compact.png?amount=${amount}&addInfo=${addInfo}&accountName=${accountName}`;
   };
 
   return (
