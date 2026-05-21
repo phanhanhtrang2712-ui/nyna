@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Newspaper, Package, Briefcase, 
   MapPin, LogOut, Plus, Trash2, Edit, Save, X, Image as ImageIcon, FileText, ShieldCheck,
   PlayCircle, Settings, Download, Upload, Database, CreditCard,
-  Calendar, TrendingUp, BarChart3, Filter
+  Calendar, TrendingUp, BarChart3, Filter, Mail, MessageSquare
 } from 'lucide-react';
 import { getSupabase } from '../lib/supabase';
 import { dataService } from '../services/dataService';
@@ -71,7 +71,7 @@ const AdminPage = () => {
     }
   }, [isAuthenticated]);
 
-  const [activeTab, setActiveTab] = useState<'news' | 'products' | 'jobs' | 'distributors' | 'pages' | 'videos' | 'settings' | 'sales_report' | 'cms_users'>('news');
+  const [activeTab, setActiveTab] = useState<'news' | 'products' | 'jobs' | 'distributors' | 'pages' | 'videos' | 'settings' | 'sales_report' | 'cms_users' | 'contacts'>('news');
   const [loginData, setLoginData] = useState({ username: '', password: '' });
   const [loginError, setLoginError] = useState('');
 
@@ -231,6 +231,7 @@ const AdminPage = () => {
             { id: 'jobs', icon: <Briefcase size={20} />, label: 'Quản lý Tuyển dụng' },
             { id: 'distributors', icon: <MapPin size={20} />, label: 'Nhà phân phối' },
             { id: 'pages', icon: <FileText size={20} />, label: 'Nội dung trang' },
+            { id: 'contacts', icon: <Mail size={20} />, label: 'Tin nhắn liên hệ' },
             ...(currentUser?.role === 'quản trị' ? [{ id: 'cms_users', icon: <ShieldCheck size={20} />, label: 'Phân quyền CMS' }] : []),
             { id: 'settings', icon: <Settings size={20} />, label: 'Cấu hình & Backup' },
           ].map((tab) => (
@@ -282,6 +283,7 @@ const AdminPage = () => {
           {activeTab === 'jobs' && <JobManager onSuccess={showSuccess} onError={showError} />}
           {activeTab === 'distributors' && <DistributorManager onSuccess={showSuccess} onError={showError} />}
           {activeTab === 'pages' && <PageManager onSuccess={showSuccess} onError={showError} />}
+          {activeTab === 'contacts' && <ContactsManager onSuccess={showSuccess} onError={showError} />}
           {activeTab === 'cms_users' && currentUser?.role === 'quản trị' && <CmsUserManager onSuccess={showSuccess} onError={showError} />}
           {activeTab === 'settings' && <SettingsManager onSuccess={showSuccess} onError={showError} />}
         </div>
@@ -2498,6 +2500,123 @@ const CmsUserManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
           </div>
         </div>
       )}
+    </div>
+  );
+};
+
+// ==========================================
+// TIN NHẮN LIÊN HỆ CMS COMPONENT
+// ==========================================
+const ContactsManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, onError: (m: string) => void }) => {
+  const [messages, setMessages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadMessages = async () => {
+    setLoading(true);
+    try {
+      const supabase = getSupabase();
+      const { data, error } = await supabase
+        .from('contacts')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        if (error.code === '42P01') { // table does not exist
+          setMessages([]);
+        } else {
+          throw error;
+        }
+      } else {
+        setMessages(data || []);
+      }
+    } catch (err: any) {
+      console.error(err);
+      onError('Lỗi khi tải danh sách liên hệ');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadMessages();
+  }, []);
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa tin nhắn này?')) return;
+    try {
+      const supabase = getSupabase();
+      const { error } = await supabase.from('contacts').delete().eq('id', id);
+      if (error) throw error;
+      onSuccess('Xóa tin nhắn liên hệ thành công');
+      loadMessages();
+    } catch (err: any) {
+      console.error(err);
+      onError('Không thể xóa tin nhắn');
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+        <div>
+          <h2 className="text-3xl font-black text-blue-900 tracking-tight uppercase">Tin nhắn liên hệ</h2>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Quản lý các tin nhắn từ khách hàng</p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-gray-50/50 border-b border-gray-100">
+                <th className="py-5 px-8 text-[10px] font-black text-blue-900 uppercase tracking-widest">Thời gian</th>
+                <th className="py-5 px-8 text-[10px] font-black text-blue-900 uppercase tracking-widest">Khách hàng</th>
+                <th className="py-5 px-8 text-[10px] font-black text-blue-900 uppercase tracking-widest">Liên hệ</th>
+                <th className="py-5 px-8 text-[10px] font-black text-blue-900 uppercase tracking-widest">Nội dung</th>
+                <th className="py-5 px-8 text-[10px] font-black text-blue-900 uppercase tracking-widest text-right">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="py-12 text-center text-xs font-bold text-gray-400 uppercase tracking-widest">Đang tải...</td>
+                </tr>
+              ) : messages.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-12 text-center text-xs font-bold text-gray-400 uppercase tracking-widest">Chưa có tin nhắn liên hệ nào</td>
+                </tr>
+              ) : (
+                messages.map((msg) => (
+                  <tr key={msg.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="py-5 px-8 text-xs font-bold text-gray-500">
+                      {msg.created_at ? new Date(msg.created_at).toLocaleString('vi-VN') : '—'}
+                    </td>
+                    <td className="py-5 px-8">
+                      <div className="text-xs font-black text-blue-900 uppercase">{msg.full_name || msg.name || '—'}</div>
+                    </td>
+                    <td className="py-5 px-8">
+                      <div className="text-xs font-bold text-blue-900">{msg.phone || '—'}</div>
+                      <div className="text-[11px] text-gray-400 font-medium">{msg.email || '—'}</div>
+                    </td>
+                    <td className="py-5 px-8 max-w-xs">
+                      <p className="text-xs text-gray-600 font-medium leading-relaxed break-words">{msg.message || msg.content || '—'}</p>
+                    </td>
+                    <td className="py-5 px-8 text-right">
+                      <button 
+                        onClick={() => handleDelete(msg.id)}
+                        className="p-2 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors"
+                        title="Xóa tin nhắn"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };

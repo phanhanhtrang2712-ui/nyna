@@ -21,13 +21,23 @@ const CartDrawer = ({
   onClear: () => void;
 }) => {
   const total = items.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
-  const [showPayment, setShowPayment] = useState(false);
+  const [checkoutStep, setCheckoutStep] = useState<'cart' | 'form' | 'payment'>('cart');
   const [isSuccess, setIsSuccess] = useState(false);
   const [bankSettings, setBankSettings] = useState<BusinessSettings | null>(null);
+  const [customerInfo, setCustomerInfo] = useState({
+    name: '',
+    phone: '',
+    address: '',
+    note: ''
+  });
+  const [formError, setFormError] = useState('');
 
   useEffect(() => {
     if (isOpen) {
-      if (!isSuccess) setShowPayment(false);
+      if (!isSuccess) {
+        setCheckoutStep('cart');
+        setFormError('');
+      }
       dataService.get<BusinessSettings>('business_settings', 'main')
         .then(res => {
           if (res) setBankSettings(res);
@@ -60,6 +70,9 @@ const CartDrawer = ({
         total_amount: total,
         payment_method: 'Chuyển khoản',
         status: 'Hoàn thành',
+        customer_name: customerInfo.name.trim(),
+        customer_phone: customerInfo.phone.trim(),
+        customer_address: customerInfo.address.trim(),
         items: items.map(it => ({
           id: it.id,
           title: it.title,
@@ -76,11 +89,34 @@ const CartDrawer = ({
 
     setIsSuccess(true);
     onClear();
-    setShowPayment(false);
+    setCheckoutStep('cart');
     setTimeout(() => {
+      setCustomerInfo({ name: '', phone: '', address: '', note: '' });
       setIsSuccess(false);
       onClose();
     }, 4000);
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customerInfo.name.trim()) {
+      setFormError('Vui lòng nhập họ và tên');
+      return;
+    }
+    if (!customerInfo.phone.trim()) {
+      setFormError('Vui lòng nhập số điện thoại');
+      return;
+    }
+    if (!customerInfo.address.trim()) {
+      setFormError('Vui lòng nhập địa chỉ giao hàng');
+      return;
+    }
+    if (customerInfo.phone.trim().length < 8) {
+      setFormError('Số điện thoại không hợp lệ (ít nhất 8 số)');
+      return;
+    }
+    setFormError('');
+    setCheckoutStep('payment');
   };
 
   return (
@@ -120,7 +156,7 @@ const CartDrawer = ({
                   <h3 className="text-2xl font-black text-blue-900 uppercase mb-3">Thanh toán hoàn tất!</h3>
                   <p className="text-gray-500 font-bold text-sm leading-relaxed max-w-[200px] mx-auto">Cảm ơn bạn đã tin dùng sản phẩm của NYNA. Đơn hàng đang được xử lý.</p>
                 </div>
-              ) : showPayment ? (
+              ) : checkoutStep === 'payment' ? (
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -128,6 +164,15 @@ const CartDrawer = ({
                 >
                   <div className="flex items-center gap-3 justify-center text-emerald-600 font-black text-[10px] uppercase tracking-widest bg-emerald-50 py-2 rounded-xl">
                      <CreditCard size={14} /> Quét mã để thanh toán
+                  </div>
+
+                  {/* Customer summary */}
+                  <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 text-[13px] text-blue-900 font-bold space-y-1.5 shadow-sm">
+                    <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1">Thông tin giao hàng</p>
+                    <p><span className="text-gray-400 font-medium">Người nhận:</span> {customerInfo.name}</p>
+                    <p><span className="text-gray-400 font-medium">SĐT:</span> {customerInfo.phone}</p>
+                    <p><span className="text-gray-400 font-medium">Địa chỉ:</span> {customerInfo.address}</p>
+                    {customerInfo.note.trim() && <p><span className="text-gray-400 font-medium">Ghi chú:</span> {customerInfo.note}</p>}
                   </div>
                   
                   <div className="aspect-square w-64 mx-auto bg-white rounded-3xl flex items-center justify-center p-3 shadow-inner border border-gray-100">
@@ -156,6 +201,81 @@ const CartDrawer = ({
                     <div className="flex justify-between items-center text-xs font-bold text-emerald-600 pt-1 mt-1 border-t border-gray-200">
                       <span>Số tiền:</span>
                       <span className="font-black">{new Intl.NumberFormat('vi-VN').format(total)}đ</span>
+                    </div>
+                  </div>
+                </motion.div>
+              ) : checkoutStep === 'form' ? (
+                <motion.div 
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="space-y-6"
+                >
+                  <div className="border-b border-gray-100 pb-4">
+                    <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest block mb-1">Xác nhận giao vụ</span>
+                    <h3 className="text-xl font-black text-blue-900 uppercase tracking-tight">Thông tin nhận hàng</h3>
+                  </div>
+
+                  {formError && (
+                    <div className="bg-rose-50 text-rose-600 text-xs font-bold rounded-xl p-4 border border-rose-100 text-left">
+                      ⚠️ {formError}
+                    </div>
+                  )}
+
+                  <div className="space-y-5 text-left">
+                    <div>
+                      <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Họ tên người nhận <span className="text-rose-500">*</span></label>
+                      <input 
+                        type="text"
+                        required
+                        placeholder="VD: Nguyễn Văn A"
+                        value={customerInfo.name}
+                        onChange={e => {
+                          setCustomerInfo({ ...customerInfo, name: e.target.value });
+                          if (formError) setFormError('');
+                        }}
+                        className="w-full bg-gray-50 border border-transparent focus:border-blue-900 focus:bg-white rounded-xl py-3.5 px-4 outline-none transition-all font-bold text-xs text-blue-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Số điện thoại liên lạc <span className="text-rose-500">*</span></label>
+                      <input 
+                        type="tel"
+                        required
+                        placeholder="VD: 0912******"
+                        value={customerInfo.phone}
+                        onChange={e => {
+                          setCustomerInfo({ ...customerInfo, phone: e.target.value });
+                          if (formError) setFormError('');
+                        }}
+                        className="w-full bg-gray-50 border border-transparent focus:border-blue-900 focus:bg-white rounded-xl py-3.5 px-4 outline-none transition-all font-bold text-xs text-blue-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Địa chỉ nhận hàng đầy đủ <span className="text-rose-500">*</span></label>
+                      <textarea 
+                        required
+                        rows={3}
+                        placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố..."
+                        value={customerInfo.address}
+                        onChange={e => {
+                          setCustomerInfo({ ...customerInfo, address: e.target.value });
+                          if (formError) setFormError('');
+                        }}
+                        className="w-full bg-gray-50 border border-transparent focus:border-blue-900 focus:bg-white rounded-xl py-3 px-4 outline-none transition-all font-bold text-xs text-blue-900 resize-none leading-relaxed"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Ghi chú (không bắt buộc)</label>
+                      <input 
+                        type="text"
+                        placeholder="Yêu cầu giờ giao hàng, lưu ý khác..."
+                        value={customerInfo.note}
+                        onChange={e => setCustomerInfo({ ...customerInfo, note: e.target.value })}
+                        className="w-full bg-gray-50 border border-transparent focus:border-blue-900 focus:bg-white rounded-xl py-3.5 px-4 outline-none transition-all font-bold text-xs text-blue-900"
+                      />
                     </div>
                   </div>
                 </motion.div>
@@ -197,11 +317,11 @@ const CartDrawer = ({
             {items.length > 0 && !isSuccess && (
               <div className="p-8 bg-gray-50 border-t border-gray-100 space-y-4">
                 <div className="flex justify-between items-end mb-2">
-                  <span className="text-gray-500 font-bold uppercase tracking-widest text-xs">Tổng tiền {showPayment ? 'thanh toán' : 'tạm tính'}</span>
+                  <span className="text-gray-500 font-bold uppercase tracking-widest text-xs">Tổng tiền {checkoutStep !== 'cart' ? 'thanh toán' : 'tạm tính'}</span>
                   <span className="text-3xl font-black text-blue-900">{new Intl.NumberFormat('vi-VN').format(total)}đ</span>
                 </div>
                 
-                {showPayment ? (
+                {checkoutStep === 'payment' ? (
                   <div className="space-y-3">
                     <button 
                       onClick={handleConfirmPayment}
@@ -210,7 +330,22 @@ const CartDrawer = ({
                       XÁC NHẬN ĐÃ THANH TOÁN
                     </button>
                     <button 
-                      onClick={() => setShowPayment(false)} 
+                      onClick={() => setCheckoutStep('form')} 
+                      className="w-full py-3 text-gray-400 font-black text-[10px] uppercase tracking-widest hover:text-blue-900 transition-all border border-transparent hover:border-gray-100 rounded-2xl text-center block"
+                    >
+                      Quay lại thông tin
+                    </button>
+                  </div>
+                ) : checkoutStep === 'form' ? (
+                  <div className="space-y-3">
+                    <button 
+                      onClick={handleFormSubmit}
+                      className="w-full py-4 bg-blue-900 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-blue-900/20 hover:bg-blue-850 transition-all active:scale-[0.98] text-center block"
+                    >
+                      TIẾN HÀNH QUÉT MÃ QR
+                    </button>
+                    <button 
+                      onClick={() => setCheckoutStep('cart')} 
                       className="w-full py-3 text-gray-400 font-black text-[10px] uppercase tracking-widest hover:text-blue-900 transition-all border border-transparent hover:border-gray-100 rounded-2xl text-center block"
                     >
                       Quay lại giỏ hàng
@@ -219,7 +354,7 @@ const CartDrawer = ({
                 ) : (
                   <div className="space-y-3">
                     <button 
-                      onClick={() => setShowPayment(true)}
+                      onClick={() => setCheckoutStep('form')}
                       className="w-full bg-blue-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-blue-800 transition-all shadow-xl shadow-blue-900/10 flex items-center justify-center gap-3"
                     >
                       <CreditCard size={18} />
