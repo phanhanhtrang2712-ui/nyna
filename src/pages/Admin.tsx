@@ -1788,14 +1788,6 @@ const SalesReportManager = ({ onSuccess, onError }: { onSuccess: (m: string) => 
           >
             Làm mới dữ liệu
           </button>
-          
-          <button 
-            onClick={handleGenerateDemoData}
-            title="Tạo lịch sử giao dịch mẫu để kiểm thử bộ lọc nhanh chóng"
-            className="px-5 py-3 tracking-wide bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-all font-bold text-xs uppercase shadow-lg shadow-emerald-50 shadow-emerald-600/10"
-          >
-            Tạo dữ liệu mẫu thử nghiệm
-          </button>
         </div>
       </div>
 
