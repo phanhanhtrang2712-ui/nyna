@@ -159,7 +159,7 @@ const Header = ({ cartCount, onOpenCart }: { cartCount: number; onOpenCart: () =
                 </Link>
                 
                 <div className="pt-4 text-center space-y-1.5 text-gray-500 text-[11px] font-medium leading-relaxed">
-                  <p>Hotline: <strong>0916 070 421 - 0916 070 422</strong></p>
+                  <p>Hotline: <strong>0923888885</strong></p>
                   <p>Email: <strong>info@nyna.com.vn</strong></p>
                 </div>
               </div>
