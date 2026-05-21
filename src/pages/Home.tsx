@@ -153,15 +153,15 @@ const Home = ({ onAddToCart: propsOnAddToCart }: HomeProps) => {
                 <div className="space-y-10">
                   {/* Nhóm sản phẩm */}
                   <div>
-                    <h4 className="text-[10px] font-black text-blue-900 uppercase tracking-widest mb-6 flex items-center gap-2">
-                       <LayoutGrid size={14} className="text-pink-500" /> NHÓM SẢN PHẨM
+                    <h4 className="text-[12px] font-black text-blue-950 uppercase tracking-widest mb-4 flex items-center gap-2 pb-2.5 border-b border-gray-100">
+                       <LayoutGrid size={15} className="text-pink-500" /> NHÓM SẢN PHẨM
                     </h4>
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                        {categories.map(cat => (
                          <button 
                           key={cat} 
                           onClick={() => setSelectedCategory(cat)}
-                          className={`w-full text-left px-5 py-3 rounded-xl text-sm font-black uppercase tracking-tight transition-all ${selectedCategory === cat ? 'bg-blue-900 text-white shadow-xl' : 'text-gray-400 hover:bg-gray-50'}`}
+                          className={`w-full text-left px-5 py-2.5 rounded-xl text-[13px] font-bold tracking-tight transition-all ${selectedCategory === cat ? 'bg-blue-50/80 text-blue-900 border border-blue-100 shadow-sm font-extrabold' : 'text-gray-400 hover:bg-gray-50/80 hover:text-gray-600 font-medium'}`}
                          >
                            {cat}
                          </button>
@@ -171,15 +171,15 @@ const Home = ({ onAddToCart: propsOnAddToCart }: HomeProps) => {
 
                   {/* Thương hiệu */}
                   <div>
-                    <h4 className="text-[10px] font-black text-blue-900 uppercase tracking-widest mb-6 flex items-center gap-2">
-                       <ShieldCheck size={14} className="text-emerald-500" /> THƯƠNG HIỆU
+                    <h4 className="text-[12px] font-black text-blue-950 uppercase tracking-widest mb-4 flex items-center gap-2 pb-2.5 border-b border-gray-100">
+                       <ShieldCheck size={15} className="text-emerald-500" /> THƯƠNG HIỆU
                     </h4>
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                        {brands.map(brand => (
                          <button 
                           key={brand} 
                           onClick={() => setSelectedBrand(brand)}
-                          className={`w-full text-left px-5 py-3 rounded-xl text-sm font-black uppercase tracking-tight transition-all ${selectedBrand === brand ? 'bg-blue-900 text-white shadow-xl' : 'text-gray-400 hover:bg-gray-50'}`}
+                          className={`w-full text-left px-5 py-2.5 rounded-xl text-[13px] font-bold tracking-tight transition-all ${selectedBrand === brand ? 'bg-blue-50/80 text-blue-900 border border-blue-100 shadow-sm font-extrabold' : 'text-gray-400 hover:bg-gray-50/80 hover:text-gray-600 font-medium'}`}
                          >
                            {brand}
                          </button>
@@ -189,15 +189,15 @@ const Home = ({ onAddToCart: propsOnAddToCart }: HomeProps) => {
 
                   {/* Khoảng giá */}
                   <div>
-                    <h4 className="text-[10px] font-black text-blue-900 uppercase tracking-widest mb-6 flex items-center gap-2">
-                       <SlidersHorizontal size={14} className="text-blue-500" /> VÙNG GIÁ
+                    <h4 className="text-[12px] font-black text-blue-950 uppercase tracking-widest mb-4 flex items-center gap-2 pb-2.5 border-b border-gray-100">
+                       <SlidersHorizontal size={15} className="text-blue-500" /> VÙNG GIÁ
                     </h4>
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                        {priceFilters.map(filter => (
                          <button 
                           key={filter.label} 
                           onClick={() => setPriceRange(filter.range as [number, number])}
-                          className={`w-full text-left px-5 py-3 rounded-xl text-sm font-black uppercase tracking-tight transition-all ${priceRange[0] === filter.range[0] && priceRange[1] === filter.range[1] ? 'bg-blue-900 text-white shadow-xl' : 'text-gray-400 hover:bg-gray-50'}`}
+                          className={`w-full text-left px-5 py-2.5 rounded-xl text-[13px] font-bold tracking-tight transition-all ${priceRange[0] === filter.range[0] && priceRange[1] === filter.range[1] ? 'bg-blue-50/80 text-blue-900 border border-blue-100 shadow-sm font-extrabold' : 'text-gray-400 hover:bg-gray-50/80 hover:text-gray-600 font-medium'}`}
                          >
                            {filter.label}
                          </button>
@@ -299,23 +299,60 @@ const Home = ({ onAddToCart: propsOnAddToCart }: HomeProps) => {
                    <button onClick={() => setIsSidebarOpen(false)} className="p-2 bg-gray-50 rounded-full"><X size={20} /></button>
                 </div>
                 
-                <div className="space-y-10">
-                   {/* Replicate Sidebar Content here for Mobile */}
+                <div className="space-y-8">
+                   {/* Nhóm sản phẩm */}
                    <div>
-                    <h4 className="text-[10px] font-black text-blue-900 uppercase tracking-widest mb-6">Nhóm sản phẩm</h4>
-                    <div className="flex flex-wrap gap-2">
-                       {categories.map(cat => (
-                         <button 
-                          key={cat} 
-                          onClick={() => { setSelectedCategory(cat); setIsSidebarOpen(false); }}
-                          className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-tight transition-all ${selectedCategory === cat ? 'bg-blue-900 text-white' : 'bg-gray-50 text-gray-400'}`}
-                         >
-                           {cat}
-                         </button>
-                       ))}
-                    </div>
-                  </div>
-                  {/* ... Add other field filters as needed for mobile drawer ... */}
+                     <h4 className="text-[12px] font-black text-blue-950 uppercase tracking-widest mb-4 flex items-center gap-2 pb-2.5 border-b border-gray-100">
+                        <LayoutGrid size={15} className="text-pink-500" /> NHÓM SẢN PHẨM
+                     </h4>
+                     <div className="flex flex-wrap gap-2">
+                        {categories.map(cat => (
+                          <button 
+                           key={cat} 
+                           onClick={() => { setSelectedCategory(cat); setIsSidebarOpen(false); }}
+                           className={`px-4 py-2.5 rounded-xl text-xs font-bold tracking-tight transition-all ${selectedCategory === cat ? 'bg-blue-50/80 text-blue-900 border border-blue-100 shadow-sm font-extrabold' : 'bg-gray-50 text-gray-400 font-medium'}`}
+                          >
+                            {cat}
+                          </button>
+                        ))}
+                     </div>
+                   </div>
+
+                   {/* Thương hiệu */}
+                   <div>
+                     <h4 className="text-[12px] font-black text-blue-950 uppercase tracking-widest mb-4 flex items-center gap-2 pb-2.5 border-b border-gray-100">
+                        <ShieldCheck size={15} className="text-emerald-500" /> THƯƠNG HIỆU
+                     </h4>
+                     <div className="flex flex-wrap gap-2">
+                        {brands.map(brand => (
+                          <button 
+                           key={brand} 
+                           onClick={() => { setSelectedBrand(brand); setIsSidebarOpen(false); }}
+                           className={`px-4 py-2.5 rounded-xl text-xs font-bold tracking-tight transition-all ${selectedBrand === brand ? 'bg-blue-50/80 text-blue-900 border border-blue-100 shadow-sm font-extrabold' : 'bg-gray-50 text-gray-400 font-medium'}`}
+                          >
+                            {brand}
+                          </button>
+                        ))}
+                     </div>
+                   </div>
+
+                   {/* Vùng giá */}
+                   <div>
+                     <h4 className="text-[12px] font-black text-blue-950 uppercase tracking-widest mb-4 flex items-center gap-2 pb-2.5 border-b border-gray-100">
+                        <SlidersHorizontal size={15} className="text-blue-500" /> VÙNG GIÁ
+                     </h4>
+                     <div className="flex flex-wrap gap-2">
+                        {priceFilters.map(filter => (
+                          <button 
+                           key={filter.label} 
+                           onClick={() => { setPriceRange(filter.range as [number, number]); setIsSidebarOpen(false); }}
+                           className={`px-4 py-2.5 rounded-xl text-xs font-bold tracking-tight transition-all ${priceRange[0] === filter.range[0] && priceRange[1] === filter.range[1] ? 'bg-blue-50/80 text-blue-900 border border-blue-100 shadow-sm font-extrabold' : 'bg-gray-50 text-gray-400 font-medium'}`}
+                          >
+                            {filter.label}
+                          </button>
+                        ))}
+                     </div>
+                   </div>
                 </div>
              </motion.div>
           </div>
