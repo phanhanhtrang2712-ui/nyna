@@ -100,6 +100,45 @@ const CartDrawer = ({
                   <h3 className="text-2xl font-black text-blue-900 uppercase mb-3">Thanh toán hoàn tất!</h3>
                   <p className="text-gray-500 font-bold text-sm leading-relaxed max-w-[200px] mx-auto">Cảm ơn bạn đã tin dùng sản phẩm của NYNA. Đơn hàng đang được xử lý.</p>
                 </div>
+              ) : showPayment ? (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-6"
+                >
+                  <div className="flex items-center gap-3 justify-center text-emerald-600 font-black text-[10px] uppercase tracking-widest bg-emerald-50 py-2 rounded-xl">
+                     <CreditCard size={14} /> Quét mã để thanh toán
+                  </div>
+                  
+                  <div className="aspect-square w-64 mx-auto bg-white rounded-3xl flex items-center justify-center p-3 shadow-inner border border-gray-100">
+                     <img 
+                      src={getQrUrl()} 
+                      alt="QR Code Payment" 
+                      className="w-full h-full"
+                     />
+                  </div>
+
+                  <div className="text-left bg-gray-50 p-5 rounded-2xl border border-gray-100 space-y-1.5">
+                    <p className="text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1 opacity-40">Thông tin thụ hưởng</p>
+                    <p className="text-xs font-black text-blue-900 uppercase">{bankSettings?.account_name || 'CÔNG TY TNHH NYNA'}</p>
+                    <div className="flex justify-between items-center text-xs font-bold text-gray-500">
+                      <span>Số tài khoản:</span>
+                      <span className="text-blue-600 font-black">{bankSettings?.account_number || '0916070421'}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs font-bold text-gray-500">
+                      <span>Ngân hàng:</span>
+                      <span>{bankSettings?.bank_name || 'MB Bank'}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs font-bold text-gray-500">
+                      <span>Chi nhánh:</span>
+                      <span>{bankSettings?.branch || 'Chi nhánh mặc định'}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs font-bold text-emerald-600 pt-1 mt-1 border-t border-gray-200">
+                      <span>Số tiền:</span>
+                      <span className="font-black">{new Intl.NumberFormat('vi-VN').format(total)}đ</span>
+                    </div>
+                  </div>
+                </motion.div>
               ) : items.length > 0 ? (
                 <div className="space-y-8">
                   {items.map((item) => (
@@ -135,66 +174,28 @@ const CartDrawer = ({
               )}
             </div>
 
-            {items.length > 0 && (
-              <div className="p-8 bg-gray-50 border-t border-gray-100 space-y-6">
-                <div className="flex justify-between items-end">
-                  <span className="text-gray-500 font-bold uppercase tracking-widest text-xs">Tổng tiền tạm tính</span>
+            {items.length > 0 && !isSuccess && (
+              <div className="p-8 bg-gray-50 border-t border-gray-100 space-y-4">
+                <div className="flex justify-between items-end mb-2">
+                  <span className="text-gray-500 font-bold uppercase tracking-widest text-xs">Tổng tiền {showPayment ? 'thanh toán' : 'tạm tính'}</span>
                   <span className="text-3xl font-black text-blue-900">{new Intl.NumberFormat('vi-VN').format(total)}đ</span>
                 </div>
                 
                 {showPayment ? (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="p-6 bg-white rounded-[32px] border-2 border-emerald-500/20 shadow-2xl space-y-4"
-                  >
-                    <div className="flex items-center gap-3 justify-center text-emerald-600 font-black text-[10px] uppercase tracking-widest bg-emerald-50 py-2 rounded-xl">
-                       <CreditCard size={14} /> Quét mã để thanh toán
-                    </div>
-                    
-                    <div className="aspect-square w-64 mx-auto bg-white rounded-3xl flex items-center justify-center p-3 shadow-inner border border-gray-100">
-                       <img 
-                        src={getQrUrl()} 
-                        alt="QR Code Payment" 
-                        className="w-full h-full"
-                       />
-                    </div>
-
-                    <div className="text-left bg-gray-50 p-5 rounded-2xl border border-gray-100 space-y-1.5">
-                      <p className="text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1 opacity-40">Thông tin thụ hưởng</p>
-                      <p className="text-xs font-black text-blue-900 uppercase">{bankSettings?.account_name || 'CÔNG TY TNHH NYNA'}</p>
-                      <div className="flex justify-between items-center text-xs font-bold text-gray-500">
-                        <span>Số tài khoản:</span>
-                        <span className="text-blue-600 font-black">{bankSettings?.account_number || '0916070421'}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs font-bold text-gray-500">
-                        <span>Ngân hàng:</span>
-                        <span>{bankSettings?.bank_name || 'MB Bank'}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs font-bold text-gray-500">
-                        <span>Chi nhánh:</span>
-                        <span>{bankSettings?.branch || 'Chi nhánh mặc định'}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-xs font-bold text-emerald-600 pt-1 mt-1 border-t border-gray-200">
-                        <span>Số tiền:</span>
-                        <span className="font-black">{new Intl.NumberFormat('vi-VN').format(total)}đ</span>
-                      </div>
-                    </div>
-                    
-                    <button 
-                      onClick={() => setShowPayment(false)} 
-                      className="w-full py-4 text-gray-400 font-black text-[10px] uppercase tracking-widest hover:text-blue-900 transition-all border border-transparent hover:border-gray-100 rounded-2xl"
-                    >
-                      Quay lại giỏ hàng
-                    </button>
-
+                  <div className="space-y-3">
                     <button 
                       onClick={handleConfirmPayment}
-                      className="w-full py-4 bg-emerald-600 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-emerald-600/20 hover:bg-emerald-700 transition-all"
+                      className="w-full py-4 bg-emerald-600 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-xl shadow-emerald-600/20 hover:bg-emerald-700 transition-[background-color,transform] active:scale-[0.98] text-center block"
                     >
                       XÁC NHẬN ĐÃ THANH TOÁN
                     </button>
-                  </motion.div>
+                    <button 
+                      onClick={() => setShowPayment(false)} 
+                      className="w-full py-3 text-gray-400 font-black text-[10px] uppercase tracking-widest hover:text-blue-900 transition-all border border-transparent hover:border-gray-100 rounded-2xl text-center block"
+                    >
+                      Quay lại giỏ hàng
+                    </button>
+                  </div>
                 ) : (
                   <div className="space-y-3">
                     <button 
