@@ -3,15 +3,17 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { MapPin, Phone } from 'lucide-react';
 import { dataService } from '../services/dataService';
+import { useDataList } from '../hooks/useDataList';
 import { DistributorItem } from '../types';
 
 const Distribution = () => {
+  const { data: fetchedDistributors, loading } = useDataList<DistributorItem>('distributors');
   const [distributors, setDistributors] = useState<DistributorItem[]>([]);
   const [activeRegion, setActiveRegion] = useState('Tất cả');
 
   useEffect(() => {
-    dataService.list<DistributorItem>('distributors').then(setDistributors);
-  }, []);
+    setDistributors(fetchedDistributors);
+  }, [fetchedDistributors]);
 
   const regions = ['Tất cả', ...Array.from(new Set(distributors.map(d => d.region)))];
   const filtered = activeRegion === 'Tất cả' 

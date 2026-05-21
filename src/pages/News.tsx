@@ -4,15 +4,17 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ChevronRight, ArrowRight, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { dataService } from '../services/dataService';
+import { useDataList } from '../hooks/useDataList';
 import { NewsItem } from '../types';
 
 const News = () => {
+  const { data: fetchedNews, loading } = useDataList<NewsItem>('news');
   const [news, setNews] = useState<NewsItem[]>([]);
   const [activeNews, setActiveNews] = useState<NewsItem | null>(null);
 
   useEffect(() => {
-    dataService.list<NewsItem>('news').then(setNews);
-  }, []);
+    setNews(fetchedNews);
+  }, [fetchedNews]);
 
   return (
     <div className="py-24 bg-white">

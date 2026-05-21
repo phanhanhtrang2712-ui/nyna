@@ -7,15 +7,17 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { dataService } from '../services/dataService';
+import { useDataList } from '../hooks/useDataList';
 import { PageItem } from '../types';
 
 const Footer = () => {
+  const { data: fetchedPages, loading } = useDataList<PageItem>('pages');
   const [pages, setPages] = useState<PageItem[]>([]);
   const [activePage, setActivePage] = useState<PageItem | null>(null);
 
   useEffect(() => {
-    dataService.list<PageItem>('pages').then(setPages);
-  }, []);
+    setPages(fetchedPages);
+  }, [fetchedPages]);
 
   const policyPages = pages.filter(p => p.category === 'policy');
   const partnerPages = pages.filter(p => p.category === 'partner');

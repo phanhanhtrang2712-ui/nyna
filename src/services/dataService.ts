@@ -50,6 +50,12 @@ export const dataService = {
       console.error(`Supabase Create Error [${table}]: `, error);
       throw error;
     }
+    // Evict client-side cache
+    try {
+      localStorage.removeItem(`nyna_cache_${table}`);
+    } catch (e) {
+      console.warn(e);
+    }
     return inserted?.[0]?.id || '';
   },
 
@@ -65,6 +71,12 @@ export const dataService = {
       console.error(`Supabase Update Error [${table}/${id}]: `, error);
       throw error;
     }
+    // Evict client-side cache
+    try {
+      localStorage.removeItem(`nyna_cache_${table}`);
+    } catch (e) {
+      console.warn(e);
+    }
   },
 
   // Generic delete
@@ -77,6 +89,12 @@ export const dataService = {
         .eq('id', id);
       
       if (error) throw error;
+      // Evict client-side cache
+      try {
+        localStorage.removeItem(`nyna_cache_${table}`);
+      } catch (e) {
+        console.warn(e);
+      }
     } catch (error) {
       console.error(`Supabase Delete Error [${table}/${id}]: `, error);
     }

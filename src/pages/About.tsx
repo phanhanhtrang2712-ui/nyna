@@ -2,17 +2,19 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { dataService } from '../services/dataService';
+import { useDataList } from '../hooks/useDataList';
 import { PageItem } from '../types';
 
 const About = () => {
+  const { data: pages, loading } = useDataList<PageItem>('pages');
   const [about, setAbout] = useState<PageItem | null>(null);
 
   useEffect(() => {
-    dataService.list<PageItem>('pages').then(pages => {
+    if (pages && pages.length > 0) {
       const page = pages.find(p => p.slug === 'about');
       if (page) setAbout(page);
-    });
-  }, []);
+    }
+  }, [pages]);
 
   return (
     <div className="py-24 bg-white">

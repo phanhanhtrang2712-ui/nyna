@@ -3,14 +3,16 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { MapPin, Users, Zap } from 'lucide-react';
 import { dataService } from '../services/dataService';
+import { useDataList } from '../hooks/useDataList';
 import { JobItem } from '../types';
 
 const Jobs = () => {
+  const { data: fetchedJobs, loading } = useDataList<JobItem>('jobs');
   const [jobs, setJobs] = useState<JobItem[]>([]);
 
   useEffect(() => {
-    dataService.list<JobItem>('jobs').then(setJobs);
-  }, []);
+    setJobs(fetchedJobs);
+  }, [fetchedJobs]);
 
   return (
     <div className="py-24 bg-white">

@@ -8,6 +8,7 @@ import {
 import { useOutletContext } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import { dataService } from '../services/dataService';
+import { useDataList } from '../hooks/useDataList';
 import { ProductItem } from '../types';
 
 interface HomeProps {
@@ -63,9 +64,9 @@ const Home = ({ onAddToCart: propsOnAddToCart }: HomeProps) => {
   const context = useOutletContext<{ onAddToCart?: (p: any) => void }>();
   const onAddToCart = propsOnAddToCart || context?.onAddToCart;
 
+  const { data: fetchedProducts, loading } = useDataList<ProductItem>('products');
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<ProductItem[]>([]);
-  const [loading, setLoading] = useState(true);
   
   const [selectedCategory, setSelectedCategory] = useState('Tất cả');
   const [selectedBrand, setSelectedBrand] = useState('Tất cả');
@@ -75,13 +76,8 @@ const Home = ({ onAddToCart: propsOnAddToCart }: HomeProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
-    dataService.list<ProductItem>('products').then(res => {
-      setProducts(res);
-      setFilteredProducts(res);
-      setLoading(false);
-    });
-  }, []);
+    setProducts(fetchedProducts);
+  }, [fetchedProducts]);
 
   useEffect(() => {
     let result = products;

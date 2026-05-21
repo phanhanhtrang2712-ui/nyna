@@ -3,16 +3,18 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play, X } from 'lucide-react';
 import { dataService } from '../services/dataService';
+import { useDataList } from '../hooks/useDataList';
 import { VideoItem } from '../types';
 import { getYoutubeThumbnail, getYoutubeEmbedUrl } from '../lib/youtube';
 
 const Video = () => {
+  const { data: fetchedVideos, loading } = useDataList<VideoItem>('videos');
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
 
   useEffect(() => {
-    dataService.list<VideoItem>('videos').then(setVideos);
-  }, []);
+    setVideos(fetchedVideos);
+  }, [fetchedVideos]);
 
   return (
     <div className="py-24 bg-white min-h-screen">
