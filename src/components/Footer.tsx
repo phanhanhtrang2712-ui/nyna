@@ -45,7 +45,7 @@ const Footer = () => {
             {policyPages.map(page => (
               <li key={page.id} onClick={() => setActivePage(page)} className="hover:text-white cursor-pointer transition-colors line-clamp-1">{page.title}</li>
             ))}
-            {policyPages.length === 0 && <li className="opacity-40 italic">Chưa có chính sách</li>}
+            {policyPages.length === 0 && <li className="opacity-40 italic">CHƯA CÓ CHÍNH SÁCH</li>}
           </ul>
         </div>
 
@@ -55,7 +55,7 @@ const Footer = () => {
             {partnerPages.map(page => (
               <li key={page.id} onClick={() => setActivePage(page)} className="hover:text-white cursor-pointer transition-colors line-clamp-1">{page.title}</li>
             ))}
-            {partnerPages.length === 0 && <li className="opacity-40 italic">Chưa có thông tin đối tác</li>}
+            {partnerPages.length === 0 && <li className="opacity-40 italic">CHƯA CÓ THÔNG TIN ĐỐI TÁC</li>}
           </ul>
         </div>
 

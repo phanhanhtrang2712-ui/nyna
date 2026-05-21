@@ -109,7 +109,7 @@ const AdminPage = () => {
               type="submit"
               className="w-full bg-blue-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center shadow-xl shadow-blue-900/20 hover:scale-[1.02] active:scale-[0.98] transition-all uppercase tracking-wider mt-4"
             >
-              Đăng nhập hệ thống
+              ĐĂNG NHẬP HỆ THỐNG
             </button>
             
             <a 
@@ -121,7 +121,7 @@ const AdminPage = () => {
           </form>
           
           <div className="mt-8 pt-8 border-t border-gray-100 text-[10px] text-center text-gray-400 uppercase tracking-widest leading-relaxed">
-            Quản trị: Phan Thái Bình
+            QUẢN TRỊ: PHAN THÁI BÌNH
           </div>
         </div>
       </div>

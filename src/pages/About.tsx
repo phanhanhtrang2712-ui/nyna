@@ -33,8 +33,8 @@ const About = () => {
           <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
               { label: 'NĂM THÀNH LẬP', value: '2018' },
-              { label: 'NHÂN SỰ', value: '50+' },
-              { label: 'ĐẠI LÝ', value: '100+' },
+              { label: 'NHÂN SỰ', value: '500+' },
+              { label: 'ĐẠI LÝ', value: '1000+' },
               { label: 'KHÁCH HÀNG', value: '1M+' },
             ].map(stat => (
               <div key={stat.label} className="text-center p-8 bg-gray-50 rounded-[32px]">
