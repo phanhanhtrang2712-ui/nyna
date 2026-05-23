@@ -7,13 +7,8 @@ import { useDataList } from '../hooks/useDataList';
 import { DistributorItem } from '../types';
 
 const Distribution = () => {
-  const { data: fetchedDistributors, loading } = useDataList<DistributorItem>('distributors');
-  const [distributors, setDistributors] = useState<DistributorItem[]>(fetchedDistributors);
+  const { data: distributors, loading } = useDataList<DistributorItem>('distributors');
   const [activeRegion, setActiveRegion] = useState('Tất cả');
-
-  useEffect(() => {
-    setDistributors(fetchedDistributors);
-  }, [fetchedDistributors]);
 
   const regions = ['Tất cả', ...Array.from(new Set(distributors.map(d => d.region)))];
   const filtered = activeRegion === 'Tất cả' 

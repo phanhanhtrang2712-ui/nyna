@@ -64,9 +64,7 @@ const Home = ({ onAddToCart: propsOnAddToCart }: HomeProps) => {
   const onAddToCart = propsOnAddToCart || context?.onAddToCart;
   const location = useLocation();
 
-  const { data: fetchedProducts, loading } = useDataList<ProductItem>('products');
-  const [products, setProducts] = useState<ProductItem[]>(fetchedProducts);
-  const [filteredProducts, setFilteredProducts] = useState<ProductItem[]>([]);
+  const { data: products, loading } = useDataList<ProductItem>('products');
   
   const [selectedCategory, setSelectedCategory] = useState('Tất cả');
   const [selectedBrand, setSelectedBrand] = useState('Tất cả');
@@ -74,10 +72,6 @@ const Home = ({ onAddToCart: propsOnAddToCart }: HomeProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  useEffect(() => {
-    setProducts(fetchedProducts);
-  }, [fetchedProducts]);
 
   // Handle smooth scroll when navigating via #san-pham hash
   useEffect(() => {
@@ -91,7 +85,7 @@ const Home = ({ onAddToCart: propsOnAddToCart }: HomeProps) => {
     }
   }, [location.hash, products]);
 
-  useEffect(() => {
+  const filteredProducts = React.useMemo(() => {
     let result = products;
 
     if (selectedCategory !== 'Tất cả') {
@@ -108,7 +102,7 @@ const Home = ({ onAddToCart: propsOnAddToCart }: HomeProps) => {
 
     result = result.filter(p => (p.price || 0) >= priceRange[0] && (p.price || 0) <= priceRange[1]);
 
-    setFilteredProducts(result);
+    return result;
   }, [selectedCategory, selectedBrand, priceRange, searchQuery, products]);
 
   const categories = ['Tất cả', ...Array.from(new Set(products.map(p => p.category).filter(Boolean)))];

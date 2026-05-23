@@ -8,13 +8,8 @@ import { VideoItem } from '../types';
 import { getYoutubeThumbnail, getYoutubeEmbedUrl } from '../lib/youtube';
 
 const Video = () => {
-  const { data: fetchedVideos, loading } = useDataList<VideoItem>('videos');
-  const [videos, setVideos] = useState<VideoItem[]>(fetchedVideos);
+  const { data: videos, loading } = useDataList<VideoItem>('videos');
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
-
-  useEffect(() => {
-    setVideos(fetchedVideos);
-  }, [fetchedVideos]);
 
   return (
     <div className="py-24 bg-white min-h-screen">

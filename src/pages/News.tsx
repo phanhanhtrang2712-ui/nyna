@@ -8,13 +8,8 @@ import { useDataList } from '../hooks/useDataList';
 import { NewsItem } from '../types';
 
 const News = () => {
-  const { data: fetchedNews, loading } = useDataList<NewsItem>('news');
-  const [news, setNews] = useState<NewsItem[]>(fetchedNews);
+  const { data: news, loading } = useDataList<NewsItem>('news');
   const [activeNews, setActiveNews] = useState<NewsItem | null>(null);
-
-  useEffect(() => {
-    setNews(fetchedNews);
-  }, [fetchedNews]);
 
   return (
     <div className="py-24 bg-white">

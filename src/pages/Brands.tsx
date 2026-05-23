@@ -9,20 +9,20 @@ import Markdown from 'react-markdown';
 
 const Brands = () => {
   const { data: fetchedBrands, loading } = useDataList<BrandItem>('brands');
-  const [brands, setBrands] = useState<BrandItem[]>(fetchedBrands);
   const [selectedBrand, setSelectedBrand] = useState<BrandItem | null>(null);
 
-  useEffect(() => {
+  const brands = React.useMemo(() => {
     if (fetchedBrands && fetchedBrands.length > 0) {
-      setBrands(fetchedBrands);
+      return fetchedBrands;
     } else if (!loading) {
-      setBrands([
+      return [
         { name: 'LYNA', description: 'Sản phẩm chăm sóc phụ nữ hiện đại', color: 'text-pink-600', image: 'https://images.unsplash.com/photo-1544126592-807daa2b567b?auto=format&fit=crop&q=80&w=800', content: 'LYNA mang đến những giải pháp chăm sóc sức khỏe phụ nữ với các dòng sản phẩm băng vệ sinh cao cấp.' },
         { name: 'SILA', description: 'Tã người lớn cao cấp', color: 'text-emerald-600', image: 'https://images.unsplash.com/photo-1544126592-807daa2b567b?auto=format&fit=crop&q=80&w=800', content: 'SILA là dòng tã bỉm người lớn chuyên dụng, thấm hút tốt và êm ái.' },
         { name: 'NYNA', description: 'Tã em bé êm mềm vượt trội', color: 'text-blue-600', image: 'https://images.unsplash.com/photo-1544126592-807daa2b567b?auto=format&fit=crop&q=80&w=800', content: 'NYNA tự hào là người bạn đồng hành của hàng triệu gia đình Việt trong việc chăm sóc con nhỏ.' },
         { name: 'TONY', description: 'Tấm lót / Miếng lót đa năng', color: 'text-indigo-600', image: 'https://images.unsplash.com/photo-1544126592-807daa2b567b?auto=format&fit=crop&q=80&w=800', content: 'TONY cung cấp các giải pháp lót thấm đa năng cho nhiều mục đích sử dụng.' },
-      ] as BrandItem[]);
+      ] as BrandItem[];
     }
+    return fetchedBrands || [];
   }, [fetchedBrands, loading]);
 
   return (

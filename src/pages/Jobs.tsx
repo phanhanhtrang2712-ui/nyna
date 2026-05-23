@@ -7,12 +7,7 @@ import { useDataList } from '../hooks/useDataList';
 import { JobItem } from '../types';
 
 const Jobs = () => {
-  const { data: fetchedJobs, loading } = useDataList<JobItem>('jobs');
-  const [jobs, setJobs] = useState<JobItem[]>(fetchedJobs);
-
-  useEffect(() => {
-    setJobs(fetchedJobs);
-  }, [fetchedJobs]);
+  const { data: jobs, loading } = useDataList<JobItem>('jobs');
 
   return (
     <div className="py-24 bg-white">
