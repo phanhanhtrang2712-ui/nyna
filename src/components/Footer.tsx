@@ -12,7 +12,7 @@ import { PageItem } from '../types';
 
 const Footer = () => {
   const { data: fetchedPages, loading } = useDataList<PageItem>('pages');
-  const [pages, setPages] = useState<PageItem[]>([]);
+  const [pages, setPages] = useState<PageItem[]>(fetchedPages);
   const [activePage, setActivePage] = useState<PageItem | null>(null);
 
   useEffect(() => {

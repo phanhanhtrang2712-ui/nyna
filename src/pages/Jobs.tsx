@@ -8,7 +8,7 @@ import { JobItem } from '../types';
 
 const Jobs = () => {
   const { data: fetchedJobs, loading } = useDataList<JobItem>('jobs');
-  const [jobs, setJobs] = useState<JobItem[]>([]);
+  const [jobs, setJobs] = useState<JobItem[]>(fetchedJobs);
 
   useEffect(() => {
     setJobs(fetchedJobs);

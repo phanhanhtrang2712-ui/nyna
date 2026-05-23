@@ -9,7 +9,7 @@ import { getYoutubeThumbnail, getYoutubeEmbedUrl } from '../lib/youtube';
 
 const Video = () => {
   const { data: fetchedVideos, loading } = useDataList<VideoItem>('videos');
-  const [videos, setVideos] = useState<VideoItem[]>([]);
+  const [videos, setVideos] = useState<VideoItem[]>(fetchedVideos);
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
 
   useEffect(() => {

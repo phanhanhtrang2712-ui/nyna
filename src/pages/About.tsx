@@ -7,7 +7,12 @@ import { PageItem } from '../types';
 
 const About = () => {
   const { data: pages, loading } = useDataList<PageItem>('pages');
-  const [about, setAbout] = useState<PageItem | null>(null);
+  const [about, setAbout] = useState<PageItem | null>(() => {
+    if (pages && pages.length > 0) {
+      return pages.find(p => p.slug === 'about') || null;
+    }
+    return null;
+  });
 
   useEffect(() => {
     if (pages && pages.length > 0) {

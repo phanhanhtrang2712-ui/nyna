@@ -8,7 +8,7 @@ import { DistributorItem } from '../types';
 
 const Distribution = () => {
   const { data: fetchedDistributors, loading } = useDataList<DistributorItem>('distributors');
-  const [distributors, setDistributors] = useState<DistributorItem[]>([]);
+  const [distributors, setDistributors] = useState<DistributorItem[]>(fetchedDistributors);
   const [activeRegion, setActiveRegion] = useState('Tất cả');
 
   useEffect(() => {

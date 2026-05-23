@@ -19,17 +19,33 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
   const context = useOutletContext<{ onAddToCart?: (p: any) => void }>();
   const onAddToCart = propsOnAddToCart || context?.onAddToCart;
 
-  const [product, setProduct] = useState<ProductItem | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [activeImage, setActiveImage] = useState<string>('');
+  const [product, setProduct] = useState<ProductItem | null>(() => {
+    try {
+      const cached = localStorage.getItem('nyna_cache_products');
+      if (cached && id) {
+        const { value } = JSON.parse(cached);
+        const found = (value as ProductItem[]).find(p => p.id === id);
+        if (found) return found;
+      }
+    } catch (e) {
+      console.warn('Error reading physical cached products in details:', e);
+    }
+    return null;
+  });
+  const [loading, setLoading] = useState(!product);
+  const [activeImage, setActiveImage] = useState<string>(product ? product.image : '');
 
   useEffect(() => {
     if (id) {
-      setLoading(true);
+      if (!product) {
+        setLoading(true);
+      }
       dataService.get<ProductItem>('products', id)
         .then(res => {
           setProduct(res);
-          setActiveImage(res.image);
+          if (!activeImage) {
+            setActiveImage(res.image);
+          }
           setLoading(false);
         })
         .catch(err => {

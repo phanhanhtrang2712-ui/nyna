@@ -9,7 +9,7 @@ import Markdown from 'react-markdown';
 
 const Brands = () => {
   const { data: fetchedBrands, loading } = useDataList<BrandItem>('brands');
-  const [brands, setBrands] = useState<BrandItem[]>([]);
+  const [brands, setBrands] = useState<BrandItem[]>(fetchedBrands);
   const [selectedBrand, setSelectedBrand] = useState<BrandItem | null>(null);
 
   useEffect(() => {

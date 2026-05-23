@@ -9,7 +9,7 @@ import { NewsItem } from '../types';
 
 const News = () => {
   const { data: fetchedNews, loading } = useDataList<NewsItem>('news');
-  const [news, setNews] = useState<NewsItem[]>([]);
+  const [news, setNews] = useState<NewsItem[]>(fetchedNews);
   const [activeNews, setActiveNews] = useState<NewsItem | null>(null);
 
   useEffect(() => {
