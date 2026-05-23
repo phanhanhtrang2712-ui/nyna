@@ -650,6 +650,25 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
   const [uploading, setUploading] = useState(false);
   const [uploadingBrandImage, setUploadingBrandImage] = useState(false);
 
+  const [filterCategory, setFilterCategory] = useState('Tất cả');
+  const [filterBrand, setFilterBrand] = useState('Tất cả');
+
+  const filterCategories = React.useMemo(() => {
+    return ['Tất cả', ...Array.from(new Set(items.map(item => item.category).filter(Boolean)))];
+  }, [items]);
+
+  const filterBrands = React.useMemo(() => {
+    return ['Tất cả', ...Array.from(new Set(items.map(item => item.brand).filter(Boolean)))];
+  }, [items]);
+
+  const filteredItems = React.useMemo(() => {
+    return items.filter(item => {
+      const matchCategory = filterCategory === 'Tất cả' || item.category === filterCategory;
+      const matchBrand = filterBrand === 'Tất cả' || item.brand === filterBrand;
+      return matchCategory && matchBrand;
+    });
+  }, [items, filterCategory, filterBrand]);
+
   const load = () => {
     dataService.list<any>('products').then(setItems).catch(err => {
       console.error("Lỗi tải sản phẩm:", err);
@@ -1007,13 +1026,47 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
       </div>
 
       <div>
-        <h3 className="text-sm font-black text-gray-400 mb-6 flex items-center gap-2 uppercase tracking-widest">
-          <div className="w-8 h-[2px] bg-blue-500 rounded-full"></div>
-          Kho hàng sản phẩm
-        </h3>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <h3 className="text-sm font-black text-gray-400 flex items-center gap-2 uppercase tracking-widest">
+            <div className="w-8 h-[2px] bg-blue-500 rounded-full"></div>
+            Kho hàng sản phẩm ({filteredItems.length})
+          </h3>
+          
+          <div className="flex flex-wrap gap-3">
+             <div className="flex items-center gap-2 bg-gray-100/80 px-4 py-2 rounded-2xl border border-gray-100">
+               <span className="text-[10px] font-black uppercase text-gray-400 tracking-wider">Nhóm:</span>
+               <select 
+                 className="bg-transparent text-xs font-bold text-blue-900 outline-none pb-0.5"
+                 value={filterCategory}
+                 onChange={e => setFilterCategory(e.target.value)}
+               >
+                 {filterCategories.map(cat => (
+                   <option key={cat} value={cat}>{cat}</option>
+                 ))}
+               </select>
+             </div>
+
+             <div className="flex items-center gap-2 bg-gray-100/80 px-4 py-2 rounded-2xl border border-gray-100">
+               <span className="text-[10px] font-black uppercase text-gray-400 tracking-wider">Thương hiệu:</span>
+               <select 
+                 className="bg-transparent text-xs font-bold text-blue-900 outline-none pb-0.5"
+                 value={filterBrand}
+                 onChange={e => setFilterBrand(e.target.value)}
+               >
+                 {filterBrands.map(br => (
+                   <option key={br} value={br}>{br}</option>
+                 ))}
+               </select>
+             </div>
+          </div>
+        </div>
         <div className="grid md:grid-cols-2 gap-4">
-          {items.length === 0 && <p className="text-gray-400 text-xs font-bold italic">Chưa có sản phẩm nào.</p>}
-          {items.map(item => (
+          {filteredItems.length === 0 && (
+            <p className="text-gray-400 text-xs font-bold italic col-span-2 py-8 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-100">
+              Không tìm thấy sản phẩm nào khớp với bộ lọc.
+            </p>
+          )}
+          {filteredItems.map(item => (
             <div key={item.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 hover:border-blue-900 transition-all group">
               <div className="w-20 h-20 bg-gray-50 rounded-xl overflow-hidden shrink-0 border border-gray-50">
                 <img src={item.image} className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-500" alt="P" />
