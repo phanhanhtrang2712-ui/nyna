@@ -24,17 +24,32 @@ export function useDataList<T>(table: string, orderField: string = 'created_at')
       try {
         const res = await dataService.list<T>(table, orderField);
         if (isMounted) {
-          setData(res);
-          setLoading(false);
-          // Save the latest fetched data to local cache
+          let hasChanged = true;
           try {
-            localStorage.setItem(`nyna_cache_${table}`, JSON.stringify({
-              value: res,
-              timestamp: Date.now()
-            }));
+            const cached = localStorage.getItem(`nyna_cache_${table}`);
+            if (cached) {
+              const { value } = JSON.parse(cached);
+              if (JSON.stringify(value) === JSON.stringify(res)) {
+                hasChanged = false;
+              }
+            }
           } catch (e) {
-            console.warn(`Error saving cache for ${table}:`, e);
+            // cache is missing, empty or corrupt, so let's update
           }
+
+          if (hasChanged) {
+            setData(res);
+            // Save the latest fetched data to local cache
+            try {
+              localStorage.setItem(`nyna_cache_${table}`, JSON.stringify({
+                value: res,
+                timestamp: Date.now()
+              }));
+            } catch (e) {
+              console.warn(`Error saving cache for ${table}:`, e);
+            }
+          }
+          setLoading(false);
         }
       } catch (err) {
         console.error(`Error loading ${table} in background:`, err);

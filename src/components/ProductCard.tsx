@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Heart, ShoppingCart, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -11,14 +11,29 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ item, onAddToCart }: ProductCardProps) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+
   return (
     <motion.div 
       layout
       className="bg-white rounded-[20px] md:rounded-[32px] border border-gray-100 shadow-sm p-2.5 md:p-5 group transition-all hover:shadow-2xl hover:-translate-y-2 flex flex-col h-full"
     >
       <Link to={`/san-pham/${item.id}`} className="relative mb-3 md:mb-6 rounded-[16px] md:rounded-[24px] overflow-hidden bg-gray-50 aspect-square shrink-0 block">
-        <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-        <div className="absolute top-2 left-2 md:top-4 md:left-4 bg-white/90 backdrop-blur-md px-1.5 py-0.5 md:px-3 md:py-1 rounded-full text-[7px] md:text-[9px] font-black text-blue-900 uppercase tracking-widest border border-white/50">
+        {/* Shimmer Placeholder */}
+        {!imageLoaded && (
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 bg-[length:200%_100%] animate-pulse" style={{ animationDuration: '1.5s' }} />
+        )}
+        
+        <img 
+          src={item.image} 
+          alt={item.title} 
+          loading="lazy"
+          onLoad={() => setImageLoaded(true)}
+          className={`w-full h-full object-cover group-hover:scale-110 transition-all duration-700 ${
+            imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+          }`} 
+        />
+        <div className="absolute top-2 left-2 md:top-4 md:left-4 bg-white/90 backdrop-blur-md px-1.5 py-0.5 md:px-3 md:py-1 rounded-full text-[7px] md:text-[9px] font-black text-blue-900 uppercase tracking-widest border border-white/50 z-10">
           {item.brand}
         </div>
       </Link>
