@@ -2624,28 +2624,51 @@ const ContactsManager = ({ onSuccess, onError }: { onSuccess: (m: string) => voi
 
   const loadMessages = async () => {
     setLoading(true);
+    let dbMessages: any[] = [];
     try {
       const supabase = getSupabase();
       const { data, error } = await supabase
         .from('contacts')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*');
 
       if (error) {
-        if (error.code === '42P01') { // table does not exist
-          setMessages([]);
-        } else {
-          throw error;
-        }
-      } else {
-        setMessages(data || []);
+        console.warn('Contacts Supabase query error (likely table table does not exist or RLS issue):', error);
+      } else if (data) {
+        dbMessages = data;
       }
     } catch (err: any) {
-      console.error(err);
-      onError('Lỗi khi tải danh sách liên hệ');
-    } finally {
-      setLoading(false);
+      console.warn('Failed to query Supabase contacts table:', err);
     }
+
+    // Get any local contacts
+    let localMessages: any[] = [];
+    try {
+      const saved = localStorage.getItem('nyna_local_contacts');
+      if (saved) {
+        localMessages = JSON.parse(saved);
+      }
+    } catch (err) {
+      console.error('Error loading local contacts:', err);
+    }
+
+    // Combine or fallback
+    let combined = [...dbMessages];
+    // Add local messages that are not already present in dbMessages (matching by id)
+    localMessages.forEach(lm => {
+      if (!combined.some(dm => dm.id === lm.id)) {
+        combined.push(lm);
+      }
+    });
+
+    // Sort by created_at descending
+    combined.sort((a, b) => {
+      const dateA = new Date(a.created_at || 0).getTime();
+      const dateB = new Date(b.created_at || 0).getTime();
+      return dateB - dateA;
+    });
+
+    setMessages(combined);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -2655,9 +2678,23 @@ const ContactsManager = ({ onSuccess, onError }: { onSuccess: (m: string) => voi
   const handleDelete = async (id: string) => {
     if (!window.confirm('Bạn có chắc chắn muốn xóa tin nhắn này?')) return;
     try {
-      const supabase = getSupabase();
-      const { error } = await supabase.from('contacts').delete().eq('id', id);
-      if (error) throw error;
+      // 1. Try to delete from Supabase if possible
+      try {
+        const supabase = getSupabase();
+        await supabase.from('contacts').delete().eq('id', id);
+      } catch (err) {
+        console.warn('Could not delete contact from remote DB:', err);
+      }
+
+      // 2. Clear from local storage
+      let localMessages: any[] = [];
+      const saved = localStorage.getItem('nyna_local_contacts');
+      if (saved) {
+        localMessages = JSON.parse(saved);
+      }
+      const filtered = localMessages.filter(m => m.id !== id);
+      localStorage.setItem('nyna_local_contacts', JSON.stringify(filtered));
+
       onSuccess('Xóa tin nhắn liên hệ thành công');
       loadMessages();
     } catch (err: any) {

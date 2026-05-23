@@ -148,9 +148,7 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
                     </div>
                   ))}
                </div>
-               <p className="text-gray-500 font-medium leading-relaxed">
-                  Sản phẩm tiêu chuẩn quốc tế được nghiên cứu và phát triển bởi NYNA Việt Nam, mang lại sự an tâm tuyệt đối cho cả gia đình.
-               </p>
+
             </div>
 
             <div className="flex gap-4 mb-16">
