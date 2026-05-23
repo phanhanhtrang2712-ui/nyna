@@ -65,7 +65,7 @@ const Home = ({ onAddToCart: propsOnAddToCart }: HomeProps) => {
   const location = useLocation();
 
   const { data: fetchedProducts, loading } = useDataList<ProductItem>('products');
-  const [products, setProducts] = useState<ProductItem[]>([]);
+  const [products, setProducts] = useState<ProductItem[]>(fetchedProducts);
   const [filteredProducts, setFilteredProducts] = useState<ProductItem[]>([]);
   
   const [selectedCategory, setSelectedCategory] = useState('Tất cả');
