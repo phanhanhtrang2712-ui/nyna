@@ -2462,15 +2462,6 @@ const CmsUserManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
         </button>
       </div>
 
-      {/* Info Block */}
-      <div className="p-6 bg-blue-50/50 border border-blue-100 rounded-3xl text-xs text-blue-900 leading-relaxed font-semibold">
-        <h4 className="font-extrabold text-[13px] uppercase tracking-wide mb-2 block text-blue-900">💡 Quy trình cấp quyền bảo mật Supabase Auth:</h4>
-        <ol className="list-decimal list-inside space-y-1.5 text-blue-800">
-          <li><strong>Tạo tài khoản Auth:</strong> Quản trị viên truy cập trang quản trị <a href="https://supabase.com" target="_blank" rel="noopener noreferrer" className="underline font-black hover:text-blue-950">Supabase Console Dashboard</a>, chọn mục <strong>Auth &gt; Users &gt; Add User &gt; Create User</strong> để cấu hình thông tin đăng ký (Email &amp; Mật khẩu cho thành viên).</li>
-          <li><strong>Phân quyền hệ thống:</strong> Thêm Email đó vào danh sách phân quyền bên dưới kèm cấp độ truy cập (<strong>quyền quản trị</strong> hoặc <strong>nhân viên</strong>) để xác định quyền truy cập các tính năng phù hợp của CMS.</li>
-        </ol>
-      </div>
-
       {showAddForm && (
         <form onSubmit={handleSubmit} className="p-8 bg-white rounded-3xl shadow-sm border border-gray-100 space-y-6">
           <h3 className="text-sm font-black text-blue-900 uppercase tracking-widest">
