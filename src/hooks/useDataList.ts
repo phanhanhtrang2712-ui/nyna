@@ -1,6 +1,21 @@
 import { useState, useEffect } from 'react';
 import { dataService } from '../services/dataService';
 import { queryCache } from '../services/queryCache';
+import { getSupabase } from '../lib/supabase';
+
+const hasSupabaseToken = () => {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
+        return true;
+      }
+    }
+  } catch (e) {
+    // ignore
+  }
+  return false;
+};
 
 export function useDataList<T>(table: string, orderField: string = 'created_at') {
   const cacheKey = `nyna_cache_${table}`;
@@ -36,13 +51,23 @@ export function useDataList<T>(table: string, orderField: string = 'created_at')
         const res = await queryCache.getOrCreatePromise(cacheKey + '_promise', fetchPromise);
         
         if (isMounted) {
+          let skipWrite = false;
           setData(prev => {
+            // Guard: If query returned empty, but we already have cached data,
+            // and we have an auth session to restore, do NOT overwrite the state yet.
+            if (res.length === 0 && prev.length > 0 && hasSupabaseToken()) {
+              skipWrite = true;
+              return prev;
+            }
             if (JSON.stringify(prev) === JSON.stringify(res)) {
               return prev;
             }
             return res;
           });
-          queryCache.set(cacheKey, res);
+          
+          if (!skipWrite) {
+            queryCache.set(cacheKey, res);
+          }
           setLoading(false);
         }
       } catch (err) {
@@ -55,10 +80,30 @@ export function useDataList<T>(table: string, orderField: string = 'created_at')
 
     fetchData();
 
+    // Listen for auth state changes to re-fetch when session is restored/changed
+    let subscription: any = null;
+    try {
+      const supabase = getSupabase();
+      const { data: { subscription: sub } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (isMounted && (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'SIGNED_OUT')) {
+          // Clear query caching promise and force a re-fetch since auth state has changed
+          queryCache.delete(cacheKey + '_promise');
+          fetchData();
+        }
+      });
+      subscription = sub;
+    } catch (e) {
+      console.warn("Supabase auth listener error in useDataList:", e);
+    }
+
     return () => {
       isMounted = false;
+      if (subscription) {
+        subscription.unsubscribe();
+      }
     };
   }, [table, orderField, cacheKey]);
 
   return { data, loading };
 }
+
