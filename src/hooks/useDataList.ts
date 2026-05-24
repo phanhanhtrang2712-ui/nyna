@@ -36,13 +36,13 @@ export function useDataList<T>(table: string, orderField: string = 'created_at')
         const res = await queryCache.getOrCreatePromise(cacheKey + '_promise', fetchPromise);
         
         if (isMounted) {
-          const cachedData = queryCache.getAny<T[]>(cacheKey);
-          const hasChanged = !cachedData || JSON.stringify(cachedData) !== JSON.stringify(res);
-
-          if (hasChanged) {
-            setData(res);
-            queryCache.set(cacheKey, res);
-          }
+          setData(prev => {
+            if (JSON.stringify(prev) === JSON.stringify(res)) {
+              return prev;
+            }
+            return res;
+          });
+          queryCache.set(cacheKey, res);
           setLoading(false);
         }
       } catch (err) {
