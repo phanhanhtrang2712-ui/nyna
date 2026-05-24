@@ -8,22 +8,7 @@ import {
 import ReactMarkdown from 'react-markdown';
 import { dataService } from '../services/dataService';
 import { queryCache } from '../services/queryCache';
-import { getSupabase } from '../lib/supabase';
 import { ProductItem } from '../types';
-
-const hasSupabaseToken = () => {
-  try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
-        return true;
-      }
-    }
-  } catch (e) {
-    // ignore
-  }
-  return false;
-};
 
 interface ProductDetailProps {
   onAddToCart?: (product: any) => void;
@@ -75,8 +60,6 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
 
   useEffect(() => {
     let isMounted = true;
-    let subscription: any = null;
-
     if (id) {
       const fetchItem = async () => {
         // Try fresh item cache first
@@ -93,19 +76,8 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
         try {
           const res = await dataService.get<ProductItem>('products', id);
           if (isMounted) {
-            if (res) {
-              setProduct(res);
-              setActiveImage(prev => prev || res.image);
-            } else {
-              // Try to fallback to cached version instead of throwing empty UI
-              const cached = queryCache.getAny<ProductItem>(`nyna_cache_products_${id}`);
-              if (cached) {
-                setProduct(cached);
-              } else if (hasSupabaseToken()) {
-                // If we have an active auth token currently loading, wait for re-fetch trigger rather than showing not found
-                return;
-              }
-            }
+            setProduct(res);
+            setActiveImage(prev => prev || res.image);
             setLoading(false);
           }
         } catch (err) {
@@ -117,26 +89,9 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
       };
 
       fetchItem();
-
-      // Listen for auth state changes to re-fetch when session is restored/changed
-      try {
-        const supabase = getSupabase();
-        const { data: { subscription: sub } } = supabase.auth.onAuthStateChange((event, session) => {
-          if (isMounted && (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'SIGNED_OUT')) {
-            fetchItem();
-          }
-        });
-        subscription = sub;
-      } catch (e) {
-        console.warn("Supabase auth listener error in ProductDetail:", e);
-      }
     }
-
     return () => {
       isMounted = false;
-      if (subscription) {
-        subscription.unsubscribe();
-      }
     };
   }, [id]);
 
@@ -179,7 +134,7 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
-            className="space-y-4 md:space-y-6 lg:sticky lg:top-24"
+            className="space-y-4 md:space-y-6 sticky top-24"
           >
             <div className="aspect-[4/3] md:aspect-square bg-gray-50 rounded-[32px] md:rounded-[48px] overflow-hidden border border-gray-100 group relative">
                <AnimatePresence mode="wait">

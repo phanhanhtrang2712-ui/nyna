@@ -35,7 +35,7 @@ export const dataService = {
       return (data || []) as T[];
     } catch (error) {
       console.error(`Supabase List Error [${table}]: `, error);
-      throw error;
+      return [];
     }
   },
 

@@ -12,9 +12,6 @@ class QueryCache {
     // 1. Try to read from in-memory cache
     const entry = this.cache.get(key);
     if (entry) {
-      if (Array.isArray(entry.data) && entry.data.length === 0) {
-        return null;
-      }
       const age = Date.now() - entry.timestamp;
       if (age < this.ttl) {
         return entry.data as T;
@@ -26,9 +23,6 @@ class QueryCache {
       const cached = localStorage.getItem(key);
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed.value) && parsed.value.length === 0) {
-          return null;
-        }
         // Warm up in-memory cache
         this.cache.set(key, { data: parsed.value, timestamp: parsed.timestamp || Date.now() });
         
@@ -47,20 +41,12 @@ class QueryCache {
   // Returns the cache regardless of expiration (for Stale-While-Revalidate)
   getAny<T>(key: string): T | null {
     const entry = this.cache.get(key);
-    if (entry) {
-      if (Array.isArray(entry.data) && entry.data.length === 0) {
-        return null;
-      }
-      return entry.data as T;
-    }
+    if (entry) return entry.data as T;
 
     try {
       const cached = localStorage.getItem(key);
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed.value) && parsed.value.length === 0) {
-          return null;
-        }
         this.cache.set(key, { data: parsed.value, timestamp: parsed.timestamp || Date.now() });
         return parsed.value as T;
       }
