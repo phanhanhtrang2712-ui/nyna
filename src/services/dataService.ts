@@ -116,7 +116,7 @@ export const dataService = {
     const listCacheKey = `nyna_cache_${table}`;
     const cachedList = queryCache.get<any[]>(listCacheKey);
     if (cachedList) {
-      const found = cachedList.find(item => String(item.id) === String(id));
+      const found = cachedList.find(item => item.id === id);
       if (found) {
         return found as T;
       }

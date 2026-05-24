@@ -31,8 +31,6 @@ export function useDataList<T>(table: string, orderField: string = 'created_at')
     return !freshData && data.length === 0;
   });
 
-  const [error, setError] = useState<any>(null);
-
   useEffect(() => {
     let isMounted = true;
     
@@ -43,7 +41,6 @@ export function useDataList<T>(table: string, orderField: string = 'created_at')
         if (isMounted) {
           setData(freshData);
           setLoading(false);
-          setError(null);
         }
         return; // Cache is totally fresh, no need to touch network
       }
@@ -72,12 +69,10 @@ export function useDataList<T>(table: string, orderField: string = 'created_at')
             queryCache.set(cacheKey, res);
           }
           setLoading(false);
-          setError(null);
         }
-      } catch (err: any) {
+      } catch (err) {
         console.error(`Error loading ${table} in background:`, err);
         if (isMounted) {
-          setError(err);
           setLoading(false);
         }
       }
@@ -90,7 +85,7 @@ export function useDataList<T>(table: string, orderField: string = 'created_at')
     try {
       const supabase = getSupabase();
       const { data: { subscription: sub } } = supabase.auth.onAuthStateChange((event, session) => {
-        if (isMounted && (event === 'SIGNED_IN' || event === 'SIGNED_OUT')) {
+        if (isMounted && (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'SIGNED_OUT')) {
           // Clear query caching promise and force a re-fetch since auth state has changed
           queryCache.delete(cacheKey + '_promise');
           fetchData();
@@ -109,6 +104,6 @@ export function useDataList<T>(table: string, orderField: string = 'created_at')
     };
   }, [table, orderField, cacheKey]);
 
-  return { data, loading, error };
+  return { data, loading };
 }
 

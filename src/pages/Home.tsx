@@ -64,11 +64,11 @@ const Home = ({ onAddToCart: propsOnAddToCart }: HomeProps) => {
   const onAddToCart = propsOnAddToCart || context?.onAddToCart;
   const location = useLocation();
 
-  const { data: products, loading, error } = useDataList<ProductItem>('products');
+  const { data: products, loading } = useDataList<ProductItem>('products');
   
   const [selectedCategory, setSelectedCategory] = useState('Tất cả');
   const [selectedBrand, setSelectedBrand] = useState('Tất cả');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000000]);
   const [searchQuery, setSearchQuery] = useState('');
   
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -256,26 +256,7 @@ const Home = ({ onAddToCart: propsOnAddToCart }: HomeProps) => {
 
             {/* Grouped Product Sections */}
             <div className="space-y-12">
-               {error ? (
-                  <div className="bg-red-50 border border-red-200 rounded-[32px] p-8 text-center max-w-xl mx-auto my-8">
-                     <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
-                        <X size={32} />
-                     </div>
-                     <h4 className="text-lg font-black text-red-900 uppercase mb-2">Lỗi tải dữ liệu sản phẩm</h4>
-                     <p className="text-red-700/80 text-sm font-medium mb-4 leading-relaxed font-sans">
-                        {error.message || "Không thể kết nối đến cơ sở dữ liệu Supabase. Vui lòng kiểm tra lại thiết lập."}
-                     </p>
-                     <div className="bg-white/80 p-4 rounded-[16px] text-[11px] font-mono text-left text-gray-600 border border-red-100 mb-6 overflow-x-auto whitespace-pre-wrap max-h-40">
-                        {JSON.stringify(error, null, 2)}
-                     </div>
-                     <button 
-                        onClick={() => window.location.reload()} 
-                        className="bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-widest px-6 py-3 rounded-xl transition-all font-bold"
-                     >
-                        Tải lại trang
-                     </button>
-                  </div>
-               ) : loading ? (
+               {loading ? (
                  <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                     {Array.from({ length: 4 }).map((_, i) => (
                       <div key={i} className="bg-white rounded-[32px] h-[400px] animate-pulse border border-gray-100"></div>
@@ -292,23 +273,7 @@ const Home = ({ onAddToCart: propsOnAddToCart }: HomeProps) => {
                     });
                  })()
                )}
-               {!loading && !error && products.length === 0 ? (
-                  <div className="bg-blue-50 border border-blue-200 rounded-[32px] p-8 text-center max-w-xl mx-auto my-8">
-                     <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-950">
-                        <LayoutGrid size={32} />
-                     </div>
-                     <h4 className="text-lg font-black text-blue-900 uppercase mb-2">Chưa có sản phẩm nào</h4>
-                     <p className="text-blue-700/80 text-sm font-medium mb-6 leading-relaxed font-sans">
-                        Cơ sở dữ liệu đã kết nối thành công nhưng chưa có sản phẩm nào được nhập. Vui lòng truy cập trang quản trị để thêm sản phẩm mới.
-                     </p>
-                     <a 
-                        href="/cms" 
-                        className="inline-block bg-blue-900 hover:bg-blue-950 text-white font-black text-xs uppercase tracking-widest px-6 py-3 rounded-xl transition-all font-bold"
-                     >
-                        Đi tới trang quản trị CMS
-                     </a>
-                  </div>
-               ) : !loading && !error && products.length > 0 && filteredProducts.length === 0 && (
+               {!loading && filteredProducts.length === 0 && (
                  <div className="py-32 text-center">
                     <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300">
                        <Search size={48} />
