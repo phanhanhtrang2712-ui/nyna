@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import MainLayout from './components/MainLayout';
 import ScrollToTop from './components/ScrollToTop';
@@ -13,6 +13,7 @@ import Distribution from './pages/Distribution';
 import Jobs from './pages/Jobs';
 import Admin from './pages/Admin';
 import ProductDetail from './pages/ProductDetail';
+import { prefetchAppCore } from './services/prefetch';
 
 const WrappedRoute = () => (
   <MainLayout>
@@ -21,6 +22,11 @@ const WrappedRoute = () => (
 );
 
 export default function App() {
+  useEffect(() => {
+    // Prefetch critical datasets immediately on boot
+    prefetchAppCore();
+  }, []);
+
   return (
     <BrowserRouter>
       <ScrollToTop />

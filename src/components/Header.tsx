@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { ShoppingCart, Search, Menu, X, Phone, Mail, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link, useLocation } from 'react-router-dom';
+import { prefetchProducts, prefetchBrands, prefetchNews, prefetchVideos, prefetchPages } from '../services/prefetch';
 
 const Header = ({ cartCount, onOpenCart }: { cartCount: number; onOpenCart: () => void }) => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -72,6 +73,13 @@ const Header = ({ cartCount, onOpenCart }: { cartCount: number; onOpenCart: () =
               <Link 
                 key={item.path} 
                 to={item.path}
+                onMouseEnter={() => {
+                  if (item.path === '/#san-pham') prefetchProducts();
+                  if (item.path === '/thuong-hieu') prefetchBrands();
+                  if (item.path === '/tin-tuc') prefetchNews();
+                  if (item.path === '/video') prefetchVideos();
+                  if (item.path === '/gioi-thieu') prefetchPages();
+                }}
                 className={`text-[13px] font-black tracking-tight uppercase transition-colors ${location.pathname === item.path ? 'text-pink-500 underline underline-offset-4 decoration-2' : 'text-blue-900 hover:text-pink-500'}`}
               >
                 {item.name}
@@ -125,6 +133,13 @@ const Header = ({ cartCount, onOpenCart }: { cartCount: number; onOpenCart: () =
                   key={item.path} 
                   to={item.path}
                   onClick={() => setMobileMenuOpen(false)}
+                  onMouseEnter={() => {
+                    if (item.path === '/#san-pham') prefetchProducts();
+                    if (item.path === '/thuong-hieu') prefetchBrands();
+                    if (item.path === '/tin-tuc') prefetchNews();
+                    if (item.path === '/video') prefetchVideos();
+                    if (item.path === '/gioi-thieu') prefetchPages();
+                  }}
                   className={`text-[16px] font-extrabold text-left uppercase tracking-tight py-1 border-b border-gray-50 flex justify-between items-center ${location.pathname === item.path ? 'text-pink-500 border-pink-100' : 'text-blue-900'}`}
                 >
                   <span>{item.name}</span>

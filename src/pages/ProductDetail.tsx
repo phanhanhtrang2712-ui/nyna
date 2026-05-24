@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { dataService } from '../services/dataService';
+import { queryCache } from '../services/queryCache';
 import { ProductItem } from '../types';
 
 interface ProductDetailProps {
@@ -20,39 +21,69 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
   const onAddToCart = propsOnAddToCart || context?.onAddToCart;
 
   const [product, setProduct] = useState<ProductItem | null>(() => {
-    try {
-      const cached = localStorage.getItem('nyna_cache_products');
-      if (cached && id) {
-        const { value } = JSON.parse(cached);
-        const found = (value as ProductItem[]).find(p => p.id === id);
-        if (found) return found;
-      }
-    } catch (e) {
-      console.warn('Error reading physical cached products in details:', e);
+    if (!id) return null;
+    
+    // 1. Try single item cache in queryCache
+    const itemCacheKey = `nyna_cache_products_${id}`;
+    const cachedItem = queryCache.getAny<ProductItem>(itemCacheKey);
+    if (cachedItem) return cachedItem;
+
+    // 2. Try general list cache in queryCache
+    const listCacheKey = `nyna_cache_products`;
+    const cachedList = queryCache.getAny<ProductItem[]>(listCacheKey);
+    if (cachedList) {
+      const found = cachedList.find(p => p.id === id);
+      if (found) return found;
     }
     return null;
   });
-  const [loading, setLoading] = useState(!product);
+  const [loading, setLoading] = useState(() => {
+    if (!id) return true;
+    const freshItem = queryCache.get<ProductItem>(`nyna_cache_products_${id}`);
+    if (freshItem) return false;
+    
+    const freshList = queryCache.get<ProductItem[]>(`nyna_cache_products`);
+    if (freshList && freshList.some(p => p.id === id)) return false;
+
+    return !product;
+  });
   const [activeImage, setActiveImage] = useState<string>(product ? product.image : '');
 
   useEffect(() => {
+    let isMounted = true;
     if (id) {
-      if (!product) {
-        setLoading(true);
-      }
-      dataService.get<ProductItem>('products', id)
-        .then(res => {
-          setProduct(res);
-          if (!activeImage) {
-            setActiveImage(res.image);
+      const fetchItem = async () => {
+        // Try fresh item cache first
+        const freshItem = queryCache.get<ProductItem>(`nyna_cache_products_${id}`);
+        if (freshItem) {
+          if (isMounted) {
+            setProduct(freshItem);
+            setActiveImage(prev => prev || freshItem.image);
+            setLoading(false);
           }
-          setLoading(false);
-        })
-        .catch(err => {
+          return;
+        }
+
+        try {
+          const res = await dataService.get<ProductItem>('products', id);
+          if (isMounted) {
+            setProduct(res);
+            setActiveImage(prev => prev || res.image);
+            setLoading(false);
+          }
+        } catch (err) {
           console.error(err);
-          setLoading(false);
-        });
+          if (isMounted) {
+            setLoading(false);
+          }
+        }
+      };
+
+      fetchItem();
     }
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
   if (loading) {

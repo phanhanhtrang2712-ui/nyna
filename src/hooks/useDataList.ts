@@ -1,71 +1,47 @@
 import { useState, useEffect } from 'react';
 import { dataService } from '../services/dataService';
+import { queryCache } from '../services/queryCache';
 
 export function useDataList<T>(table: string, orderField: string = 'created_at') {
+  const cacheKey = `nyna_cache_${table}`;
+
   const [data, setData] = useState<T[]>(() => {
-    // Synchronously check the local localStorage cache for instant UI rendering
-    try {
-      const cached = localStorage.getItem(`nyna_cache_${table}`);
-      if (cached) {
-        const { value } = JSON.parse(cached);
-        return value as T[];
-      }
-    } catch (e) {
-      console.warn(`Error parsing cache for ${table}:`, e);
-    }
-    return [];
+    // Get item from in-memory or fallback localStorage instantly (even if stale)
+    return queryCache.getAny<T[]>(cacheKey) || [];
   });
-  const [loading, setLoading] = useState(data.length === 0);
+  
+  // Only show a loading spinner if we don't even have stale/cached data to present
+  const [loading, setLoading] = useState(() => {
+    const freshData = queryCache.get<T[]>(cacheKey);
+    return !freshData && data.length === 0;
+  });
 
   useEffect(() => {
     let isMounted = true;
     
     const fetchData = async () => {
-      // Check cache freshness (5-minute TTL)
-      try {
-        const cached = localStorage.getItem(`nyna_cache_${table}`);
-        if (cached) {
-          const { timestamp } = JSON.parse(cached);
-          const age = Date.now() - timestamp;
-          const TTL = 5 * 60 * 1000; // 5 minutes TTL
-          if (age < TTL) {
-            if (isMounted) {
-              setLoading(false);
-            }
-            return; // Cache is fresh, skip background server load
-          }
+      // Check if cache is fresh and within TTL (5 minutes)
+      const freshData = queryCache.get<T[]>(cacheKey);
+      if (freshData) {
+        if (isMounted) {
+          setData(freshData);
+          setLoading(false);
         }
-      } catch (e) {
-        console.warn(`Error verifying cache TTL for ${table}:`, e);
+        return; // Cache is totally fresh, no need to touch network
       }
 
+      // If missing or stale, fetch from network with request coalescing/deduplication
       try {
-        const res = await dataService.list<T>(table, orderField);
+        const fetchPromise = () => dataService.list<T>(table, orderField);
+        const res = await queryCache.getOrCreatePromise(cacheKey + '_promise', fetchPromise);
+        
         if (isMounted) {
-          let hasChanged = true;
-          try {
-            const cached = localStorage.getItem(`nyna_cache_${table}`);
-            if (cached) {
-              const { value } = JSON.parse(cached);
-              if (JSON.stringify(value) === JSON.stringify(res)) {
-                hasChanged = false;
-              }
-            }
-          } catch (e) {
-            // cache is missing, empty or corrupt, so let's update
-          }
+          const cachedData = queryCache.getAny<T[]>(cacheKey);
+          const hasChanged = !cachedData || JSON.stringify(cachedData) !== JSON.stringify(res);
 
           if (hasChanged) {
             setData(res);
-            // Save the latest fetched data to local cache
-            try {
-              localStorage.setItem(`nyna_cache_${table}`, JSON.stringify({
-                value: res,
-                timestamp: Date.now()
-              }));
-            } catch (e) {
-              console.warn(`Error saving cache for ${table}:`, e);
-            }
+            queryCache.set(cacheKey, res);
           }
           setLoading(false);
         }
@@ -82,7 +58,7 @@ export function useDataList<T>(table: string, orderField: string = 'created_at')
     return () => {
       isMounted = false;
     };
-  }, [table, orderField]);
+  }, [table, orderField, cacheKey]);
 
   return { data, loading };
 }

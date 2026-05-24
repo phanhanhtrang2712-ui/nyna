@@ -1,4 +1,5 @@
 import { getSupabase } from '../lib/supabase';
+import { queryCache } from './queryCache';
 
 export enum OperationType {
   CREATE = 'create',
@@ -42,9 +43,9 @@ export const dataService = {
   async create<T>(table: string, data: T): Promise<string> {
     const supabase = getSupabase();
     const { data: inserted, error } = await supabase
-      .from(table)
-      .insert([data] as any)
-      .select();
+       .from(table)
+       .insert([data] as any)
+       .select();
     
     if (error) {
       console.error(`Supabase Create Error [${table}]: `, error);
@@ -52,7 +53,7 @@ export const dataService = {
     }
     // Evict client-side cache
     try {
-      localStorage.removeItem(`nyna_cache_${table}`);
+      queryCache.clearTable(table);
     } catch (e) {
       console.warn(e);
     }
@@ -63,9 +64,9 @@ export const dataService = {
   async update<T>(table: string, id: string, data: Partial<T>): Promise<void> {
     const supabase = getSupabase();
     const { error } = await supabase
-      .from(table)
-      .update(data as any)
-      .eq('id', id);
+       .from(table)
+       .update(data as any)
+       .eq('id', id);
     
     if (error) {
       console.error(`Supabase Update Error [${table}/${id}]: `, error);
@@ -73,8 +74,8 @@ export const dataService = {
     }
     // Evict client-side cache
     try {
-      localStorage.removeItem(`nyna_cache_${table}`);
-      localStorage.removeItem(`nyna_cache_${table}_${id}`);
+      queryCache.clearTable(table);
+      queryCache.delete(`nyna_cache_${table}_${id}`);
     } catch (e) {
       console.warn(e);
     }
@@ -85,82 +86,64 @@ export const dataService = {
     try {
       const supabase = getSupabase();
       const { error } = await supabase
-        .from(table)
-        .delete()
-        .eq('id', id);
+         .from(table)
+         .delete()
+         .eq('id', id);
       
       if (error) throw error;
       // Evict client-side cache
       try {
-        localStorage.removeItem(`nyna_cache_${table}`);
-        localStorage.removeItem(`nyna_cache_${table}_${id}`);
+        queryCache.clearTable(table);
+        queryCache.delete(`nyna_cache_${table}_${id}`);
       } catch (e) {
         console.warn(e);
       }
     } catch (error) {
-      console.error(`Supabase Delete Error [${table}/${id}]: `, error);
+       console.error(`Supabase Delete Error [${table}/${id}]: `, error);
     }
   },
 
   async get<T>(table: string, id: string): Promise<T> {
-    // 1. Try to fetch from general table list cache if fresh (5-minute TTL)
-    try {
-      const cached = localStorage.getItem(`nyna_cache_${table}`);
-      if (cached) {
-        const { value, timestamp } = JSON.parse(cached);
-        const age = Date.now() - timestamp;
-        const TTL = 5 * 60 * 1000; // 5 minutes TTL
-        if (age < TTL) {
-          const found = (value as any[]).find(item => item.id === id);
-          if (found) {
-            return found as T;
-          }
-        }
-      }
-    } catch (e) {
-      console.warn(`Error reading general cache in get [${table}/${id}]:`, e);
-    }
-
-    // 2. Try to fetch from specific item cache if fresh (5-minute TTL)
-    try {
-      const cacheKey = `nyna_cache_${table}_${id}`;
-      const cachedItem = localStorage.getItem(cacheKey);
-      if (cachedItem) {
-        const { value, timestamp } = JSON.parse(cachedItem);
-        const age = Date.now() - timestamp;
-        const TTL = 5 * 60 * 1000; // 5 minutes TTL
-        if (age < TTL) {
-          return value as T;
-        }
-      }
-    } catch (e) {
-      console.warn(`Error reading individual cache in get [${table}/${id}]:`, e);
-    }
-
-    // Fallback: network fetch
-    const supabase = getSupabase();
-    const { data, error } = await supabase
-      .from(table)
-      .select('*')
-      .eq('id', id)
-      .single();
+    const cacheKey = `nyna_cache_${table}_${id}`;
     
-    if (error) {
-      console.error(`Supabase Get Error [${table}/${id}]: `, error);
-      throw error;
+    // 1. Try individual cache first (fresh)
+    const cachedItem = queryCache.get<T>(cacheKey);
+    if (cachedItem) {
+      return cachedItem;
     }
 
-    // Save fetched item to individual cache
-    try {
-      localStorage.setItem(`nyna_cache_${table}_${id}`, JSON.stringify({
-        value: data,
-        timestamp: Date.now()
-      }));
-    } catch (e) {
-      console.warn(`Error saving individual cache for [${table}/${id}]:`, e);
+    // 2. Try table list cache next (fresh)
+    const listCacheKey = `nyna_cache_${table}`;
+    const cachedList = queryCache.get<any[]>(listCacheKey);
+    if (cachedList) {
+      const found = cachedList.find(item => item.id === id);
+      if (found) {
+        return found as T;
+      }
     }
 
-    return data as T;
+    // Fallback: network fetch with deduplication
+    const fetchFunc = async () => {
+      const supabase = getSupabase();
+      const { data, error } = await supabase
+         .from(table)
+         .select('*')
+         .eq('id', id)
+         .single();
+      
+      if (error) {
+        console.error(`Supabase Get Error [${table}/${id}]: `, error);
+        throw error;
+      }
+      return data as T;
+    };
+
+    const data = await queryCache.getOrCreatePromise(cacheKey, fetchFunc);
+    
+    // Save to individual cache
+    queryCache.set(cacheKey, data);
+
+    return data;
   },
 
   // Settings
