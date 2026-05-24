@@ -90,7 +90,7 @@ export function useDataList<T>(table: string, orderField: string = 'created_at')
     try {
       const supabase = getSupabase();
       const { data: { subscription: sub } } = supabase.auth.onAuthStateChange((event, session) => {
-        if (isMounted && (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'SIGNED_OUT')) {
+        if (isMounted && (event === 'SIGNED_IN' || event === 'SIGNED_OUT')) {
           // Clear query caching promise and force a re-fetch since auth state has changed
           queryCache.delete(cacheKey + '_promise');
           fetchData();

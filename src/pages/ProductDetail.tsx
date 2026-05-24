@@ -133,7 +133,7 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
       try {
         const supabase = getSupabase();
         const { data: { subscription: sub } } = supabase.auth.onAuthStateChange((event, session) => {
-          if (isMounted && (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'SIGNED_OUT')) {
+          if (isMounted && (event === 'SIGNED_IN' || event === 'SIGNED_OUT')) {
             fetchItem();
           }
         });
