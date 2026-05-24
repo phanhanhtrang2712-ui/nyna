@@ -178,7 +178,7 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
           >
             <div className="mb-10 font-sans">
               <span className="text-pink-500 font-black uppercase tracking-[0.4em] text-xs mb-4 block">{product.category}</span>
-              <h1 className="text-2xl md:text-5xl font-black text-blue-900 mb-6 uppercase tracking-tight leading-[1.1]">
+              <h1 className="text-xl md:text-3xl font-black text-blue-900 mb-4 uppercase tracking-tight leading-tight">
                 {product.title}
               </h1>
               <div className="flex items-center gap-6">

@@ -40,7 +40,7 @@ const ProductCard = ({ item, onAddToCart }: ProductCardProps) => {
 
       <div className="flex-1 flex flex-col">
         <Link to={`/san-pham/${item.id}`} className="block group-hover:text-pink-500 transition-colors">
-          <h3 className="text-sm md:text-base font-black text-blue-900 mb-2 md:mb-4 uppercase tracking-tight line-clamp-2 min-h-[40px] md:min-h-[48px] leading-tight">
+          <h3 className="text-xs md:text-sm font-black text-blue-900 mb-2 md:mb-4 uppercase tracking-tight line-clamp-2 min-h-[32px] md:min-h-[40px] leading-tight">
             {item.title}
           </h3>
         </Link>
