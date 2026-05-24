@@ -47,7 +47,7 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
     const listCacheKey = `nyna_cache_products`;
     const cachedList = queryCache.getAny<ProductItem[]>(listCacheKey);
     if (cachedList) {
-      const found = cachedList.find(p => p.id === id);
+      const found = cachedList.find(p => String(p.id) === String(id));
       if (found) return found;
     }
     return null;
@@ -58,7 +58,7 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
     if (freshItem) return false;
     
     const freshList = queryCache.get<ProductItem[]>(`nyna_cache_products`);
-    if (freshList && freshList.some(p => p.id === id)) return false;
+    if (freshList && freshList.some(p => String(p.id) === String(id))) return false;
 
     return !product;
   });
@@ -99,8 +99,11 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
             } else {
               // Try to fallback to cached version instead of throwing empty UI
               const cached = queryCache.getAny<ProductItem>(`nyna_cache_products_${id}`);
-              if (cached) {
-                setProduct(cached);
+              const cachedFromList = !cached ? (queryCache.getAny<ProductItem[]>(`nyna_cache_products`)?.find(p => String(p.id) === String(id))) : null;
+              const fallback = cached || cachedFromList;
+              if (fallback) {
+                setProduct(fallback);
+                setActiveImage(prev => prev || fallback.image);
               } else if (hasSupabaseToken()) {
                 // If we have an active auth token currently loading, wait for re-fetch trigger rather than showing not found
                 return;
@@ -109,8 +112,16 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
             setLoading(false);
           }
         } catch (err) {
-          console.error(err);
+          console.error("Error loading product detail in background:", err);
           if (isMounted) {
+            // Even on error, try to restore from cache if possible
+            const cached = queryCache.getAny<ProductItem>(`nyna_cache_products_${id}`);
+            const cachedFromList = !cached ? (queryCache.getAny<ProductItem[]>(`nyna_cache_products`)?.find(p => String(p.id) === String(id))) : null;
+            const fallback = cached || cachedFromList;
+            if (fallback) {
+              setProduct(fallback);
+              setActiveImage(prev => prev || fallback.image);
+            }
             setLoading(false);
           }
         }
