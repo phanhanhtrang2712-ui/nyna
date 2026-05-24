@@ -21,6 +21,24 @@ export function useDataList<T>(table: string, orderField: string = 'created_at')
     let isMounted = true;
     
     const fetchData = async () => {
+      // Check cache freshness (5-minute TTL)
+      try {
+        const cached = localStorage.getItem(`nyna_cache_${table}`);
+        if (cached) {
+          const { timestamp } = JSON.parse(cached);
+          const age = Date.now() - timestamp;
+          const TTL = 5 * 60 * 1000; // 5 minutes TTL
+          if (age < TTL) {
+            if (isMounted) {
+              setLoading(false);
+            }
+            return; // Cache is fresh, skip background server load
+          }
+        }
+      } catch (e) {
+        console.warn(`Error verifying cache TTL for ${table}:`, e);
+      }
+
       try {
         const res = await dataService.list<T>(table, orderField);
         if (isMounted) {
