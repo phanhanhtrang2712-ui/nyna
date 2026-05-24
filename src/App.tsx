@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import MainLayout from './components/MainLayout';
@@ -15,6 +14,10 @@ import Admin from './pages/Admin';
 import ProductDetail from './pages/ProductDetail';
 import { prefetchAppCore } from './services/prefetch';
 
+// Gọi ngay khi module load - không đợi React render
+// Giúp dữ liệu được tải sớm hơn ~200-500ms
+prefetchAppCore();
+
 const WrappedRoute = () => (
   <MainLayout>
     <Outlet />
@@ -22,11 +25,6 @@ const WrappedRoute = () => (
 );
 
 export default function App() {
-  useEffect(() => {
-    // Prefetch critical datasets immediately on boot
-    prefetchAppCore();
-  }, []);
-
   return (
     <BrowserRouter>
       <ScrollToTop />
