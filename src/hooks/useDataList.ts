@@ -31,6 +31,8 @@ export function useDataList<T>(table: string, orderField: string = 'created_at')
     return !freshData && data.length === 0;
   });
 
+  const [error, setError] = useState<any>(null);
+
   useEffect(() => {
     let isMounted = true;
     
@@ -41,6 +43,7 @@ export function useDataList<T>(table: string, orderField: string = 'created_at')
         if (isMounted) {
           setData(freshData);
           setLoading(false);
+          setError(null);
         }
         return; // Cache is totally fresh, no need to touch network
       }
@@ -69,10 +72,12 @@ export function useDataList<T>(table: string, orderField: string = 'created_at')
             queryCache.set(cacheKey, res);
           }
           setLoading(false);
+          setError(null);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error(`Error loading ${table} in background:`, err);
         if (isMounted) {
+          setError(err);
           setLoading(false);
         }
       }
@@ -104,6 +109,6 @@ export function useDataList<T>(table: string, orderField: string = 'created_at')
     };
   }, [table, orderField, cacheKey]);
 
-  return { data, loading };
+  return { data, loading, error };
 }
 
