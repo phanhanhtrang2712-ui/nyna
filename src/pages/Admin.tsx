@@ -637,8 +637,12 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
     price: '', 
     original_price: '',
     category: '', 
-    description: '' 
+    description: '',
+    variants: [] as { name: string; price: number; original_price?: number }[]
   });
+  const [newVariantName, setNewVariantName] = useState('');
+  const [newVariantPrice, setNewVariantPrice] = useState('');
+  const [newVariantOriginal, setNewVariantOriginal] = useState('');
   const [brandFormData, setBrandFormData] = useState({ 
     name: '', 
     description: '', 
@@ -695,7 +699,8 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
       price: item.price.toString(),
       original_price: (item.original_price || '').toString(),
       category: item.category || '',
-      description: item.description || ''
+      description: item.description || '',
+      variants: item.variants || []
     });
     setEditingId(item.id);
     setIsAdding(true);
@@ -767,7 +772,8 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
         original_price: formData.original_price ? Number(formData.original_price) : null,
         category: formData.category || 'Chưa phân loại',
         description: formData.description || '',
-        features: [{label: 'Nổi bật', icon: 'zap'}] 
+        features: [{label: 'Nổi bật', icon: 'zap'}],
+        variants: formData.variants || []
       };
 
       if (editingId) {
@@ -788,7 +794,8 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
         price: '', 
         original_price: '',
         category: '', 
-        description: '' 
+        description: '',
+        variants: []
       });
       await load();
     } catch (err: any) {
@@ -939,6 +946,111 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Nhóm sản phẩm (Phân loại)</label>
                 <input required className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none transition-all" value={formData.category} onChange={e=>setFormData({...formData, category: e.target.value})} placeholder="VD: Tã bỉm em bé, Băng vệ sinh..." />
+              </div>
+              
+              <div className="md:col-span-2 border-t border-gray-100 pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-xs font-black text-blue-900 uppercase tracking-widest flex items-center gap-2">
+                    <div className="w-6 h-[2px] bg-pink-500 rounded-full"></div>
+                    Phân loại & Giá bán (Không bắt buộc)
+                  </h4>
+                  <span className="text-[10px] bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-black uppercase tracking-tight">Cấu hình giá theo loại</span>
+                </div>
+                
+                {/* Variant input fields */}
+                <div className="grid md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-[20px] mb-4 border border-gray-100 items-end">
+                  <div className="md:col-span-2">
+                    <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 pl-0.5">Tên phân loại (VD: Lốc 2 Gói, Lốc 6 Gói, S, M, L...)</label>
+                    <input 
+                      type="text" 
+                      placeholder="Nhập tên phân loại..." 
+                      className="w-full p-3 bg-white border border-transparent focus:border-pink-500 rounded-xl outline-none transition-all text-xs font-bold text-blue-900 shadow-sm"
+                      value={newVariantName}
+                      onChange={e => setNewVariantName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 pl-0.5">Giá bán (VND)</label>
+                    <input 
+                      type="number" 
+                      placeholder="VD: 25600" 
+                      className="w-full p-3 bg-white border border-transparent focus:border-pink-500 rounded-xl outline-none transition-all text-xs font-black text-blue-900 shadow-sm"
+                      value={newVariantPrice}
+                      onChange={e => setNewVariantPrice(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-gray-400 uppercase mb-2 pl-0.5">Giá gốc (nếu có)</label>
+                    <div className="flex gap-2">
+                      <input 
+                        type="number" 
+                        placeholder="VD: 40000" 
+                        className="flex-1 min-w-0 p-3 bg-white border border-transparent focus:border-pink-500 rounded-xl outline-none transition-all text-xs text-blue-900 shadow-sm font-medium"
+                        value={newVariantOriginal}
+                        onChange={e => setNewVariantOriginal(e.target.value)}
+                      />
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          if (!newVariantName || !newVariantPrice) {
+                            alert("Vui lòng điền thông tin tên phân loại và giá bán!");
+                            return;
+                          }
+                          const currentVariants = formData.variants || [];
+                          setFormData({
+                            ...formData,
+                            variants: [
+                              ...currentVariants,
+                              {
+                                name: newVariantName.trim(),
+                                price: Number(newVariantPrice),
+                                original_price: newVariantOriginal ? Number(newVariantOriginal) : undefined
+                              }
+                            ]
+                          });
+                          setNewVariantName('');
+                          setNewVariantPrice('');
+                          setNewVariantOriginal('');
+                        }}
+                        className="bg-blue-900 text-white px-4 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-pink-500 transition-colors shrink-0 h-[46px] flex items-center justify-center whitespace-nowrap"
+                      >
+                        Thêm
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* List of active variants with tag layout */}
+                {formData.variants && formData.variants.length > 0 ? (
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {formData.variants.map((v, idx) => (
+                      <div key={idx} className="bg-blue-50/50 border border-blue-100/50 pl-4 pr-2 py-2 rounded-2xl flex items-center gap-4 text-xs font-black text-blue-900 shadow-sm">
+                        <div className="leading-tight">
+                          <span className="uppercase tracking-tight text-blue-900">{v.name}</span>
+                          <span className="mx-2 text-gray-300">|</span>
+                          <span className="italic text-pink-500">{new Intl.NumberFormat('vi-VN').format(v.price)}đ</span>
+                          {v.original_price && (
+                            <span className="text-[10px] line-through text-gray-400 ml-1.5">{new Intl.NumberFormat('vi-VN').format(v.original_price)}đ</span>
+                          )}
+                        </div>
+                        <button 
+                          type="button" 
+                          onClick={() => {
+                            setFormData({
+                              ...formData,
+                              variants: formData.variants?.filter((_, i) => i !== idx)
+                            });
+                          }}
+                          className="text-red-400 hover:text-white hover:bg-red-500 transition-all p-1.5 rounded-lg"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-gray-400 italic font-medium ml-1">Sản phẩm chưa cấu hình phân loại tùy biến (mặc định theo giá bán chung nhận ở trên).</p>
+                )}
               </div>
               
               <div className="md:col-span-2">

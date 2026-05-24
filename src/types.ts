@@ -10,6 +10,12 @@ export interface NewsItem {
   content?: string;
 }
 
+export interface ProductVariant {
+  name: string;
+  price: number;
+  original_price?: number;
+}
+
 export interface ProductItem {
   id?: string;
   title: string;
@@ -23,6 +29,7 @@ export interface ProductItem {
   category?: string;
   description?: string;
   specifications?: { key: string; value: string }[];
+  variants?: ProductVariant[];
 }
 
 export interface JobItem {

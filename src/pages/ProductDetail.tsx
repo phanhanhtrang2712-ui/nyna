@@ -48,6 +48,15 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
     return !product;
   });
   const [activeImage, setActiveImage] = useState<string>(product ? product.image : '');
+  const [selectedVariant, setSelectedVariant] = useState<any>(null);
+
+  useEffect(() => {
+    if (product && product.variants && product.variants.length > 0) {
+      setSelectedVariant(product.variants[0]);
+    } else {
+      setSelectedVariant(null);
+    }
+  }, [product]);
 
   useEffect(() => {
     let isMounted = true;
@@ -167,27 +176,29 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
             animate={{ opacity: 1, x: 0 }}
             className="flex flex-col h-full"
           >
-            <div className="mb-10">
+            <div className="mb-10 font-sans">
               <span className="text-pink-500 font-black uppercase tracking-[0.4em] text-xs mb-4 block">{product.category}</span>
               <h1 className="text-2xl md:text-5xl font-black text-blue-900 mb-6 uppercase tracking-tight leading-[1.1]">
                 {product.title}
               </h1>
               <div className="flex items-center gap-6">
                 <div className="text-2xl md:text-5xl font-black text-blue-900 italic">
-                  {new Intl.NumberFormat('vi-VN').format(product.price || 0)}đ
+                  {new Intl.NumberFormat('vi-VN').format(selectedVariant ? selectedVariant.price : (product.price || 0))}đ
                 </div>
-                {product.original_price && product.original_price > (product.price || 0) && (
+                {((selectedVariant ? selectedVariant.original_price : product.original_price) && (selectedVariant ? selectedVariant.original_price : product.original_price) > (selectedVariant ? selectedVariant.price : (product.price || 0))) && (
                   <div className="flex flex-col">
-                    <span className="text-[10px] font-black text-pink-500 uppercase tracking-tighter mb-1">Tiết kiệm {new Intl.NumberFormat('vi-VN').format(product.original_price - (product.price || 0))}đ</span>
+                    <span className="text-[10px] font-black text-pink-500 uppercase tracking-tighter mb-1">
+                      Tiết kiệm {new Intl.NumberFormat('vi-VN').format((selectedVariant ? selectedVariant.original_price : product.original_price) - (selectedVariant ? selectedVariant.price : (product.price || 0)))}đ
+                    </span>
                     <div className="text-sm font-bold text-gray-300 uppercase tracking-widest line-through decoration-pink-500/30">
-                      {new Intl.NumberFormat('vi-VN').format(product.original_price)}đ
+                      {new Intl.NumberFormat('vi-VN').format(selectedVariant ? selectedVariant.original_price : product.original_price)}đ
                     </div>
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="space-y-6 mb-12">
+            <div className="space-y-6 mb-8">
                <div className="flex flex-wrap gap-3">
                   {product.features?.map((f, i) => (
                     <div key={i} className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-tight shadow-sm">
@@ -195,12 +206,56 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
                     </div>
                   ))}
                </div>
-
             </div>
+
+            {/* Product Variants / Options Selector */}
+            {product.variants && product.variants.length > 0 && (
+              <div className="mb-10 pb-8 border-b border-gray-100">
+                <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3.5 pl-0.5">Phân loại phẩm cấp:</label>
+                <div className="flex flex-wrap gap-2.5">
+                  {product.variants.map((v, i) => {
+                    const isSelected = selectedVariant?.name === v.name;
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => setSelectedVariant(v)}
+                        className={`px-5 py-3 rounded-2xl text-[11px] font-black uppercase tracking-wider transition-all relative border-2 ${
+                          isSelected 
+                            ? 'bg-pink-50 text-pink-600 border-pink-500 shadow-sm font-black' 
+                            : 'bg-gray-50 text-blue-900 border-transparent hover:bg-gray-100'
+                        }`}
+                      >
+                        {v.name}
+                        {isSelected && (
+                          <div className="absolute right-1 bottom-1 w-2.5 h-2.5 bg-pink-500 rounded-full flex items-center justify-center border border-white">
+                            <span className="block w-1.5 h-1.5 bg-white rounded-full"></span>
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <div className="flex gap-4 mb-16">
                <button 
-                onClick={() => onAddToCart && onAddToCart(product)}
+                onClick={() => {
+                  if (onAddToCart) {
+                    if (selectedVariant) {
+                       onAddToCart({
+                         ...product,
+                         id: `${product.id}-${selectedVariant.name}`,
+                         title: `${product.title} (${selectedVariant.name})`,
+                         price: selectedVariant.price,
+                         original_price: selectedVariant.original_price,
+                         selectedVariant: selectedVariant.name
+                       });
+                    } else {
+                       onAddToCart(product);
+                    }
+                  }
+                }}
                 className="flex-1 bg-blue-900 text-white h-20 rounded-3xl font-black uppercase tracking-widest hover:bg-pink-500 transition-all shadow-xl shadow-blue-900/10 flex items-center justify-center gap-4 group"
                >
                  THÊM VÀO GIỎ HÀNG <ShoppingCart size={22} className="group-hover:scale-110 transition-transform" />
