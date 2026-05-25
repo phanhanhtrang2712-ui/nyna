@@ -15,7 +15,6 @@ export function middleware(request) {
 
   // Nếu có mã bí mật trên URL, tiến hành lưu Cookie và cho phép vào website
   if (hasAccessQuery) {
-    // Xóa tham số trên URL để giao diện sạch sẽ sau khi đăng nhập thành công
     url.searchParams.delete('access');
     const response = NextResponse.redirect(url);
     
@@ -25,6 +24,7 @@ export function middleware(request) {
       maxAge: 60 * 60 * 24 * 30, // 30 ngày
       httpOnly: true,
       secure: true,
+      sameSite: 'lax',
     });
     return response;
   }
@@ -34,7 +34,7 @@ export function middleware(request) {
     return NextResponse.next();
   }
 
-  // --- GIAO DIỆN BẢO TRÌ (Dành cho người dùng thông thường) ---
+  // --- GIAO DIỆN BẢO TRÌ ---
   const maintenanceHtml = `
     <!DOCTYPE html>
     <html lang="vi">
@@ -64,17 +64,33 @@ export function middleware(request) {
         <div class="container">
             <div class="icon">🚧</div>
             <h1>Website hiện đang tạm dừng hoạt động</h1>
-         </div>
+            <p>Chúng tôi đang tiến hành nâng cấp hệ thống. Xin lỗi vì sự bất tiện này!</p>
+        </div>
     </body>
     </html>
   `;
 
-  return new NextResponse(maintenanceHtml, {
+  // SỬA LỖI: Chuyển đổi HTML String thành một Stream hợp lệ cho Edge Runtime
+  const encoder = new TextEncoder();
+  const customResponse = new NextResponse(encoder.encode(maintenanceHtml), {
     status: 503,
-    headers: { 'content-type': 'text/html; charset=utf-8' },
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+    },
   });
+
+  return customResponse;
 }
 
 export const config = {
-  matcher: '/:path*',
+  matcher: [
+    /*
+     * Áp dụng cho tất cả các đường dẫn ngoại trừ:
+     * - api (các đường dẫn API)
+     * - _next/static (các file tĩnh như js, css)
+     * - _next/image (hệ thống tối ưu ảnh của next)
+     * - favicon.ico (icon website)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
 };
