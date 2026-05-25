@@ -13,7 +13,6 @@ import Distribution from './pages/Distribution';
 import Jobs from './pages/Jobs';
 import Admin from './pages/Admin';
 import ProductDetail from './pages/ProductDetail';
-import MaintenanceGuard from './components/MaintenanceGuard';
 import { prefetchAppCore } from './services/prefetch';
 
 const WrappedRoute = () => (
@@ -31,25 +30,23 @@ export default function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <MaintenanceGuard>
-        <Routes>
-          <Route path="/cms" element={<Admin />} />
-          
-          <Route element={<WrappedRoute />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/san-pham/:id" element={<ProductDetail />} />
-            <Route path="/gioi-thieu" element={<About />} />
-            <Route path="/thuong-hieu" element={<Brands />} />
-            <Route path="/tin-tuc" element={<News />} />
-            <Route path="/video" element={<Video />} />
-            <Route path="/lien-he" element={<Contact />} />
-            <Route path="/he-thong" element={<Distribution />} />
-            <Route path="/tuyen-dung" element={<Jobs />} />
-          </Route>
+      <Routes>
+        <Route path="/cms" element={<Admin />} />
+        
+        <Route element={<WrappedRoute />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/san-pham/:id" element={<ProductDetail />} />
+          <Route path="/gioi-thieu" element={<About />} />
+          <Route path="/thuong-hieu" element={<Brands />} />
+          <Route path="/tin-tuc" element={<News />} />
+          <Route path="/video" element={<Video />} />
+          <Route path="/lien-he" element={<Contact />} />
+          <Route path="/he-thong" element={<Distribution />} />
+          <Route path="/tuyen-dung" element={<Jobs />} />
+        </Route>
 
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </MaintenanceGuard>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </BrowserRouter>
   );
 }
