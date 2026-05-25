@@ -97,7 +97,7 @@ export default function MaintenanceGuard({ children }: MaintenanceGuardProps) {
           Website đang bảo trì
         </h1>
         <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-8">
-          Chúng tôi đang thực hiện một số nâng cấp hệ thống định kỳ. Xin lỗi vì sự bất tiện này và vui lòng quay lại sau ít phút.
+          Chúng tôi đang thực hiện một số nâng cấp hệ thống định kỳ.
         </p>
 
         {/* Elegant/Discreet Lock Input Trigger */}
