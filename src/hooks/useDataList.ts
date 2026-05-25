@@ -1,71 +1,56 @@
-import { useState, useEffect } from 'react';
-import { dataService } from '../services/dataService';
-import { queryCache } from '../services/queryCache';
-import { FALLBACK_DATA } from '../data/fallbackData';
+﻿import { useState, useEffect } from "react";
+import { dataService } from "../services/dataService";
+import { queryCache } from "../services/queryCache";
+import { FALLBACK_DATA } from "../data/fallbackData";
 
-export function useDataList<T>(table: string, orderField: string = 'created_at') {
+export function useDataList<T>(table: string, orderField: string = "created_at") {
   const cacheKey = `nyna_cache_${table}`;
 
+  // 1. Hiển thị ngay lập tức: cache > fallback JSON > rong
   const [data, setData] = useState<T[]>(() => {
-    // Get item from in-memory or fallback localStorage instantly (even if stale)
     const cached = queryCache.getAny<T[]>(cacheKey);
-    if (cached && cached.length > 0) {
-      return cached;
-    }
-    // If no cache exists, return our static fallback backup data immediately (0 second delay!)
-    return (FALLBACK_DATA[table] || []) as T[];
+    if (cached && cached.length > 0) return cached;
+    return (FALLBACK_DATA[table] ?? []) as T[];
   });
-  
-  // Only show a loading spinner if we don't even have stale/cached or fallback data to present
-  const [loading, setLoading] = useState(() => {
-    const freshData = queryCache.get<T[]>(cacheKey);
-    const hasData = freshData && freshData.length > 0;
-    return !hasData && data.length === 0;
+
+  // 2. Chỉ show spinner nếu KHÔNG có gì để hiển thị (không cache, không fallback)
+  const [loading, setLoading] = useState<boolean>(() => {
+    const cached = queryCache.getAny<T[]>(cacheKey);
+    const hasCached = cached && cached.length > 0;
+    const hasFallback = (FALLBACK_DATA[table] ?? []).length > 0;
+    return !hasCached && !hasFallback;
   });
 
   useEffect(() => {
-    let isMounted = true;
-    
-    const fetchData = async () => {
-      // Check if cache is fresh and within TTL (5 minutes)
-      const freshData = queryCache.get<T[]>(cacheKey);
-      if (freshData && freshData.length > 0) {
-        if (isMounted) {
-          setData(freshData);
-          setLoading(false);
-        }
-        return; // Cache is totally fresh, no need to touch network
+    let cancelled = false;
+
+    // Cache còn tươi -> dùng luôn, không fetch
+    if (queryCache.isFresh(cacheKey)) {
+      const fresh = queryCache.get<T[]>(cacheKey)!;
+      if (fresh.length > 0) {
+        setData(fresh);
+        setLoading(false);
+        return;
       }
+    }
 
-      // If missing or stale, fetch from network with request coalescing/deduplication
-      try {
-        const fetchPromise = () => dataService.list<T>(table, orderField);
-        const res = await queryCache.getOrCreatePromise(cacheKey + '_promise', fetchPromise);
-        
-        if (isMounted) {
-          const currentReference = queryCache.getAny<T[]>(cacheKey) || (FALLBACK_DATA[table] || []);
-          const hasChanged = JSON.stringify(currentReference) !== JSON.stringify(res);
+    // Fetch Supabase ngầm (user đã thấy fallback/cache rồi)
+    const promiseKey = `${cacheKey}_fetch`;
+    queryCache.getOrCreatePromise<T[]>(
+      promiseKey,
+      () => dataService.list<T>(table, orderField)
+    ).then(res => {
+      if (cancelled) return;
+      queryCache.set(cacheKey, res);
+      setData(res);
+      setLoading(false);
+    }).catch(err => {
+      console.error(`useDataList error [${table}]:`, err);
+      if (!cancelled) setLoading(false);
+    });
 
-          if (hasChanged) {
-            setData(res);
-            queryCache.set(cacheKey, res);
-          }
-          setLoading(false);
-        }
-      } catch (err) {
-        console.error(`Error loading ${table} in background:`, err);
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [table, orderField, cacheKey]);
+    return () => { cancelled = true; };
+  }, [cacheKey, table, orderField]);
 
   return { data, loading };
 }
