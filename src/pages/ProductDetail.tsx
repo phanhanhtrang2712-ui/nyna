@@ -15,6 +15,11 @@ interface ProductDetailProps {
   onAddToCart?: (product: any) => void;
 }
 
+const hasProductDetailFields = (item: ProductItem) => (
+  Object.prototype.hasOwnProperty.call(item, 'description') &&
+  Object.prototype.hasOwnProperty.call(item, 'features')
+);
+
 const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -27,14 +32,14 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
     // 1. Try single item cache in queryCache
     const itemCacheKey = `nyna_cache_products_${id}`;
     const cachedItem = queryCache.getAny<ProductItem>(itemCacheKey);
-    if (cachedItem) return cachedItem;
+    if (cachedItem && hasProductDetailFields(cachedItem)) return cachedItem;
 
     // 2. Try general list cache in queryCache
     const listCacheKey = `nyna_cache_products`;
     const cachedList = queryCache.getAny<ProductItem[]>(listCacheKey);
     if (cachedList) {
       const found = cachedList.find(p => p.id === id);
-      if (found) return found;
+      if (found && hasProductDetailFields(found)) return found;
     }
 
     // 3. Try fallback static backup database
@@ -48,10 +53,11 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
   const [loading, setLoading] = useState(() => {
     if (!id) return true;
     const freshItem = queryCache.get<ProductItem>(`nyna_cache_products_${id}`);
-    if (freshItem) return false;
+    if (freshItem && hasProductDetailFields(freshItem)) return false;
     
     const freshList = queryCache.get<ProductItem[]>(`nyna_cache_products`);
-    if (freshList && freshList.some(p => p.id === id)) return false;
+    const freshListItem = freshList?.find(p => p.id === id);
+    if (freshListItem && hasProductDetailFields(freshListItem)) return false;
 
     return !product;
   });
@@ -72,7 +78,7 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
       const fetchItem = async () => {
         // Try fresh item cache first
         const freshItem = queryCache.get<ProductItem>(`nyna_cache_products_${id}`);
-        if (freshItem) {
+        if (freshItem && hasProductDetailFields(freshItem)) {
           if (isMounted) {
             setProduct(freshItem);
             setActiveImage(prev => prev || freshItem.image);

@@ -13,7 +13,7 @@ export enum OperationType {
 
 // Anh da la URL nhe - an toan de include trong list query
 const LIST_SELECT: Record<string, string> = {
-  products: "id,created_at,title,brand,price,original_price,category,features,image,images",
+  products: "*",
   brands: "*",
   news: "id,created_at,title,date,excerpt,image",
   videos: "*",
