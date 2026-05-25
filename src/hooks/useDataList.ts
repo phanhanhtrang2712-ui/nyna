@@ -6,21 +6,23 @@ import { FALLBACK_DATA } from '../data/fallbackData';
 export function useDataList<T>(table: string, orderField: string = 'created_at') {
   const cacheKey = `nyna_cache_${table}`;
 
-  const [data, setData] = useState<T[]>(() => {
-    // Get item from in-memory or fallback localStorage instantly (even if stale)
+  // Pre-calculate initial data to completely prevent Temporal Dead Zone (TDZ) ReferenceError
+  const initialData = (() => {
     const cached = queryCache.getAny<T[]>(cacheKey);
     if (cached && cached.length > 0) {
       return cached;
     }
     // If no cache exists, return our static fallback backup data immediately (0 second delay!)
     return (FALLBACK_DATA[table] || []) as T[];
-  });
+  })();
+
+  const [data, setData] = useState<T[]>(initialData);
   
   // Only show a loading spinner if we don't even have stale/cached or fallback data to present
   const [loading, setLoading] = useState(() => {
     const freshData = queryCache.get<T[]>(cacheKey);
     const hasData = freshData && freshData.length > 0;
-    return !hasData && data.length === 0;
+    return !hasData && initialData.length === 0;
   });
 
   useEffect(() => {
