@@ -8,6 +8,7 @@ import {
 import ReactMarkdown from 'react-markdown';
 import { dataService } from '../services/dataService';
 import { queryCache } from '../services/queryCache';
+import { FALLBACK_DATA } from '../data/fallbackData';
 import { ProductItem } from '../types';
 
 interface ProductDetailProps {
@@ -33,6 +34,13 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
     const cachedList = queryCache.getAny<ProductItem[]>(listCacheKey);
     if (cachedList) {
       const found = cachedList.find(p => p.id === id);
+      if (found) return found;
+    }
+
+    // 3. Try fallback static backup database
+    const fallbackList = FALLBACK_DATA["products"];
+    if (fallbackList) {
+      const found = fallbackList.find(p => p.id === id);
       if (found) return found;
     }
     return null;
