@@ -97,7 +97,7 @@ export default function MaintenanceGuard({ children }: MaintenanceGuardProps) {
           Website đang bảo trì
         </h1>
         <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-8">
-          Chúng tôi đang thực hiện một số nâng cấp hệ thống định kỳ.
+          Chúng tôi đang thực hiện một số nâng cấp hệ thống định kỳ. Xin lỗi vì sự bất tiện này và vui lòng quay lại sau ít phút.
         </p>
 
         {/* Elegant/Discreet Lock Input Trigger */}
@@ -172,7 +172,7 @@ export default function MaintenanceGuard({ children }: MaintenanceGuardProps) {
 
       {/* Humble Footer info */}
       <div className="absolute bottom-6 text-center text-slate-400 dark:text-slate-500 text-xs select-none pointer-events-none">
-        &copy; 2026 BINHPHAN. Mọi quyền được bảo lưu.
+        &copy; 2026 Admin Panel. Mọi quyền được bảo lưu.
       </div>
     </div>
   );
