@@ -16,10 +16,10 @@ const Brands = () => {
       return fetchedBrands;
     } else if (!loading) {
       return [
-        { name: 'LYNA', description: 'Sản phẩm chăm sóc phụ nữ hiện đại', color: 'text-pink-600', image: '', content: 'LYNA mang đến những giải pháp chăm sóc sức khỏe phụ nữ với các dòng sản phẩm băng vệ sinh cao cấp.' },
-        { name: 'SILA', description: 'Tã người lớn cao cấp', color: 'text-emerald-600', image: '', content: 'SILA là dòng tã bỉm người lớn chuyên dụng, thấm hút tốt và êm ái.' },
-        { name: 'NYNA', description: 'Tã em bé êm mềm vượt trội', color: 'text-blue-600', image: '', content: 'NYNA tự hào là người bạn đồng hành của hàng triệu gia đình Việt trong việc chăm sóc con nhỏ.' },
-        { name: 'TONY', description: 'Tấm lót / Miếng lót đa năng', color: 'text-indigo-600', image: '', content: 'TONY cung cấp các giải pháp lót thấm đa năng cho nhiều mục đích sử dụng.' },
+        { name: 'LYNA', description: 'Sản phẩm chăm sóc phụ nữ hiện đại', color: 'text-pink-600', image: 'https://images.unsplash.com/photo-1544126592-807daa2b567b?auto=format&fit=crop&q=80&w=800', content: 'LYNA mang đến những giải pháp chăm sóc sức khỏe phụ nữ với các dòng sản phẩm băng vệ sinh cao cấp.' },
+        { name: 'SILA', description: 'Tã người lớn cao cấp', color: 'text-emerald-600', image: 'https://images.unsplash.com/photo-1544126592-807daa2b567b?auto=format&fit=crop&q=80&w=800', content: 'SILA là dòng tã bỉm người lớn chuyên dụng, thấm hút tốt và êm ái.' },
+        { name: 'NYNA', description: 'Tã em bé êm mềm vượt trội', color: 'text-blue-600', image: 'https://images.unsplash.com/photo-1544126592-807daa2b567b?auto=format&fit=crop&q=80&w=800', content: 'NYNA tự hào là người bạn đồng hành của hàng triệu gia đình Việt trong việc chăm sóc con nhỏ.' },
+        { name: 'TONY', description: 'Tấm lót / Miếng lót đa năng', color: 'text-indigo-600', image: 'https://images.unsplash.com/photo-1544126592-807daa2b567b?auto=format&fit=crop&q=80&w=800', content: 'TONY cung cấp các giải pháp lót thấm đa năng cho nhiều mục đích sử dụng.' },
       ] as BrandItem[];
     }
     return fetchedBrands || [];
@@ -42,15 +42,8 @@ const Brands = () => {
               viewport={{ once: true }}
               className="flex flex-col md:flex-row bg-gray-50 rounded-[32px] md:rounded-[48px] overflow-hidden group hover:shadow-2xl transition-all"
             >
-              <div className="md:w-1/2 aspect-square overflow-hidden bg-white p-8 flex items-center justify-center">
-                {brand.image ? (
-                  <img src={brand.image} alt={brand.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700" />
-                ) : (
-                  <div className="w-full h-full rounded-[24px] bg-sky-50 flex flex-col items-center justify-center text-center p-6 border border-sky-100/50 group-hover:scale-105 transition-transform duration-700">
-                    <span className={`text-6xl font-black tracking-widest ${brand.color || 'text-blue-950'}`}>{brand.name}</span>
-                    <span className="text-[10px] uppercase font-black text-blue-950/35 mt-2 tracking-widest">ECOSYSTEM BY NYNA</span>
-                  </div>
-                )}
+              <div className="md:w-1/2 aspect-square overflow-hidden bg-white p-8">
+                <img src={brand.image || 'https://images.unsplash.com/photo-1544126592-807daa2b567b?auto=format&fit=crop&q=80&w=800'} alt={brand.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700" />
               </div>
               <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
                 <h3 className={`text-3xl md:text-5xl font-black mb-4 uppercase ${brand.color || 'text-blue-900'}`}>{brand.name}</h3>
@@ -97,14 +90,7 @@ const Brands = () => {
 
               <div className="flex-1 overflow-y-auto no-scrollbar">
                 <div className="relative h-[300px] md:h-[450px] bg-white p-12 md:p-20 flex items-center justify-center">
-                   {selectedBrand.image ? (
-                     <img src={selectedBrand.image} className="max-w-full max-h-full object-contain" alt={selectedBrand.name} />
-                   ) : (
-                     <div className="w-full h-full rounded-[32px] bg-sky-50/50 border border-sky-100 flex flex-col items-center justify-center text-center p-8">
-                       <span className={`text-7xl md:text-9xl font-black tracking-widest ${selectedBrand.color || 'text-blue-950'}`}>{selectedBrand.name}</span>
-                       <span className="text-xs font-black text-blue-950/30 tracking-[0.3em] uppercase mt-4">NYNA PREMIUM TRADEMARK</span>
-                     </div>
-                   )}
+                   <img src={selectedBrand.image} className="max-w-full max-h-full object-contain" alt={selectedBrand.name} />
                    <div className="absolute inset-0 bg-gradient-to-t from-white/10 to-transparent pointer-events-none"></div>
                    <div className="absolute bottom-12 left-12">
                       <h2 className={`text-5xl md:text-8xl font-black uppercase tracking-tighter ${selectedBrand.color || 'text-blue-900'} drop-shadow-sm`}>{selectedBrand.name}</h2>

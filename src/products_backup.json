@@ -1,460 +1,137 @@
 [
   {
-    "id": "5b630ca1-bd20-4428-b3bf-dc0c2a85bd22",
-    "created_at": "2026-05-20T06:10:59.573864+00:00",
-    "title": "Băng vệ sinh Sila Siêu Thấm Tím",
-    "brand": "SILA",
-    "image": "",
-    "price": 129000,
-    "features": [
-      {
-        "icon": "zap",
-        "label": "Nổi bật"
-      }
+    "id": "prod-1",
+    "title": "Tã quần em bé NYNA Premium (Size L - 54 miếng)",
+    "brand": "NYNA",
+    "category": "Tã em bé",
+    "price": 185000,
+    "original_price": 245000,
+    "image": "https://images.unsplash.com/photo-1544126592-807daa2b567b?auto=format&fit=crop&q=80&w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1544126592-807daa2b567b?auto=format&fit=crop&q=80&w=800"
     ],
-    "category": "Băng vệ sinh",
-    "description": "Băng vệ sinh Sila Siêu Thấm Tím gói 12 miếng, BVS có cánh 𝟐𝟒𝐂𝐌, dùng ban ngày 𝐦ặ𝐭 𝐥ướ𝐢 khô thoáng bạc hà mát dịu\n𝟏. 🌹🌹🌹 𝐌ô 𝐭ả 𝐬ả𝐧 𝐩𝐡ẩ𝐦 🌹🌹🌹\n-  Băng vệ sinh ban ngày, có cánh, MẶT LƯỚI, bạc hà mát dịu, 3 in 1 (ban ngày, ban đêm, hàng ngày)\n𝟐. 🌹🌹🌹 𝐓𝐡ô𝐧𝐠 𝐭𝐢𝐧 𝐬ả𝐧 𝐩𝐡ẩ𝐦 🌹🌹🌹\n-  Kích thước: 24cm\n-  Quy cách: 1 lốc gồm 8 gói, một gói gồm 12 miếng: 8 miếng ban ngày 02 miếng ban đêm và 2 miếng hàng ngày .\n- Thành phần: Bề mặt PE (𝐦ặ𝐭 𝐥ưới), vải không dệt, Airlaid, màng PE, bột giấy, giấy không dính, hạt siêu thấm (SAP), keo, tinh chất bạc hà.\n-  Xuất xứ: Việt Nam\n-  Hạn sử dụng: 4 năm\n-  Lưu ý: Tránh xa tầm tay trẻ em. Nên thay băng 3 - 4h/ lần để ngăn ngừa vi khuẩn gây bệnh\n- Thông tin an toàn sức khỏe: Thận trọng cho làn da nhạy cảm. Ngưng ngay khi bị kích ứng.\n-  Bảo quản: Nơi thoáng mát, tránh ánh sáng trực tiếp.\n𝟑. 🌹🌹🌹 Đặ𝐜 đ𝐢ể𝐦 𝐬ả𝐧 𝐩𝐡ẩ𝐦 🌹🌹🌹\n- Băng Vệ Sinh Nyna Dryblue Lốc 8 Gói Mẫu Tím - Ban Ngày Có Cánh Mặt Lưới Khô Thoáng  Thấm Hút  Tinh Chất Bạc Hà Mát Dịu được sản xuất trên dây chuyền tiên tiến, hiện đại theo tiêu chuẩn của Châu Âu.\n-  Bảo vệ nhân đôi với MẶT LƯỚI mềm, khô thoáng cho vùng da nhạy cảm.\n-  Khả năng thấm hút gấp 2 lần không gây tràn băng nhờ các hạt siêu thấm hút, kháng khuẩn mang lại cảm giác thoải mái, tự tin trong những ngày đèn đỏ.\n-  Đường rãnh thiết kế kép chống co rúm.\n -  Cánh lệch rất tiện dụng cho việc sử dụng cả ban ngày lẫn ban đêm, phù hợp vừa vặn trong làm việc, vui chơi giải trí, vận động giúp các bạn gái và chị em phụ nữ thoải mái trong những ngày đèn đỏ.\n-  Với màng thấm hút 3D co giãn bốn chiều giúp thấm hút siêu nhanh, cho bạn cảm giác thật khô thoáng và thoải mái, không lo hầm bí.\n-  Công nghệ nano Bạc: tăng cường khả năng kháng khuẩn Ecoli và Saureus.\n-  Lớp dẫn thấm ADL Blue kết hợp công nghệ DLO khử mùi tuyệt đối.",
-    "specifications": [],
-    "images": [],
-    "original_price": null,
-    "variants": []
+    "features": [
+      { "label": "100% Cotton tự nhiên", "icon": "CheckCircle2" },
+      { "label": "Thấm hút tới 12 giờ", "icon": "CheckCircle2" }
+    ],
+    "color": "text-blue-600",
+    "description": "Sản phẩm tã quần trẻ em NYNA Premium mềm mại đột phá, gấp đôi thun đàn hồi giúp bé luôn khô thoáng, thoải mái vận động suốt ngày dài.",
+    "specifications": [
+      { "key": "Thương hiệu", "value": "NYNA" },
+      { "key": "Xuất xứ", "value": "Việt Nam" },
+      { "key": "Chất liệu", "value": "Bông Cotton tự nhiên" },
+      { "key": "Độ tuổi", "value": "Cho bé từ 9 - 14kg" }
+    ],
+    "variants": [
+      { "name": "Size M - 60 miếng", "price": 175000, "original_price": 235000 },
+      { "name": "Size L - 54 miếng", "price": 185000, "original_price": 245000 },
+      { "name": "Size XL - 48 miếng", "price": 195000, "original_price": 255000 }
+    ]
   },
   {
-    "id": "5af6d672-b5db-4b73-a602-dff28bcb5631",
-    "created_at": "2026-05-20T06:07:31.646422+00:00",
-    "title": "Băng Vệ Sinh Nyna Dryblue",
-    "brand": "SILA",
-    "image": "",
-    "price": 111000,
-    "features": [
-      {
-        "icon": "zap",
-        "label": "Nổi bật"
-      }
+    "id": "prod-2",
+    "title": "Tã dán hỗ trợ sơ sinh NYNA Soft & Dry XS",
+    "brand": "NYNA",
+    "category": "Tã em bé",
+    "price": 135000,
+    "original_price": 165000,
+    "image": "https://images.unsplash.com/photo-1544126592-807daa2b567b?auto=format&fit=crop&q=80&w=800",
+    "images": [
+      "https://images.unsplash.com/photo-1544126592-807daa2b567b?auto=format&fit=crop&q=80&w=800"
     ],
-    "category": "Băng vệ sinh",
-    "description": "Băng Vệ Sinh Nyna Dryblue Lốc 8 Gói Màu Xanh - Bvs Có Cánh Ban Ngày Siêu Thấm Khô Thoáng .., Hương Bạc Hà Mát Dịu\nNyna là thương hiệu sản xuất các sản phẩm dành cho người lớn, trẻ em, phụ nữ tốt nhất. Sản phẩm được sản xuất theo công nghệ Nhật Bản với nguyên liệu được nhập khẩu từ Châu Âu.\n\n\n\nQuy cách          : 10 miếng trong 1 bao bì\n\nThành phần     : Bề mặt PE mềm mại, vải không dệt, Airlaid, màng PE, bột giấy, giấy không dính, hạt siêu thấm (SAP), keo\n\nBảo quản         : Lưu giữ nơi khô ráo, thoáng mát, tránh trực tiếp ánh nắng mặt trời\n\nLưu ý                : Tránh xa tầm tay trẻ em. Nên thay băng thường xuyên\n\nThông tin an toàn sức khỏe: Thận trọng cho làn da nhạy cảm. Ngưng ngay khi bị kích ứng.\n\nNgày sản xuất : Xem trên bao bì\n\nHạn sử dụng   : 04 năm \n\n\n\nĐẶC ĐIỂM:\n\n- Băng vệ sinh Nyna được sản xuất trên dây truyền tiên tiến, hiện đại theo tiêu chuẩn của Châu Âu.\n\n- Sản phẩm băng vệ sinh Nyna Xanh Gold (10M) kết hợp 3 trong 1: miếng ban ngày, miếng ban đêm, miếng hàng ngay trong cùng 1 sản phẩm.\n\n- Với màng thấm hút 3D giúp thấm hút siêu nhanh, cho bạn cảm giác thật khô thoáng và thoải mái.\n\n- Kết hợp với thiết kế cánh lệch rất tiện dụng cho việc sử dụng cả ban ngày lẫn ban đêm, phù hợp vừa vặn trong làm việc, vui chơi giải trí, vận động giúp các bạn gái và chị em phụ nữ thoải mái trong những ngày đèn đỏ.\n\n\n\n 📌 LƯU Ý: Màu sắc sản phẩm trên hình ảnh đôi khi sẽ bị chênh lệch một chút so với sản phẩm thực tế nhưng Shop cam kết sẽ không ảnh hưởng đến chất lượng sản phẩm. \n\nKính mong quý khách hàng thông cảm và thấu hiểu giúp shop.",
-    "specifications": [],
-    "images": [],
-    "original_price": null,
-    "variants": []
+    "features": [
+      { "label": "Air-through siêu thoáng", "icon": "CheckCircle2" },
+      { "label": "Rãnh rốn Oheso bảo vệ bé tốt nhất", "icon": "CheckCircle2" }
+    ],
+    "color": "text-blue-600",
+    "description": "Hỗ trợ tuyệt vời cho giai đoạn sơ sinh đầu đời. Thiết kế cắt rãnh rốn Oheso tránh tiếp xúc phần rốn nhạy cảm, chất liệu lụa satin êm đềm bảo vệ tối đa làn da non nớt.",
+    "specifications": [
+      { "key": "Thương hiệu", "value": "NYNA" },
+      { "key": "Dòng sản phẩm", "value": "Soft & Dry" },
+      { "key": "Chỉ số thấm hút", "value": "Tốt" }
+    ],
+    "variants": [
+      { "name": "XS (Dưới 5kg)", "price": 135000, "original_price": 165000 }
+    ]
   },
   {
-    "id": "54fb16c4-129a-4ab7-9ad9-10a03356f263",
-    "created_at": "2026-05-20T06:26:10.268715+00:00",
-    "title": "Băng Vệ Sinh Sila Hồng NaNo",
+    "id": "prod-3",
+    "title": "Tã quần người lớn SILA Active siêu mềm (M/L)",
     "brand": "SILA",
-    "image": "",
-    "price": 106000,
-    "features": [
-      {
-        "icon": "zap",
-        "label": "Nổi bật"
-      }
-    ],
-    "category": "Băng vệ sinh",
-    "description": "Băng Vệ Sinh Sila Hồng NaNo Kháng Khuẩn Lốc 8 Gói Màu Hồng - Bvs Có Cánh Ban Ngày Siêu Thấm Khô Thoáng, Kháng Khuẩn 99%\n🔰 Thông tin sản phẩm:\n\nQuy cách : 7 miếng trong 1 bao bì.\n\nThành phần : Bề mặt PE mềm mại, vải không dệt, Airlaid, màng PE, bột giấy, giấy không dính, hạt siêu thấm (SAP), keo\n\nBảo quản : Lưu giữ nơi khô ráo, thoáng mát, tránh trực tiếp ánh nắng mặt trời\n\nLưu ý : Tránh xa tầm tay trẻ em. Nên thay băng thường xuyên\n\n\n\nThông tin an toàn sức khỏe: Thận trọng cho làn da nhạy cảm. Ngưng ngay khi bị kích ứng.\n\nNgày sản xuất : Xem trên bao bì\n\nChiều dài miếng băng: 24.5cm\n\nHạn sử dụng : 04 năm\n\n- Băng vệ sinh Sila được sản xuất trên dây truyền tiên tiến, hiện đại theo tiêu chuẩn của Châu Âu.\n\n- Với màng thấm hút 3D giúp thấm hút siêu nhanh, cho bạn cảm giác thật khô thoáng và thoải mái.\n\n- Kết hợp với thiết kế cánh lệch rất tiện dụng cho việc sử dụng cả ban ngày lẫn ban đêm, phù hợp vừa vặn trong làm việc, vui chơi giải trí, vận động giúp các bạn gái và chị em phụ nữ thoải mái trong những ngày đèn đỏ",
-    "specifications": [],
-    "images": [],
-    "original_price": null,
-    "variants": []
-  },
-  {
-    "id": "11550bbb-e0b2-4125-a929-26e936136cb8",
-    "created_at": "2026-05-21T04:59:24.353838+00:00",
-    "title": "Băng Vệ Sinh Sila Xanh NaNo",
-    "brand": "SILA",
-    "image": "",
-    "price": 111000,
-    "features": [
-      {
-        "icon": "zap",
-        "label": "Nổi bật"
-      }
-    ],
-    "category": "Băng vệ sinh",
-    "description": "Băng Vệ Sinh Sila Xanh NaNo Kháng Khuẩn Lốc 8 Gói Màu Xanh - Bvs Có Cánh Ban Ngày Siêu Thấm Khô Thoáng, Kháng Khuẩn 99%\n Thông tin sản phẩm:\n\nQuy cách : 10 miếng trong 1 bao bì.\nThành phần : Bề mặt PE mềm mại, vải không dệt, Airlaid, màng PE, bột giấy, giấy không dính, hạt siêu thấm (SAP), keo\nBảo quản : Lưu giữ nơi khô ráo, thoáng mát, tránh trực tiếp ánh nắng mặt trời\nLưu ý : Tránh xa tầm tay trẻ em. Nên thay băng thường xuyên\nThông tin an toàn sức khỏe: Thận trọng cho làn da nhạy cảm. Ngưng ngay khi bị kích ứng.\nNgày sản xuất : Xem trên bao bì\nChiều dài miếng băng: 24.5cm\nHạn sử dụng : 04 năm\n- Băng vệ sinh Sila được sản xuất trên dây truyền tiên tiến, hiện đại theo tiêu chuẩn của Châu Âu.\n- Với màng thấm hút 3D giúp thấm hút siêu nhanh, cho bạn cảm giác thật khô thoáng và thoải mái.\n- Kết hợp với thiết kế cánh lệch rất tiện dụng cho việc sử dụng cả ban ngày lẫn ban đêm, phù hợp vừa vặn trong làm việc, vui chơi giải trí, vận động giúp các bạn gái và chị em phụ nữ thoải mái trong những ngày đèn đỏ",
-    "specifications": [],
-    "images": [],
-    "original_price": 131000,
-    "variants": []
-  },
-  {
-    "id": "ecd0b074-5d00-42f4-9b13-40ab483f6156",
-    "created_at": "2026-05-20T06:18:23.649937+00:00",
-    "title": "Tã Dán Người Lớn SILA",
-    "brand": "SILA",
-    "image": "",
-    "price": 88000,
-    "features": [
-      {
-        "icon": "zap",
-        "label": "Nổi bật"
-      }
-    ],
     "category": "Tã người lớn",
-    "description": "Tã Dán Người Lớn SILA Size M/L 10 Miếng (1 gói= 10 miếng) siêu mềm siêu thấm\nThông tin sản phẩm: \n\n- Xuất xứ: Việt Nam\n\n- Quy cách đóng : M/L 10 Miếng\n\n- Vòng hông : 70-120cm.\n\n- Thành phần : Vải không dệt, hạt siêu hút nước (SAP), bông cellulose, chun sợi, màng PE, polyme kết dính, giấy không dính, hương hoa cỏ.\n\n- Chỉ dẫn : Thay tã ngay khi người già tiểu bẩn, bỏ vào thùng rác sau khi sử dụng xong.\n\n- Cảnh báo : Không bỏ vào bồn cầu và cẩn thận cho làn da nhạy cảm\n\n- Thương hiệu : \n\n- Hạn sử dụng : 4 năm\n\n\nĐặc điểm sản phẩm :\n- Tã giấy người lớn Sila với 3 tác động: kháng khuẩn- khử mùi- chống hăm nhờ có hoạt chất nano bạc đánh bay tối đa mùi nước tiểu. Tã giấy người lớn luôn là người bạn đồng hành với người cao tuổi, người bệnh, bệnh nhân mắc chứng khó kiểm soát trong vệ sinh tiểu đại tiện.\n- Sản phẩm được sản xuất bởi nguyên liệu nhập khẩu chất lượng quốc tế kết hợp công nghệ Nano tiên tiến của Nhật tạo ra dòng sản phẩm kháng khuẩn, chống tràn bốn chiều, siêu thấm hút tuyệt đối.\n- Bề mặt bông vi sợi êm ái thông thoáng tạo cảm giác mát mẻ, không gây khó chịu, chật chội, nóng nực cho người bệnh phải nằm yên, không được vận động hay những bề mặt da nhạy cảm.\n- Bảo quản: Nơi thoáng mát, tránh ánh sáng trực tiếp.",
-    "specifications": [],
+    "price": 95000,
+    "original_price": 135000,
+    "image": "https://images.unsplash.com/photo-1544126592-807daa2b567b?auto=format&fit=crop&q=80&w=800",
     "images": [],
-    "original_price": null,
-    "variants": []
+    "features": [
+      { "label": "Kháng khuẩn khử mùi Nhật Bản", "icon": "CheckCircle2" },
+      { "label": "Thoải mái tựa đồ lót thường ngày", "icon": "CheckCircle2" }
+    ],
+    "color": "text-emerald-600",
+    "description": "Dòng tã quần người lớn cao cấp dành riêng cho người có thể đi lại, tiện lợi và kín đáo tựa đồ lót thường ngày.",
+    "specifications": [
+      { "key": "Thương hiệu", "value": "SILA" },
+      { "key": "Kích cỡ", "value": "M/L (Vòng bụng 60 - 90cm)" }
+    ]
   },
   {
-    "id": "03efdadc-c449-4c63-af2d-dc1ae723cbad",
-    "created_at": "2026-05-21T09:19:10.64322+00:00",
-    "title": "Khăn khô đa năng cao cấp SILA 300 gram",
+    "id": "prod-4",
+    "title": "Tã dán người già SILA Super Absorb siêu thấm hút",
     "brand": "SILA",
-    "image": "",
-    "price": 39000,
-    "features": [
-      {
-        "icon": "zap",
-        "label": "Nổi bật"
-      }
-    ],
-    "category": "Khăn khô",
-    "description": "Sử dụng 100% cotton mềm mại, dịu nhẹ, co giãn tốt, không xù, không xơ bông An toàn tuyệt đối: Không màu, không mùi, không chất hóa học độc hại Sử dụng đa năng: Có thể dùng khô trực tiếp hoặc trở thành khăn ướt dễ dàng khi được thấm nước.",
-    "specifications": [],
+    "category": "Tã người lớn",
+    "price": 125000,
+    "original_price": 155000,
+    "image": "https://images.unsplash.com/photo-1544126592-807daa2b567b?auto=format&fit=crop&q=80&w=800",
     "images": [],
+    "features": [
+      { "label": "Vạch báo tã đầy thông minh", "icon": "CheckCircle2" },
+      { "label": "Hạt SAP thấm hút tối ưu", "icon": "CheckCircle2" }
+    ],
+    "color": "text-emerald-600",
+    "description": "Thích hợp cho người lớn tuổi nằm giường dài ngày. Lõi thấm hút kép kết hợp rãnh sần dẫn thấm 4 chiều giữ bề mặt luôn sạch khô mát mẻ.",
+    "specifications": [
+      { "key": "Thương hiệu", "value": "SILA" },
+      { "key": "Quy cách", "value": "Gói 10 miếng" }
+    ]
+  },
+  {
+    "id": "prod-5",
+    "title": "Băng vệ sinh thảo dược cao cấp LYNA Cool Fresh",
+    "brand": "LYNA",
+    "category": "Chăm sóc phụ nữ",
+    "price": 38000,
     "original_price": 45000,
-    "variants": []
-  },
-  {
-    "id": "a6aa52c8-f547-4088-9c45-9a6b8d499922",
-    "created_at": "2026-05-21T09:22:41.173255+00:00",
-    "title": "Khăn khô đa năng cao cấp SILA 500 gram",
-    "brand": "SILA",
-    "image": "",
-    "price": 69000,
-    "features": [
-      {
-        "icon": "zap",
-        "label": "Nổi bật"
-      }
-    ],
-    "category": "Khăn khô",
-    "description": "Sử dụng 100% cotton mềm mại, dịu nhẹ, co giãn tốt, không xù, không xơ bông An toàn tuyệt đối: Không màu, không mùi, không chất hóa học độc hại Sử dụng đa năng: Có thể dùng khô trực tiếp hoặc trở thành khăn ướt dễ dàng khi được thấm nước.",
-    "specifications": [],
+    "image": "https://images.unsplash.com/photo-1544126592-807daa2b567b?auto=format&fit=crop&q=80&w=800",
     "images": [],
-    "original_price": 75000,
-    "variants": []
-  },
-  {
-    "id": "7326dff6-7b61-4169-a0e2-96f318279587",
-    "created_at": "2026-05-21T09:26:43.552735+00:00",
-    "title": "MIẾNG LÓT Y TẾ NYNA",
-    "brand": "NYNA",
-    "image": "",
-    "price": 71000,
     "features": [
-      {
-        "icon": "zap",
-        "label": "Nổi bật"
-      }
+      { "label": "Bạc hà thảo dược mát dịu", "icon": "CheckCircle2" },
+      { "label": "Bảo vệ mỏng nhẹ 0.1cm", "icon": "CheckCircle2" }
     ],
-    "category": "Tã người lớn",
-    "description": "Quy cách         : 10 miếng trong 1 bao bì.\n\nKhổ trải            : 52 x 70cm\n\nThành phần     : Vải không dệt, hạt siêu  hút nước (SAP), bông cellulose, chun sợi, màng PE, polyme kết dính, giấy không dính, hương hoa cỏ.\n\nChỉ dẫn            : Thay miếng lót ngay khi người bệnh tiểu bẩn, bỏ vào thùng rác sau khi sử dụng xong.\n\nCảnh báo         : Không bỏ vào bồn cầu và cẩn thận cho làn da nhạy cảm\n\nBảo quản         : Nơi thoáng mát, tránh ánh sáng trực tiếp.\n\nNgày sản xuất : Xem trên bao bì\n\nHạn sử dụng   : 04 năm\n\n- Tấm lót y tế Nyna luôn là người bạn đồng hành với người cao tuổi, người bệnh, bệnh nhân mắc chứng khó kiểm soát trong vệ sinh tiểu đại tiện.\n\n- Sản phẩm được sản xuất bởi nguyên liệu nhập khẩu chất lượng quốc tế kết hợp công nghệ Nano tiên tiến của Nhật tạo ra dòng sản phẩm kháng khuẩn, chống tràn bốn chiều, siêu thấm hút tuyệt đối.\n\n- Bề mặt bông vi sợi êm ái thông thoáng tạo cảm giác mát mẻ, không gây khó chịu, chật chội, nóng nực cho người bệnh phải nằm yên, không được vận động hay những bề mặt da nhạy cảm.",
-    "specifications": [],
-    "images": [],
-    "original_price": 79000,
-    "variants": []
-  },
-  {
-    "id": "6357b9da-b648-4d9c-a239-244a79af9abf",
-    "created_at": "2026-05-21T11:03:39.415435+00:00",
-    "title": "Tã Dán Người Lớn SILA",
-    "brand": "SILA",
-    "image": "",
-    "price": 170000,
-    "features": [
-      {
-        "icon": "zap",
-        "label": "Nổi bật"
-      }
-    ],
-    "category": "Tã người lớn",
-    "description": "Tã Dán Người Lớn SILA Size M/L (20 Miếng/ 1 bao) siêu mềm siêu thấm - Bỉm dán, tã gười Già sila- Tả dán, tả giấy cho người già\nTã giấy người lớn SILA - HÀNG VIỆT NAM - CHẤT LƯỢNG CAO\n\n● Vòng bụng: 70 -120cm\n\n- Tã giấy người lớn SILA với khả năng: Kháng khuẩn- khử mùi- chống hăm nhờ có hoạt chất nano bạc đánh bay tối đa mùi nước tiểu.\n\n- Sản phẩm được sản xuất bởi nguyên liệu nhập khẩu chất lượng quốc tế kết hợp công nghệ lõi kép tiên tiến tạo ra dòng sản phẩm kháng khuẩn, chống tràn hoàn hảo, siêu thấm hút tuyệt đối.\n\n- Bề mặt bông vi sợi êm ái thông thoáng tạo cảm giác mát mẻ, không gây khó chịu, chật chội, nóng nực cho người bệnh phải nằm yên, không được vận động hay những bề mặt da nhạy cảm\n\n- Tã giấy người lớn luôn là người bạn đồng hành với người cao tuổi, người bệnh, bệnh nhân mắc chứng khó kiểm soát trong vệ sinh tiểu đại tiện.\n",
-    "specifications": [],
-    "images": [],
-    "original_price": 185000,
-    "variants": []
-  },
-  {
-    "id": "cef115de-1bd9-4c9d-983a-0fab307454bb",
-    "created_at": "2026-05-24T03:30:48.876296+00:00",
-    "title": "TÃ DÁN NGƯỜI LỚN SILA 9M (M/XL)",
-    "brand": "SILA",
-    "image": "",
-    "price": 88000,
-    "features": [
-      {
-        "icon": "zap",
-        "label": "Nổi bật"
-      }
-    ],
-    "category": "Tã người lớn",
-    "description": "Tã giấy người lớn SILA - HÀNG VIỆT NAM - CHẤT LƯỢNG CAO\n\n- Tã giấy người lớn SILA với khả năng: Kháng khuẩn- khử mùi- chống hăm nhờ có hoạt chất nano bạc đánh bay tối đa mùi nước tiểu.\n\n- Sản phẩm được sản xuất bởi nguyên liệu nhập khẩu chất lượng quốc tế kết hợp công nghệ tiên tiến tạo ra dòng sản phẩm kháng khuẩn, chống tràn bốn chiều, siêu thấm hút tuyệt đối.\n\n- Bề mặt bông vi sợi êm ái thông thoáng tạo cảm giác mát mẻ, không gây khó chịu, chật chội, nóng nực cho người bệnh phải nằm yên, không được vận động hay những bề mặt da nhạy cảm\n\n- Tã giấy người lớn luôn là người bạn đồng hành với người cao tuổi, người bệnh, bệnh nhân mắc chứng khó kiểm soát trong vệ sinh tiểu đại tiện.",
-    "specifications": [],
-    "images": [],
-    "original_price": 99000,
-    "variants": []
-  },
-  {
-    "id": "3f5e3a32-efa5-4a9f-ba09-0489dfb6462d",
-    "created_at": "2026-05-24T03:50:01.024555+00:00",
-    "title": "Băng Vệ Sinh SiLA Hàng Ngày Thảo Dược Kháng Khuẩn",
-    "brand": "SILA",
-    "image": "",
-    "price": 56000,
-    "features": [
-      {
-        "icon": "zap",
-        "label": "Nổi bật"
-      }
-    ],
-    "category": "Băng vệ sinh",
-    "description": "Băng Vệ Sinh SiLA Hàng Ngày Thảo Dược Kháng Khuẩn Lốc 8 Gói\n\n🔰 Thông tin sản phẩm:\n\nQuy cách          : 8 miếng trong 1 bao bì\n\nThành phần      : Bề mặt PE mềm mại, vải không dệt, Airlaid, màng PE, bột giấy, giấy không dính, hạt siêu thấm (SAP), tinh chất thảo dược thiên nhiên, keo.\n\nBảo quản          : Lưu giữ nơi khô ráo, thoáng mát, tránh trực tiếp ánh nắng mặt trời\n\nLưu ý                : Tránh xa tầm tay trẻ em. Nên thay băng thường xuyên\n\nThông tin an toàn sức khỏe: Thận trọng cho làn da nhạy cảm. Ngưng ngay khi bị kích ứng.\n\nNgày sản xuất : Xem trên bao bì\n\nHạn sử dụng   : 04 năm \n\nĐặc điểm:\n\n- Băng vệ sinh là người bạn thân thiết với các bạn gái và chị em phụ nữ.\n\n- Nyna luôn đồng hành với những sản phẩm băng vệ sinh dành riêng cho làn da nhạy cảm.\n\n- Công nghệ 3D vi sợi làm êm thoáng làn da, thông khí, thoát và hút ẩm hiệu quả.\n\n- Thiết kế vừa vặn giúp các bạn gái và chị em phụ nữ thoải mái trong những ngày đèn đỏ.\n\n\n\n📌 LƯU Ý: Màu sắc sản phẩm trên hình ảnh đôi khi sẽ bị chênh lệch một chút so với sản phẩm thực tế nhưng Shop cam kết sẽ không ảnh hưởng đến chất lượng sản phẩm. \n\nKính mong quý khách hàng thông cảm và thấu hiểu giúp shop.",
-    "specifications": [],
-    "images": [],
-    "original_price": 59000,
-    "variants": []
-  },
-  {
-    "id": "f8bd6283-187a-46dc-a5e0-646c937ff992",
-    "created_at": "2026-05-24T03:56:45.044706+00:00",
-    "title": "Băng Vệ Sinh NYNA Ban Đêm Super Dry",
-    "brand": "NYNA",
-    "image": "",
-    "price": 82000,
-    "features": [
-      {
-        "icon": "zap",
-        "label": "Nổi bật"
-      }
-    ],
-    "category": "Băng vệ sinh",
-    "description": "Băng Vệ Sinh NYNA Ban Đêm 4 Miếng Dài 29cm Siêu Thấm Kháng Khuẩn (LỐC 6 GÓI)\n\nBăng Vệ Sinh NYNA Ban Đêm 4 Miếng Dài 29cm Siêu Thấm Kháng Khuẩn (4 miếng/ gói)  có chiều dài lý tưởng đến 29cm cùng rãnh chống tràn và thiết kế mở rộng về phía sau sẽ giúp bảo vệ bạn gái trong giấc ngủ. Hệ thống thấm hút độc đáo giúp thấm hút nhanh và khóa chặt chất lỏng, cho bạn cảm giác khô thoáng, không lo chất dịch bị trào ngược gây khó chịu. Bề mặt băng mềm mại với hương thơm dễ chịu giúp bạn luôn được thư giãn kể cả trong những ngày nhạy cảm.\n\n- Quy cách: 4 miếng/ gói\n\n- Xuất xứ: Việt Nam\n\n- Kích thước: 29cm\n\n- Hạn sử dụng: 48 tháng kể từ NSX\n\n- NSX: Xem thông tin in trên bao bì",
-    "specifications": [],
-    "images": [],
-    "original_price": 89000,
-    "variants": []
-  },
-  {
-    "id": "299aec04-788e-4b74-afe3-b766a5d6dcfd",
-    "created_at": "2026-05-24T03:36:49.122282+00:00",
-    "title": "Băng vệ sinh Ban Đêm Lyna Cool Mint",
-    "brand": "NYNA",
-    "image": "",
-    "price": 25600,
-    "features": [
-      {
-        "icon": "zap",
-        "label": "Nổi bật"
-      }
-    ],
-    "category": "Băng vệ sinh",
-    "description": "Băng vệ sinh Ban Đêm Lyna Cool 29cm ( 4 miếng) Lốc 2, 6 Gói\nLõi thấm hút đa chiều, màng lưới siêu thấm, giúp thấm hút nhiều và nhanh hơn.\n\n- Rãnh Chống Tràn Chủ Động: Hệ rãnh khép kín thành những hàng rào giúp chủ động ngăn chất lỏng đa chiều.\n\n- Thiết kế độc đáo, dải keo 5 mặt tiếp xúc đặc biệt giữ băng luôn cố định và chắc chắn, cùng thân sau mở rộng hình quạt và chiều dài 29 cm, giúp chống tràn sau hiệu quả.\n\n- Màng đáy được thiết kế hoa văn trang nhã, mang lại cho phái đẹp một sản phẩm chất lượng ưu việt cùng những trải nghiệm thẩm mĩ tinh tế.\n\n- Bề mặt bông mềm mại cùng hương hoa cỏ thơm mát, dịu nhẹ, phù hợp với nhiều loại da, đặc biệt là làn da nhạy cảm.",
-    "specifications": [],
-    "images": [],
-    "original_price": 26900,
-    "variants": [
-      {
-        "name": "Lốc 2 gói",
-        "price": 25600,
-        "original_price": 26900
-      },
-      {
-        "name": "Lốc 6 gói",
-        "price": 74000,
-        "original_price": 79000
-      }
+    "color": "text-pink-600",
+    "description": "Cảm giác sảng khoái mát lạnh tức thì giúp xua tan cảm giác bí bách mệt mỏi trong những ngày nhạy cảm.",
+    "specifications": [
+      { "key": "Thương hiệu", "value": "LYNA" },
+      { "key": "Độ dài", "value": "24.5cm siêu mỏng cánh" }
     ]
   },
   {
-    "id": "454b4bc0-b00c-4ee7-ae83-e809ae54f7c8",
-    "created_at": "2026-05-24T04:01:53.228446+00:00",
-    "title": "Băng vệ sinh Hộp Lyna Cool Bạc Hà",
-    "brand": "LYNA",
-    "image": "",
-    "price": 40000,
-    "features": [
-      {
-        "icon": "zap",
-        "label": "Nổi bật"
-      }
-    ],
-    "category": "Băng vệ sinh",
-    "description": "Băng vệ sinh Hộp Lyna Cool Bạc Hà 8 miếng\n\nThông tin sản phẩm:\n\nQuy cách : 8 miếng trong 1 bao bì. \n\nThành phần : Bề mặt PE mềm mại, vải không dệt, Airlaid, màng PE, bột giấy, giấy không dính, hạt siêu thấm (SAP), keo\n\nBảo quản : Lưu giữ nơi khô ráo, thoáng mát, tránh trực tiếp ánh nắng mặt trời\n\nLưu ý : Tránh xa tầm tay trẻ em. Nên thay băng thường xuyên\n\nThông tin an toàn sức khỏe: Thận trọng cho làn da nhạy cảm. Ngưng ngay khi bị kích ứng.\n\nNgày sản xuất : Xem trên bao bì\n\nHạn sử dụng : 04 năm ",
-    "specifications": [],
-    "images": [],
-    "original_price": 49000,
-    "variants": [
-      {
-        "name": "2 gói",
-        "price": 40000,
-        "original_price": 49000
-      },
-      {
-        "name": "6 gói",
-        "price": 117000,
-        "original_price": 120000
-      }
-    ]
-  },
-  {
-    "id": "bce86896-da1c-4826-b205-7cb53fb8cd88",
-    "created_at": "2026-05-24T04:07:50.012919+00:00",
-    "title": "Băng vệ sinh Lyna dạng quần 5 miếng",
-    "brand": "LYNA",
-    "image": "",
-    "price": 59000,
-    "features": [
-      {
-        "icon": "zap",
-        "label": "Nổi bật"
-      }
-    ],
-    "category": "Băng vệ sinh",
-    "description": "BĂNG VỆ SINH LYNA DẠNG QUẦN 5 MIẾNG\n\nLoại : BVS dạng quần\n\nQuy Cách: 5 miếng/ gói\n\nSize: S-L\n\nVòng hông phù hợp: 60cm - 105 cm\n\nThiết kế dạng quần 360 Ôm sát cơ thể - chống tràn hiệu quả\n\nThấm hút nhanh - khóa chất lỏng. Giữ bề mặt khô thoáng\n\nMềm mại - thoáng khí - không gây bí\n\nThoải mái vận động. Phù hợp ngủ đêm, đi học, đi làm và du lịch",
-    "specifications": [],
-    "images": [],
-    "original_price": null,
-    "variants": []
-  },
-  {
-    "id": "e55f0ca4-c98e-465a-abf6-875a4592eb4c",
-    "created_at": "2026-05-24T04:12:02.917835+00:00",
-    "title": "BĂNG VỆ SINH FOR NIGHT BAN ĐÊM",
-    "brand": "LYNA",
-    "image": "",
-    "price": 76800,
-    "features": [
-      {
-        "icon": "zap",
-        "label": "Nổi bật"
-      }
-    ],
-    "category": "Băng vệ sinh",
-    "description": "BĂNG VỆ SINH NIGHT BAN ĐÊM 35 CM (1 GÓI GỒM 3 MIẾNG) LỐC 6 GÓI\n\nThành phần: vải không dệt, Airlaid, nano bạc, màng PE, bột giấy, giấy không dính, hạt siêu thấm (SAP), keo\n\n- Xuất xứ: Việt Nam\n\n- Hạn sử dụng: 4 năm\n\n- Lưu ý: Nên thay băng 3 - 4h/ lần để ngăn ngừa vi khuẩn gây bệnh.\n\n- Bảo quản: Nơi thoáng mát, tránh ánh sáng trực tiếp.\n\n- Bề mặt vải siêu mềm đêm đến cảm giác nhẹ dịu cho làn da, không gây khô rát, khó chịu.\n\n Với màng thấm hút 3D co giãn bốn chiều giúp thấm hút siêu nhanh, cho bạn cảm giác thật khô thoáng và thoải mái, không tràn băng..\n\n- Công nghệ nano Bạc: tăng cường khả năng kháng khuẩn Ecoli và Saureus.\n\n Băng vệ sinh không có bạc hà, tập trung vào các tính năng nổi trội là kháng khuẩn, khử mùi và bề mặt mềm êm📌 LƯU Ý: Màu sắc sản phẩm trên hình ảnh đôi khi sẽ bị chênh lệch một chút so với sản phẩm thực tế nhưng Shop cam kết sẽ không ảnh hưởng đến chất lượng sản phẩm. \n\nKính mong quý khách hàng thông cảm và thấu hiểu giúp shop.",
-    "specifications": [],
-    "images": [],
-    "original_price": 79000,
-    "variants": []
-  },
-  {
-    "id": "b35902cd-382e-478b-b5af-5f0cbfccfad9",
-    "created_at": "2026-05-24T04:19:47.850591+00:00",
-    "title": "Băng Vệ Sinh Nyna Cooltea",
-    "brand": "NYNA",
-    "image": "",
-    "price": 118000,
-    "features": [
-      {
-        "icon": "zap",
-        "label": "Nổi bật"
-      }
-    ],
-    "category": "Băng vệ sinh",
-    "description": "Băng Vệ Sinh Nyna Cooltea Lốc 6 Gói Siêu Mềm Có Cánh - Bvs Cool Bạc Hà Mát Lạnh, Vải Lụa Mềm Mại, Kháng Khuẩn, Khử Mùi\n\nQuy cách : 8 miếng trong 1 bao bì\n\nThành phần : Bề mặt PE mềm mại, vải không dệt, Airlaid, màng PE, bột giấy, giấy không dính, hạt siêu thấm (SAP), keo, tinh chất làm mát (bạc hà), hương trà xanh\n\nBảo quản : Lưu giữ nơi khô ráo, thoáng mát, tránh trực tiếp ánh nắng mặt trời\n\nLưu ý : Tránh xa tầm tay trẻ em. Nên thay băng thường xuyên\n\nThông tin an toàn sức khỏe: Thận trọng cho làn da nhạy cảm. Ngưng ngay khi bị kích ứng.\n\nNgày sản xuất : Xem trên bao bì\n\nHạn sử dụng : 04 năm \n\n\n\n- Băng vệ sinh là người bạn thân thiết với các bạn gái và chị em phụ nữ.\n\n- Nyna luôn đồng hành với những sản phẩm băng vệ sinh dành riêng cho làn da nhạy cảm.\n\n- Công nghệ 3D vi sợi làm êm thoáng làn da, thông khí, thoát và hút ẩm giúp người sử dụng cảm giác kho thoáng dễ chịu.\n\n- Tinh chất làm mát da, hương thơm trà xanh dễ chịu, kết hợp công nghệ Nano (Ag+) khử mùi hiệu quả.\n\n- Thiết kế vừa vặn, cánh lệch phù hợp sử dụng cả ngày lẫn đêm. Rất tiện dụng trong làm việc, vui chơi giải trí, vận động giúp các bạn gái và chị em phụ nữ thoải mái trong những ngày đèn đỏ.\n\n- Đặc biệt: thiết kế nắp mở tiện lợi, giúp bảo quản vệ sinh rất an toàn khi đang sử dụng.\n\n📌 LƯU Ý: Màu sắc sản phẩm trên hình ảnh đôi khi sẽ bị chênh lệch một chút so với sản phẩm thực tế nhưng Shop cam kết sẽ không ảnh hưởng đến chất lượng sản phẩm. \n\nKính mong quý khách hàng thông cảm và thấu hiểu giúp shop.",
-    "specifications": [],
-    "images": [],
-    "original_price": 129000,
-    "variants": []
-  },
-  {
-    "id": "2f1d4c8d-a9c1-43f1-b918-3202ab9fffb5",
-    "created_at": "2026-05-24T04:29:34.678836+00:00",
-    "title": "Băng vệ sinh Nyna Superdry 7 miếng mẫu hồng",
-    "brand": "NYNA",
-    "image": "",
-    "price": 110000,
-    "features": [
-      {
-        "icon": "zap",
-        "label": "Nổi bật"
-      }
-    ],
-    "category": "Băng vệ sinh",
-    "description": "Băng vệ sinh Nyna Superdry 7 miếng mẫu hồng. BVS NYNA kháng khuẩn không có bạc hà cool.{1 Dây Gồm 8 Gói}\n\nThông tin sản phẩm:\n\nQuy cách : 7 miếng trong 1 bao bì.\n\nThành phần : Bề mặt PE mềm mại, vải không dệt, Airlaid, màng PE, bột giấy, giấy không dính, hạt siêu thấm (SAP), keo\n\nBảo quản : Lưu giữ nơi khô ráo, thoáng mát, tránh trực tiếp ánh nắng mặt trời\n\nLưu ý : Tránh xa tầm tay trẻ em. Nên thay băng thường xuyên\n\nThông tin an toàn sức khỏe: Thận trọng cho làn da nhạy cảm. Ngưng ngay khi bị kích ứng.\n\nNgày sản xuất : Xem trên bao bì\n\nChiều dài miếng băng: 24.0cm\n\nHạn sử dụng : 04 năm\n\n- Băng vệ sinh Sila được sản xuất trên dây truyền tiên tiến, hiện đại theo tiêu chuẩn của Châu Âu.\n\n- Với màng thấm hút 3D giúp thấm hút siêu nhanh, cho bạn cảm giác thật khô thoáng và thoải mái.\n\n- Kết hợp với thiết kế cánh lệch rất tiện dụng cho việc sử dụng cả ban ngày lẫn ban đêm, phù hợp vừa vặn trong làm việc, vui chơi giải trí, vận động giúp các bạn gái và chị em phụ nữ thoải mái trong những ngày đèn đỏ",
-    "specifications": [],
-    "images": [],
-    "original_price": 119000,
-    "variants": []
-  },
-  {
-    "id": "76ac2adc-df7c-4b51-9f19-afcc54528dca",
-    "created_at": "2026-05-20T06:15:06.720461+00:00",
-    "title": "MIẾNG LÓT SƠ SINH- NEWBORN",
-    "brand": "SILA",
-    "image": "",
-    "price": 40000,
-    "features": [
-      {
-        "icon": "zap",
-        "label": "Nổi bật"
-      }
-    ],
-    "category": "Tã, miếng lót trẻ em",
-    "description": "MIẾNG LÓT SƠ SINH- NEWBORN 1 NHỎ- 27 MIẾNG/ bao bì\n\nDùng cho trẻ từ dưới 5 ký\nHạn sử dụng: 4 năm \nLàn da mỏng manh và nhạy cảm của bé sơ sinh cần sự bảo vệ và chăm sóc tốt nhất. thương hiệu bỉm NEWBORN 1 NHỎ- 27 MIẾNG đã đem đến cho bé yêu dòng sản phẩm miếng lót NEWBORN 1  cho bé cảm giác thoải mái và dễ chịu tuyệt đối. được sản xuất ra từ chất liệu siêu mềm mại và thoáng khí từ trong ra ngoài.  siêu thấm và các rãnh dọc giúp thấm nhanh, dàn đều chất lỏng, miếng lót sơ sinh sẽ giúp bề mặt khô thoáng hơn gấp 10 lần. Sản phẩm NEWBORN 1  miếng lót sơ sinh sẽ là lựa chọn hoàn hảo của mẹ cho bé trong những ngày đầu tiên chào đời.",
-    "specifications": [],
-    "images": [],
-    "original_price": null,
-    "variants": []
-  },
-  {
-    "id": "5da4f6fc-10dc-4f94-911b-0ca7f2b19812",
-    "created_at": "2026-05-24T04:35:07.66529+00:00",
-    "title": "TÃ QUẦN VÀNG TONY ĐỦ SIZE (S11,M10,L9,XL8)",
+    "id": "prod-6",
+    "title": "Tấm lót thấm hút đa năng tiện lợi TONY Plus (Bịch 10 miếng)",
     "brand": "TONY",
-    "image": "",
-    "price": 40000,
-    "features": [
-      {
-        "icon": "zap",
-        "label": "Nổi bật"
-      }
-    ],
-    "category": "Tã, miếng lót trẻ em",
-    "description": "TÃ QUẦN VÀNG TONY - HÀNG VIỆT NAM - CHẤT LƯỢNG CAO\n\nMối lo toan của các bà mẹ là làm sao để bé cưng của mình có một môi trường sống tốt nhất. Các mẹ hãy yên tâm vui đùa cùng bé cưng vì Tã Quần VÀNG TONY sẽ trợ giúp các mẹ điều đó.\n\nVới sản phẩm và nguyên liệu nhập khẩu từ các nước Châu Âu và dây chuyền sản xuất khép kín đạt tiêu chuẩn cao trong ngành tã giấy.\n\nCác sản phẩm:  Tã quần VÀNG TONY\n\n- Thế hệ tã mới cải tiến mỏng hơn thấm hút nhanh, với công nghệ 1000 phễu siêu thấm hút cùng màng đáy thoát ẩm 100% mềm mại như bông giúp da bé khô thoáng dài lâu\n\n- Hệ thun bụng-hông-đùi co giãn siêu linh hoạt, kết hợp cùng lớp vải phủ bằng chất liệu Cotton-soft siêu mềm, giúp tã ôm vừa vặn cơ thể bé, ngăn tràn hiệu quả đồng thời giảm vết hằn trên da\n\n- Hạt nổi 3D sinh thái học giúp tã luôn thoáng khí, triệt tiêu độ ẩm, massage cho một làn da thật mềm mại, đáng yêu.\n\nCác mẹ yên tâm và tin tưởng khi sử dụng sản phẩm nhé!",
-    "specifications": [],
+    "category": "Tấm lót đa năng",
+    "price": 65000,
+    "original_price": 85000,
+    "image": "https://images.unsplash.com/photo-1544126592-807daa2b567b?auto=format&fit=crop&q=80&w=800",
     "images": [],
-    "original_price": 49000,
-    "variants": []
-  },
-  {
-    "id": "18b9d7e0-f794-43b7-93e5-aa932085bc5c",
-    "created_at": "2026-05-21T05:08:21.068173+00:00",
-    "title": "Tã Dán Người Lớn NYNA",
-    "brand": "NYNA",
-    "image": "",
-    "price": 97000,
     "features": [
-      {
-        "icon": "zap",
-        "label": "Nổi bật"
-      }
+      { "label": "Màng đáy PE chống tràn tuyệt đối", "icon": "CheckCircle2" },
+      { "label": "Thấm nhanh khóa dịch lỏng", "icon": "CheckCircle2" }
     ],
-    "category": "Tã người lớn",
-    "description": "Tã Dán Người Lớn Size( M; M/L; L/XL) 10 Miếng - Tã Người Già Nyna - Bỉm Dán Người Già Siêu Thấm\n\nThông tin sản phẩm: \n\n- Xuất xứ: Việt Nam\n\n- Quy cách đóng : Size( M; M/L; L/XL)  10 Miếng.\n\n- Thành phần : Vải không dệt, hạt siêu hút nước (SAP), bông cellulose, chun sợi, màng PE, polyme kết dính, giấy không dính, hương hoa cỏ.\n\n- Chỉ dẫn : Thay tã ngay khi người già tiểu bẩn, bỏ vào thùng rác sau khi sử dụng xong.\n\n- Cảnh báo : Không bỏ vào bồn cầu và cẩn thận cho làn da nhạy cảm\n\n- Thương hiệu : Nyna\n\n- Hạn sử dụng : 3 năm\n\n Đặc điểm sản phẩm :\n\n- Tã giấy người lớn Nyna với 3 tác động: kháng khuẩn- khử mùi- chống hăm nhờ có hoạt chất nano bạc đánh bay tối đa mùi nước tiểu. Tã giấy người lớn luôn là người bạn đồng hành với người cao tuổi, người bệnh, bệnh nhân mắc chứng khó kiểm soát trong vệ sinh tiểu đại tiện.\n\n- Sản phẩm được sản xuất bởi nguyên liệu nhập khẩu chất lượng quốc tế kết hợp công nghệ Nano tiên tiến của Nhật tạo ra dòng sản phẩm kháng khuẩn, chống tràn bốn chiều, siêu thấm hút tuyệt đối.\n\n- Bề mặt bông vi sợi êm ái thông thoáng tạo cảm giác mát mẻ, không gây khó chịu, chật chội, nóng nực cho người bệnh phải nằm yên, không được vận động hay những bề mặt da nhạy cảm.\n\n- Bảo quản: Nơi thoáng mát, tránh ánh sáng trực tiếp.",
-    "specifications": [],
-    "images": [],
-    "original_price": 99000,
-    "variants": [
-      {
-        "name": "Size M (60-106 cm)",
-        "price": 97000,
-        "original_price": 99000
-      },
-      {
-        "name": "Size M/L (70-120 cm)",
-        "price": 101000,
-        "original_price": 109000
-      },
-      {
-        "name": "Size L/XL (110-145 cm)",
-        "price": 125000,
-        "original_price": 129000
-      }
+    "color": "text-indigo-600",
+    "description": "Tấm lót đa năng bảo vệ giường nằm, nôi em bé hoặc xe lăn sạch sẽ tuyệt đối, vệ sinh dễ dàng chỉ trong một bước bỏ.",
+    "specifications": [
+      { "key": "Thương hiệu", "value": "TONY" },
+      { "key": "Số lượng", "value": "10 miếng/bịch" }
     ]
   }
 ]

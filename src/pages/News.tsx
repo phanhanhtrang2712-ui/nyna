@@ -29,16 +29,9 @@ const News = () => {
               onClick={() => setActiveNews(item)}
               className="group cursor-pointer"
             >
-              <div className="h-72 rounded-[48px] overflow-hidden mb-10 shadow-xl border border-white relative flex items-center justify-center bg-gray-50 uppercase">
-                 {item.image ? (
-                   <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s]" />
-                 ) : (
-                   <div className="w-full h-full bg-gradient-to-tr from-blue-900/10 to-pink-500/10 flex flex-col items-center justify-center p-8 text-center group-hover:scale-105 transition-transform duration-700">
-                     <span className="text-[10px] font-black tracking-widest text-blue-900/30 mb-2">NYNA TIN TỨC</span>
-                     <span className="text-xl font-bold text-blue-900/40 line-clamp-2 px-4 leading-tight">{item.title}</span>
-                   </div>
-                 )}
-                 <div className="absolute top-6 left-6 bg-white/90 backdrop-blur px-4 py-2 rounded-2xl font-black text-[10px] uppercase text-blue-900 z-10">{item.date}</div>
+              <div className="h-72 rounded-[48px] overflow-hidden mb-10 shadow-xl border border-white relative">
+                 <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s]" />
+                 <div className="absolute top-6 left-6 bg-white/90 backdrop-blur px-4 py-2 rounded-2xl font-black text-[10px] uppercase text-blue-900">{item.date}</div>
               </div>
               <h3 className="text-2xl font-black text-blue-900 mb-4 group-hover:text-pink-500 transition-colors leading-tight uppercase tracking-tight line-clamp-2">{item.title}</h3>
               <p className="text-gray-500 text-sm leading-relaxed mb-8 line-clamp-3 font-medium">{item.excerpt}</p>

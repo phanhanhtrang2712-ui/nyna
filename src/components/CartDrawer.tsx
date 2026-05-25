@@ -283,15 +283,8 @@ const CartDrawer = ({
                 <div className="space-y-8">
                   {items.map((item) => (
                     <div key={item.id} className="flex gap-4 group">
-                      <div className="w-24 h-24 rounded-2xl bg-gray-50 overflow-hidden shrink-0 border border-gray-100 flex items-center justify-center">
-                        {item.image ? (
-                          <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex flex-col items-center justify-center bg-sky-50 p-1 text-[8px] text-center font-black text-blue-900/40 uppercase">
-                            <span>NYNA</span>
-                            <span className="text-[6px] font-bold text-gray-400 capitalize">Ảnh trống</span>
-                          </div>
-                        )}
+                      <div className="w-24 h-24 rounded-2xl bg-gray-50 overflow-hidden shrink-0 border border-gray-100">
+                        <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <span className="text-[10px] font-black uppercase tracking-widest text-blue-400 mb-1 block">{item.brand}</span>

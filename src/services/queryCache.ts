@@ -9,18 +9,62 @@ class QueryCache {
   private ttl = 5 * 60 * 1000; // 5 minutes default TTL
 
   get<T>(key: string): T | null {
-    // Caching is suspended as requested. Always return null to force real database query.
+    // 1. Try to read from in-memory cache
+    const entry = this.cache.get(key);
+    if (entry) {
+      const age = Date.now() - entry.timestamp;
+      if (age < this.ttl) {
+        return entry.data as T;
+      }
+    }
+
+    // 2. Try to read from localStorage if memory is missing
+    try {
+      const cached = localStorage.getItem(key);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        // Warm up in-memory cache
+        this.cache.set(key, { data: parsed.value, timestamp: parsed.timestamp || Date.now() });
+        
+        const age = Date.now() - (parsed.timestamp || 0);
+        if (age < this.ttl) {
+          return parsed.value as T;
+        }
+      }
+    } catch (e) {
+      console.warn(`QueryCache read error for key ${key}:`, e);
+    }
+
     return null;
   }
 
   // Returns the cache regardless of expiration (for Stale-While-Revalidate)
   getAny<T>(key: string): T | null {
-    // Caching is suspended as requested. Always return null to force real database query.
+    const entry = this.cache.get(key);
+    if (entry) return entry.data as T;
+
+    try {
+      const cached = localStorage.getItem(key);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        this.cache.set(key, { data: parsed.value, timestamp: parsed.timestamp || Date.now() });
+        return parsed.value as T;
+      }
+    } catch (e) {
+      console.warn(`QueryCache read error for key ${key}:`, e);
+    }
+
     return null;
   }
 
   set<T>(key: string, value: T): void {
-    // Caching is suspended. Do not store in memory or localStorage.
+    const timestamp = Date.now();
+    this.cache.set(key, { data: value, timestamp });
+    try {
+      localStorage.setItem(key, JSON.stringify({ value, timestamp }));
+    } catch (e) {
+      console.warn(`QueryCache write error for key ${key}:`, e);
+    }
   }
 
   delete(key: string): void {

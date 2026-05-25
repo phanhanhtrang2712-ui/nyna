@@ -24,7 +24,20 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
   const [product, setProduct] = useState<ProductItem | null>(() => {
     if (!id) return null;
     
-    // Fall back to offline static backup database first for seamless transition
+    // 1. Try single item cache in queryCache
+    const itemCacheKey = `nyna_cache_products_${id}`;
+    const cachedItem = queryCache.getAny<ProductItem>(itemCacheKey);
+    if (cachedItem) return cachedItem;
+
+    // 2. Try general list cache in queryCache
+    const listCacheKey = `nyna_cache_products`;
+    const cachedList = queryCache.getAny<ProductItem[]>(listCacheKey);
+    if (cachedList) {
+      const found = cachedList.find(p => p.id === id);
+      if (found) return found;
+    }
+
+    // 3. Try fallback static backup database
     const fallbackList = FALLBACK_DATA["products"];
     if (fallbackList) {
       const found = fallbackList.find(p => p.id === id);
@@ -32,7 +45,16 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
     }
     return null;
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    if (!id) return true;
+    const freshItem = queryCache.get<ProductItem>(`nyna_cache_products_${id}`);
+    if (freshItem) return false;
+    
+    const freshList = queryCache.get<ProductItem[]>(`nyna_cache_products`);
+    if (freshList && freshList.some(p => p.id === id)) return false;
+
+    return !product;
+  });
   const [activeImage, setActiveImage] = useState<string>(product ? product.image : '');
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
 
@@ -48,16 +70,26 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
     let isMounted = true;
     if (id) {
       const fetchItem = async () => {
+        // Try fresh item cache first
+        const freshItem = queryCache.get<ProductItem>(`nyna_cache_products_${id}`);
+        if (freshItem) {
+          if (isMounted) {
+            setProduct(freshItem);
+            setActiveImage(prev => prev || freshItem.image);
+            setLoading(false);
+          }
+          return;
+        }
+
         try {
-          setLoading(true);
           const res = await dataService.get<ProductItem>('products', id);
           if (isMounted) {
             setProduct(res);
-            setActiveImage(res.image || '');
+            setActiveImage(prev => prev || res.image);
             setLoading(false);
           }
         } catch (err) {
-          console.error("Error fetching product details from network:", err);
+          console.error(err);
           if (isMounted) {
             setLoading(false);
           }
@@ -112,25 +144,18 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
             animate={{ opacity: 1, x: 0 }}
             className="space-y-4 md:space-y-6 sticky top-24"
           >
-            <div className="aspect-[4/3] md:aspect-square bg-gray-50 rounded-[32px] md:rounded-[48px] overflow-hidden border border-gray-100 group relative flex items-center justify-center">
-               {activeImage ? (
-                 <AnimatePresence mode="wait">
-                   <motion.img 
-                    key={activeImage}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    src={activeImage} 
-                    alt={product.title} 
-                    className="w-full h-full object-contain p-8 md:p-12 transition-transform duration-700 group-hover:scale-105" 
-                   />
-                 </AnimatePresence>
-               ) : (
-                 <div className="flex flex-col items-center justify-center p-8 text-center select-none">
-                   <span className="text-xl md:text-2xl font-black text-blue-900/25 uppercase tracking-widest mb-3">NYNA & SILA</span>
-                   <span className="text-xs md:text-sm font-bold text-gray-400 capitalize">Hình ảnh thật đang được cập nhật</span>
-                 </div>
-               )}
+            <div className="aspect-[4/3] md:aspect-square bg-gray-50 rounded-[32px] md:rounded-[48px] overflow-hidden border border-gray-100 group relative">
+               <AnimatePresence mode="wait">
+                 <motion.img 
+                  key={activeImage}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  src={activeImage} 
+                  alt={product.title} 
+                  className="w-full h-full object-contain p-8 md:p-12 transition-transform duration-700 group-hover:scale-105" 
+                 />
+               </AnimatePresence>
                <div className="absolute top-4 left-4 md:top-8 md:left-8 bg-white/90 backdrop-blur px-3 py-1 md:px-4 md:py-1.5 rounded-full text-[8px] md:text-[10px] font-black uppercase text-blue-900 border border-white/50 tracking-widest">
                  {product.brand}
                </div>

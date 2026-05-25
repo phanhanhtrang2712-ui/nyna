@@ -75,7 +75,7 @@ const Footer = () => {
 
       <div className="max-w-7xl mx-auto px-6 pt-16 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 relative z-10">
         <p className="text-[11px] font-black text-blue-100/30 uppercase tracking-[0.3em]">
-          © 2024 - {new Date().getFullYear()} CÔNG TY TNHH MTV SẢN XUẤT VÀ THƯƠNG MẠI NYNA. ALL RIGHTS RESERVED.
+          © 2026 CÔNG TY TNHH MTV SẢN XUẤT VÀ THƯƠNG MẠI NYNA. ALL RIGHTS RESERVED.
         </p>
         <div className="flex items-center gap-10">
            <Link to="/cms" className="text-[11px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-400/10 px-4 py-2 rounded-lg hover:bg-emerald-400 hover:text-blue-900 transition-all">ADMIN DASHBOARD</Link>
