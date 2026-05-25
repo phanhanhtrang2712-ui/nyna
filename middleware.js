@@ -1,27 +1,35 @@
 import { NextResponse } from 'next/server';
 
-// Đặt một mã bí mật của riêng bạn (Nên đổi thành chuỗi ký tự khó đoán hơn)
-const SECRET_KEY = '220785'; 
+const SECRET_KEY = 'my_secret_key_2026'; // Thay bằng mã của bạn
 const COOKIE_NAME = 'bypass_maintenance';
 
 export function middleware(request) {
   const url = request.nextUrl.clone();
   
-  // 1. Kiểm tra nếu URL có chứa tham số mã bí mật (?access=...)
+  // Tránh vòng lặp vô hạn: Nếu đang truy cập vào chính trang bảo trì hoặc các file hệ thống thì cho qua luôn
+  if (
+    url.pathname === '/baotri' || 
+    url.pathname.startsWith('/_next/') || 
+    url.pathname.includes('.')
+  ) {
+    return NextResponse.next();
+  }
+
+  // 1. Kiểm tra mã bí mật trên URL (?access=...)
   const hasAccessQuery = url.searchParams.get('access') === SECRET_KEY;
   
-  // 2. Kiểm tra nếu trình duyệt đã có sẵn Cookie quyền truy cập trước đó
+  // 2. Kiểm tra Cookie có sẵn
   const hasAccessCookie = request.cookies.get(COOKIE_NAME)?.value === SECRET_KEY;
 
-  // Nếu có mã bí mật trên URL, tiến hành lưu Cookie và cho phép vào website
+  // Nếu nhập đúng mã bí mật qua URL
   if (hasAccessQuery) {
     url.searchParams.delete('access');
     const response = NextResponse.redirect(url);
     
-    // Lưu Cookie vào trình duyệt, có hiệu lực trong 30 ngày
+    // Cấp quyền truy cập trong 30 ngày
     response.cookies.set(COOKIE_NAME, SECRET_KEY, {
       path: '/',
-      maxAge: 60 * 60 * 24 * 30, // 30 ngày
+      maxAge: 60 * 60 * 24 * 30,
       httpOnly: true,
       secure: true,
       sameSite: 'lax',
@@ -29,68 +37,17 @@ export function middleware(request) {
     return response;
   }
 
-  // Nếu đã có sẵn Cookie hợp lệ, cho phép truy cập bình thường (Bỏ qua bảo trì)
+  // Nếu có cookie hợp lệ -> Cho xem website thật bình thường
   if (hasAccessCookie) {
     return NextResponse.next();
   }
 
-  // --- GIAO DIỆN BẢO TRÌ ---
-  const maintenanceHtml = `
-    <!DOCTYPE html>
-    <html lang="vi">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Website Tạm Dừng Hoạt Động</title>
-        <style>
-            * { box-sizing: border-box; margin: 0; padding: 0; }
-            body { 
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                background-color: #f3f4f6; color: #1f2937; 
-                display: flex; justify-content: center; align-items: center; 
-                height: 100vh; padding: 20px;
-            }
-            .container { 
-                text-align: center; background: white; padding: 40px 30px; 
-                border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-                max-width: 500px; width: 100%;
-            }
-            .icon { font-size: 64px; margin-bottom: 20px; }
-            h1 { font-size: 24px; font-weight: 700; margin-bottom: 16px; color: #111827; }
-            p { font-size: 16px; color: #4b5563; line-height: 1.6; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="icon">🚧</div>
-            <h1>Website hiện đang tạm dừng hoạt động</h1>
-            <p>Chúng tôi đang tiến hành nâng cấp hệ thống. Xin lỗi vì sự bất tiện này!</p>
-        </div>
-    </body>
-    </html>
-  `;
-
-  // SỬA LỖI: Chuyển đổi HTML String thành một Stream hợp lệ cho Edge Runtime
-  const encoder = new TextEncoder();
-  const customResponse = new NextResponse(encoder.encode(maintenanceHtml), {
-    status: 503,
-    headers: {
-      'Content-Type': 'text/html; charset=utf-8',
-    },
-  });
-
-  return customResponse;
+  // Đối với người dùng thông thường: Âm thầm đổi hướng hiển thị sang trang bảo trì công khai
+  url.pathname = '/baotri';
+  return NextResponse.rewrite(url);
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Áp dụng cho tất cả các đường dẫn ngoại trừ:
-     * - api (các đường dẫn API)
-     * - _next/static (các file tĩnh như js, css)
-     * - _next/image (hệ thống tối ưu ảnh của next)
-     * - favicon.ico (icon website)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ],
+  // Áp dụng kiểm tra cho toàn bộ các trang trên website
+  matcher: '/:path*',
 };
