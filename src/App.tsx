@@ -24,6 +24,18 @@ const WrappedRoute = () => (
 
 export default function App() {
   useEffect(() => {
+    // Clear any stale local cache items from local storage to force raw real-time data loading
+    try {
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('nyna_cache')) {
+          localStorage.removeItem(key);
+        }
+      }
+    } catch (e) {
+      console.warn("Could not sweep localStorage:", e);
+    }
+
     // Prefetch critical datasets immediately on boot
     prefetchAppCore();
   }, []);
