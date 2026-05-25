@@ -3,7 +3,7 @@ import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ShoppingCart, ArrowLeft, CheckCircle2, ShieldCheck, 
-  Zap, Info, ListChecks, ChevronRight, Heart
+  Info, ListChecks, ChevronRight, Heart
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { dataService } from '../services/dataService';
@@ -125,6 +125,11 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
     );
   }
 
+  const featureLabels = (product.features || [])
+    .map((feature: any) => typeof feature === 'string' ? feature : feature?.label)
+    .filter((label: any) => typeof label === 'string' && label.trim() && label.trim().toLowerCase() !== 'nổi bật')
+    .slice(0, 4);
+
   return (
     <div className="bg-white">
       <div className="max-w-7xl mx-auto px-6 py-12 md:py-24">
@@ -206,15 +211,18 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
               </div>
             </div>
 
-            <div className="space-y-6 mb-8">
-               <div className="flex flex-wrap gap-3">
-                  {product.features?.map((f, i) => (
-                    <div key={i} className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-tight shadow-sm">
-                       <Zap size={14} /> {f.label}
+            {featureLabels.length > 0 && (
+              <div className="mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl">
+                  {featureLabels.map((label, i) => (
+                    <div key={i} className="flex items-center gap-2.5 bg-emerald-50 text-emerald-700 px-4 py-3 rounded-xl text-[11px] font-black uppercase tracking-tight shadow-sm border border-emerald-100">
+                      <CheckCircle2 size={15} className="shrink-0 text-emerald-500" />
+                      <span className="min-w-0 leading-snug break-words">{label}</span>
                     </div>
                   ))}
-               </div>
-            </div>
+                </div>
+              </div>
+            )}
 
             {/* Product Variants / Options Selector */}
             {product.variants && product.variants.length > 0 && (
