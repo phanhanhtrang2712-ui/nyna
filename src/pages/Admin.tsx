@@ -625,10 +625,13 @@ const NewsManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, o
 const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, onError: (m: string) => void }) => {
   const [items, setItems] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [isAddingBrand, setIsAddingBrand] = useState(false);
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingBrandId, setEditingBrandId] = useState<string | null>(null);
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ 
     title: '', 
     brand: '', 
@@ -651,6 +654,10 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
     content: '',
     slug: ''
   });
+  const [categoryFormData, setCategoryFormData] = useState({
+    name: '',
+    description: ''
+  });
   const [uploading, setUploading] = useState(false);
   const [uploadingBrandImage, setUploadingBrandImage] = useState(false);
 
@@ -658,8 +665,14 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
   const [filterBrand, setFilterBrand] = useState('Tất cả');
 
   const filterCategories = React.useMemo(() => {
-    return ['Tất cả', ...Array.from(new Set(items.map(item => item.category).filter(Boolean)))];
-  }, [items]);
+    const list = categories.map(c => c.name);
+    items.forEach(item => {
+      if (item.category && !list.includes(item.category)) {
+        list.push(item.category);
+      }
+    });
+    return ['Tất cả', ...list];
+  }, [categories, items]);
 
   const filterBrands = React.useMemo(() => {
     return ['Tất cả', ...Array.from(new Set(items.map(item => item.brand).filter(Boolean)))];
@@ -686,9 +699,42 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
         setFormData(prev => ({ ...prev, brand: res[0].name }));
       }
     });
+    dataService.list<any>('product_categories').then(res => {
+      setCategories(res);
+    }).catch(err => {
+      console.warn("Lỗi tải danh mục sản phẩm:", err);
+    });
   };
 
   useEffect(() => { load(); }, []);
+
+  const handleAddCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setUploading(true);
+    try {
+      const payload = {
+        name: categoryFormData.name,
+        description: categoryFormData.description || ''
+      };
+
+      if (editingCategoryId) {
+        await dataService.update('product_categories', editingCategoryId, payload);
+        onSuccess("Đã cập nhật nhóm sản phẩm!");
+      } else {
+        await dataService.create('product_categories', payload);
+        onSuccess("Đã thêm nhóm sản phẩm mới!");
+      }
+      setIsAddingCategory(false);
+      setEditingCategoryId(null);
+      setCategoryFormData({ name: '', description: '' });
+      await load();
+    } catch (err: any) {
+      console.error(err);
+      onError(err.message || "Lỗi khi lưu nhóm sản phẩm");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleEditProduct = (item: any) => {
     setFormData({
@@ -842,6 +888,9 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-3xl font-black text-blue-900">Quản lý sản phẩm & Thương hiệu</h2>
         <div className="flex gap-3">
+          <button onClick={() => setIsAddingCategory(true)} className="bg-purple-600 text-white px-6 py-2.5 rounded-full font-bold flex items-center gap-2 hover:bg-purple-700 transition-all shadow-lg shadow-purple-600/20">
+            <Plus size={20} /> Thêm Nhóm sản phẩm
+          </button>
           <button onClick={() => setIsAddingBrand(true)} className="bg-pink-500 text-white px-6 py-2.5 rounded-full font-bold flex items-center gap-2 hover:bg-pink-600 transition-all shadow-lg shadow-pink-500/20">
             <Plus size={20} /> Thêm Thương hiệu
           </button>
@@ -850,6 +899,34 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
           </button>
         </div>
       </div>
+
+      {/* Category Management Form */}
+      {isAddingCategory && (
+        <form onSubmit={handleAddCategory} className="bg-purple-50/50 p-8 rounded-[32px] shadow-xl mb-8 border border-purple-100">
+           <h3 className="text-xl font-black text-purple-700 mb-6 uppercase tracking-tight">{editingCategoryId ? 'Chỉnh sửa nhóm sản phẩm' : 'Cấu hình nhóm sản phẩm mới'}</h3>
+           <div className="grid md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Tên nhóm sản phẩm</label>
+                <input required className="w-full p-3 bg-white border-2 border-transparent focus:border-purple-500 rounded-xl outline-none transition-all" value={categoryFormData.name} onChange={e=>setCategoryFormData({...categoryFormData, name: e.target.value})} placeholder="VD: Tã em bé, Băng vệ sinh..." />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Mô tả ngắn</label>
+                <input required className="w-full p-3 bg-white border-2 border-transparent focus:border-purple-500 rounded-xl outline-none transition-all" value={categoryFormData.description} onChange={e=>setCategoryFormData({...categoryFormData, description: e.target.value})} placeholder="VD: Các sản phẩm tã giấy, bỉm cho trẻ sơ sinh bỉm sữa..." />
+              </div>
+           </div>
+           <div className="flex gap-3">
+            <button type="submit" disabled={uploading} className="bg-purple-600 text-white px-8 py-3 rounded-xl font-bold disabled:opacity-50 flex items-center gap-2">
+              {uploading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Đang lưu...
+                </>
+              ) : (editingCategoryId ? 'Cập nhật' : 'Lưu nhóm sản phẩm')}
+            </button>
+            <button type="button" onClick={() => {setIsAddingCategory(false); setEditingCategoryId(null); setCategoryFormData({ name: '', description: '' });}} className="px-8 py-3 rounded-xl font-bold text-gray-400">Hủy</button>
+           </div>
+        </form>
+      )}
 
       {/* Brand Form */}
       {isAddingBrand && (
@@ -944,8 +1021,26 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
                 <textarea rows={4} className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none transition-all resize-none" value={formData.description} onChange={e=>setFormData({...formData, description: e.target.value})} placeholder="Nhập chi tiết về ưu điểm, công dụng, đặc tính của sản phẩm..." />
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Nhóm sản phẩm (Phân loại)</label>
-                <input required className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none transition-all" value={formData.category} onChange={e=>setFormData({...formData, category: e.target.value})} placeholder="VD: Tã bỉm em bé, Băng vệ sinh..." />
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1 flex justify-between items-center">
+                  <span>Nhóm sản phẩm (Phân loại)</span>
+                  <button type="button" onClick={() => { setIsAddingCategory(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-[10px] text-blue-600 hover:text-pink-500 hover:underline font-black uppercase tracking-wider">
+                    + Quản lý Nhóm
+                  </button>
+                </label>
+                <select 
+                  required 
+                  className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none transition-all font-bold text-blue-900" 
+                  value={formData.category} 
+                  onChange={e=>setFormData({...formData, category: e.target.value})}
+                >
+                  <option value="">-- Chọn nhóm sản phẩm --</option>
+                  {categories.map(c => (
+                    <option key={c.id || c.name} value={c.name}>{c.name}</option>
+                  ))}
+                  {formData.category && !categories.some(c => c.name === formData.category) && (
+                    <option value={formData.category}>{formData.category}</option>
+                  )}
+                </select>
               </div>
               
               <div className="md:col-span-2 border-t border-gray-100 pt-6">
@@ -1134,6 +1229,50 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
             </div>
           ))}
           {brands.length === 0 && <p className="text-gray-400 text-xs font-bold italic">Chưa có thương hiệu được thiết lập.</p>}
+        </div>
+      </div>
+
+      {/* Product Categories Summary List */}
+      <div className="mb-12">
+        <h3 className="text-sm font-black text-gray-400 mb-6 flex items-center gap-2 uppercase tracking-widest">
+          <div className="w-8 h-[2px] bg-purple-500 rounded-full"></div>
+          Nhóm sản phẩm hiện có
+        </h3>
+        <div className="flex flex-wrap gap-4">
+          {categories.map(cat => (
+            <div key={cat.id || cat.name} className="bg-white px-6 py-4 rounded-3xl shadow-sm border border-gray-100 flex items-center gap-6 group">
+              <div>
+                <div className="font-black uppercase tracking-tight text-sm text-blue-900">{cat.name}</div>
+                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{cat.description || 'Chưa có mô tả'}</div>
+              </div>
+              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                <button 
+                  onClick={() => {
+                    setCategoryFormData({ name: cat.name, description: cat.description || '' });
+                    setEditingCategoryId(cat.id);
+                    setIsAddingCategory(true);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }} 
+                  className="p-2 text-blue-400 hover:bg-blue-50 rounded-xl"
+                >
+                  <Edit size={16} />
+                </button>
+                <button 
+                  onClick={async () => { 
+                    if(confirm(`Xóa nhóm sản phẩm "${cat.name}"? Các sản phẩm thuộc nhóm này sẽ không bị xóa nhưng sẽ mất nhãn phân loại.`)) { 
+                      await dataService.delete('product_categories', cat.id); 
+                      load(); 
+                      onSuccess("Đã xóa nhóm sản phẩm!"); 
+                    } 
+                  }}
+                  className="p-2 text-red-400 hover:bg-red-50 rounded-xl"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            </div>
+          ))}
+          {categories.length === 0 && <p className="text-gray-400 text-xs font-bold italic">Chưa có nhóm sản phẩm nào được thiết lập.</p>}
         </div>
       </div>
 

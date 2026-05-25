@@ -41,5 +41,13 @@ export const FALLBACK_DATA: Record<string, any[]> = {
   jobs: [
     { id: "job-1", title: "Nhân viên Kinh doanh Kênh GT (Toàn quốc)", location: "TP.HCM / Hà Nội / Đà Nẵng", salary: "10M - 20M + Hoa hồng", deadline: "30/06/2026" },
     { id: "job-2", title: "Trưởng nhóm Marketing Thương hiệu (Brand Manager)", location: "Hội sở chính TP.HCM", salary: "Cạnh tranh", deadline: "15/06/2026" }
+  ],
+  product_categories: [
+    { id: "cat-1", name: "Tã em bé", description: "Các dòng tã quần, tã dán cao cấp nhẹ êm ôm bé yêu" },
+    { id: "cat-2", name: "Tã người lớn", description: "Sản phẩm bảo vệ, chăm sóc thoải mái cho người lớn tuổi" },
+    { id: "cat-3", name: "Chăm sóc phụ nữ", description: "Các sản phẩm chăm sóc sức khỏe phụ nữ cao cấp" },
+    { id: "cat-4", name: "Tấm lót đa năng", description: "Miếng lót đa năng tiện ích, chống tràn tuyệt hảo" },
+    { id: "cat-5", name: "Khăn khô", description: "Khăn giấy khô đa năng từ bông thiên nhiên" },
+    { id: "cat-6", name: "Sữa trẻ em", description: "Sản phẩm sữa công thức & dinh dưỡng cho trẻ nhỏ" }
   ]
 };

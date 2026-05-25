@@ -157,3 +157,13 @@ INSERT INTO public.cms_users (email, full_name, role)
 VALUES ('phanhanhtrang2712@gmail.com', 'Phan Thái Bình', 'quản trị') 
 ON CONFLICT (email) DO NOTHING;
 
+-- 11. Bảng Nhóm Sản phẩm (product_categories)
+CREATE TABLE IF NOT EXISTS public.product_categories (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    created_at TIMESTAMPTZ DEFAULT now(),
+    name TEXT UNIQUE NOT NULL,
+    description TEXT
+);
+ALTER TABLE public.product_categories DISABLE ROW LEVEL SECURITY;
+
+
