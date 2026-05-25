@@ -1,40 +1,37 @@
-import { useState, useEffect } from 'react';
-import { dataService } from '../services/dataService';
-import { FALLBACK_DATA } from '../data/fallbackData';
+﻿import { useState, useEffect } from "react";
+import { dataService } from "../services/dataService";
+import { queryCache } from "../services/queryCache";
 
-export function useDataList<T>(table: string, orderField: string = 'created_at') {
-  // Always start with an empty list and loading state to fetch the true real database source
-  const [data, setData] = useState<T[]>([]);
-  const [loading, setLoading] = useState(true);
+export function useDataList<T>(table: string, orderField: string = "created_at") {
+  const cacheKey = `nyna_cache_${table}`;
+
+  const [data, setData] = useState<T[]>(() => queryCache.getAny<T[]>(cacheKey) ?? []);
+  const [loading, setLoading] = useState<boolean>(!queryCache.getAny<T[]>(cacheKey));
 
   useEffect(() => {
-    let isMounted = true;
-    
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const res = await dataService.list<T>(table, orderField);
-        
-        if (isMounted) {
-          setData(res);
-          setLoading(false);
-        }
-      } catch (err) {
-        console.error(`Error loading ${table} from network:`, err);
-        if (isMounted) {
-          // Fallback to offline dataset if network or configuration is failing
-          setData((FALLBACK_DATA[table] || []) as T[]);
-          setLoading(false);
-        }
-      }
-    };
+    let cancelled = false;
 
-    fetchData();
+    if (queryCache.isFresh(cacheKey)) {
+      const fresh = queryCache.get<T[]>(cacheKey)!;
+      setData(fresh);
+      setLoading(false);
+      return;
+    }
 
-    return () => {
-      isMounted = false;
-    };
-  }, [table, orderField]);
+    const promiseKey = `${cacheKey}_promise`;
+    queryCache.getOrCreatePromise<T[]>(promiseKey, () =>
+      dataService.list<T>(table, orderField)
+    ).then(res => {
+      if (cancelled) return;
+      setData(res);
+      setLoading(false);
+    }).catch(err => {
+      console.error(`useDataList fetch error [${table}]:`, err);
+      if (!cancelled) setLoading(false);
+    });
+
+    return () => { cancelled = true; };
+  }, [cacheKey, table, orderField]);
 
   return { data, loading };
 }

@@ -1,4 +1,4 @@
-type CacheEntry<T> = {
+﻿type CacheEntry<T> = {
   data: T;
   timestamp: number;
 };
@@ -6,65 +6,95 @@ type CacheEntry<T> = {
 class QueryCache {
   private cache = new Map<string, CacheEntry<any>>();
   private promises = new Map<string, Promise<any>>();
-  private ttl = 5 * 60 * 1000; // 5 minutes default TTL
+  private ttl = 5 * 60 * 1000;
 
   get<T>(key: string): T | null {
-    // Caching is suspended as requested. Always return null to force real database query.
+    const entry = this.cache.get(key);
+    if (entry) {
+      if (Date.now() - entry.timestamp < this.ttl) {
+        return entry.data as T;
+      }
+    }
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const data = parsed.value;
+        const ts = parsed.timestamp || 0;
+        this.cache.set(key, { data, timestamp: ts });
+        if (Date.now() - ts < this.ttl) {
+          return data as T;
+        }
+      }
+    } catch (e) {
+      console.warn(`QueryCache read error [${key}]:`, e);
+    }
     return null;
   }
 
-  // Returns the cache regardless of expiration (for Stale-While-Revalidate)
   getAny<T>(key: string): T | null {
-    // Caching is suspended as requested. Always return null to force real database query.
+    const entry = this.cache.get(key);
+    if (entry) return entry.data as T;
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const data = parsed.value;
+        this.cache.set(key, { data, timestamp: parsed.timestamp || 0 });
+        return data as T;
+      }
+    } catch (e) {
+      console.warn(`QueryCache getAny error [${key}]:`, e);
+    }
     return null;
   }
 
   set<T>(key: string, value: T): void {
-    // Caching is suspended. Do not store in memory or localStorage.
+    const timestamp = Date.now();
+    this.cache.set(key, { data: value, timestamp });
+    try {
+      localStorage.setItem(key, JSON.stringify({ value, timestamp }));
+    } catch (e) {
+      console.warn(`QueryCache write error [${key}]:`, e);
+    }
   }
 
   delete(key: string): void {
     this.cache.delete(key);
-    try {
-      localStorage.removeItem(key);
-    } catch (e) {
-      console.warn(`QueryCache delete error for key ${key}:`, e);
-    }
+    try { localStorage.removeItem(key); } catch { }
   }
 
   clearTable(table: string): void {
-    const tablePrefix = `nyna_cache_${table}`;
+    const prefix = `nyna_cache_${table}`;
     this.cache.forEach((_, key) => {
-      if (key.startsWith(tablePrefix) || key.startsWith(`nyna_cache_${table}_`)) {
-        this.cache.delete(key);
-      }
+      if (key.startsWith(prefix)) this.cache.delete(key);
     });
-
     try {
       for (let i = localStorage.length - 1; i >= 0; i--) {
         const key = localStorage.key(i);
-        if (key && (key.startsWith(tablePrefix) || key.startsWith(`nyna_cache_${table}_`))) {
-          localStorage.removeItem(key);
-        }
+        if (key && key.startsWith(prefix)) localStorage.removeItem(key);
       }
-    } catch (e) {
-      console.warn(`QueryCache clearTable error for ${table}:`, e);
-    }
+    } catch { }
   }
 
-  // Deduplication: Coalesces parallel identical requests to a single promise
   getOrCreatePromise<T>(key: string, fetchFn: () => Promise<T>): Promise<T> {
     const existing = this.promises.get(key);
-    if (existing) {
-      return existing;
-    }
-
-    const promise = fetchFn().finally(() => {
-      this.promises.delete(key);
-    });
-
+    if (existing) return existing;
+    const cacheKey = key.replace("_promise", "");
+    const promise = fetchFn()
+      .then(result => {
+        this.set(cacheKey, result);
+        return result;
+      })
+      .finally(() => {
+        this.promises.delete(key);
+      });
     this.promises.set(key, promise);
     return promise;
+  }
+
+  isFresh(key: string): boolean {
+    return this.get(key) !== null;
   }
 }
 
