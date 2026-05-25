@@ -6,57 +6,47 @@ import { FALLBACK_DATA } from '../data/fallbackData';
 export function useDataList<T>(table: string, orderField: string = 'created_at') {
   const cacheKey = `nyna_cache_${table}`;
 
-  // Pre-calculate initial data to completely prevent Temporal Dead Zone (TDZ) ReferenceError
-  const initialData = (() => {
-    const cached = queryCache.getAny<T[]>(cacheKey);
-    if (cached && cached.length > 0) {
-      return cached;
-    }
-    // If no cache exists, return our static fallback backup data immediately (0 second delay!)
-    return (FALLBACK_DATA[table] || []) as T[];
-  })();
+  // Get only fresh, valid cache first
+  const freshCache = queryCache.get<T[]>(cacheKey);
+  const hasFreshData = freshCache && freshCache.length > 0;
 
-  const [data, setData] = useState<T[]>(initialData);
+  // Initialize data: only use fresh data if available, otherwise start empty to show loading skeleton
+  const [data, setData] = useState<T[]>(hasFreshData ? (freshCache as T[]) : []);
   
-  // Only show a loading spinner if we don't even have stale/cached or fallback data to present
-  const [loading, setLoading] = useState(() => {
-    const freshData = queryCache.get<T[]>(cacheKey);
-    const hasData = freshData && freshData.length > 0;
-    return !hasData && initialData.length === 0;
-  });
+  // Set initial loading state based on whether we have fresh data
+  const [loading, setLoading] = useState(!hasFreshData);
 
   useEffect(() => {
     let isMounted = true;
     
     const fetchData = async () => {
-      // Check if cache is fresh and within TTL (5 minutes)
+      // Re-check if cache became fresh in other concurrent mounts
       const freshData = queryCache.get<T[]>(cacheKey);
       if (freshData && freshData.length > 0) {
         if (isMounted) {
           setData(freshData);
           setLoading(false);
         }
-        return; // Cache is totally fresh, no need to touch network
+        return;
       }
 
-      // If missing or stale, fetch from network with request coalescing/deduplication
       try {
         const fetchPromise = () => dataService.list<T>(table, orderField);
         const res = await queryCache.getOrCreatePromise(cacheKey + '_promise', fetchPromise);
         
         if (isMounted) {
-          const currentReference = queryCache.getAny<T[]>(cacheKey) || (FALLBACK_DATA[table] || []);
-          const hasChanged = JSON.stringify(currentReference) !== JSON.stringify(res);
-
-          if (hasChanged) {
-            setData(res);
-            queryCache.set(cacheKey, res);
-          }
+          setData(res);
+          queryCache.set(cacheKey, res);
           setLoading(false);
         }
       } catch (err) {
-        console.error(`Error loading ${table} in background:`, err);
+        console.error(`Error loading ${table} from network:`, err);
         if (isMounted) {
+          // If network fails and we didn't have any cached data, fill with the offline fallback data
+          setData((prev) => {
+            if (prev && prev.length > 0) return prev;
+            return (FALLBACK_DATA[table] || []) as T[];
+          });
           setLoading(false);
         }
       }
