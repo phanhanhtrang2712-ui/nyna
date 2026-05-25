@@ -13,7 +13,7 @@ export enum OperationType {
 
 // Cac field nhe cho list view - KHONG lay image base64
 const LIST_SELECT: Record<string, string> = {
-  products: "id,created_at,title,brand,price,original_price,category,features,specifications,variants,image,images",
+  products: "id,created_at,title,brand,price,original_price,category,features,specifications,variants,image,images,description",
   brands: "*",
   news: "id,created_at,title,date,excerpt,image",
   videos: "*",
