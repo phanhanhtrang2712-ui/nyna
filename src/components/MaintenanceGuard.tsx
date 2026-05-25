@@ -172,7 +172,7 @@ export default function MaintenanceGuard({ children }: MaintenanceGuardProps) {
 
       {/* Humble Footer info */}
       <div className="absolute bottom-6 text-center text-slate-400 dark:text-slate-500 text-xs select-none pointer-events-none">
-        &copy; 2026 Admin Panel. Mọi quyền được bảo lưu.
+        &copy; 2026 BINHPHAN. Mọi quyền được bảo lưu.
       </div>
     </div>
   );
