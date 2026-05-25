@@ -3,6 +3,8 @@ import { queryCache } from './queryCache';
 
 export const prefetchTable = async (table: string, orderField: string = 'created_at'): Promise<void> => {
   const cacheKey = `nyna_cache_${table}`;
+  
+  // Only prefetch if the cache is expired or doesn't exist
   const freshData = queryCache.get(cacheKey);
   if (freshData) return;
 
@@ -11,7 +13,7 @@ export const prefetchTable = async (table: string, orderField: string = 'created
     const res = await queryCache.getOrCreatePromise(cacheKey + '_promise', fetchPromise);
     queryCache.set(cacheKey, res);
   } catch (err) {
-    console.warn(`Failed to prefetch ${table}:`, err);
+    console.warn(`Failed to prefetch ${table} in background:`, err);
   }
 };
 
@@ -23,13 +25,9 @@ export const prefetchDistributors = () => prefetchTable('distributors');
 export const prefetchPages = () => prefetchTable('pages');
 export const prefetchJobs = () => prefetchTable('jobs');
 
-// Prefetch TẤT CẢ các bảng ngay khi app khởi động
+// Warm cache with crucial home-page dependencies immediately on startup
 export const prefetchAppCore = () => {
   prefetchProducts();
   prefetchBrands();
   prefetchPages();
-  prefetchNews();
-  prefetchVideos();
-  prefetchDistributors();
-  prefetchJobs();
 };

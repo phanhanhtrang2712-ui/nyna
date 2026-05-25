@@ -13,7 +13,8 @@ export function useDataList<T>(table: string, orderField: string = 'created_at')
   // Only show a loading spinner if we don't even have stale/cached data to present
   const [loading, setLoading] = useState(() => {
     const freshData = queryCache.get<T[]>(cacheKey);
-    return !freshData && data.length === 0;
+    const hasData = freshData && freshData.length > 0;
+    return !hasData && data.length === 0;
   });
 
   useEffect(() => {
@@ -22,7 +23,7 @@ export function useDataList<T>(table: string, orderField: string = 'created_at')
     const fetchData = async () => {
       // Check if cache is fresh and within TTL (5 minutes)
       const freshData = queryCache.get<T[]>(cacheKey);
-      if (freshData) {
+      if (freshData && freshData.length > 0) {
         if (isMounted) {
           setData(freshData);
           setLoading(false);
