@@ -776,6 +776,28 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const uploadProductImage = async (file: File, type: 'main' | 'gallery') => {
+    const supabase = getSupabase();
+    const extension = file.name.split('.').pop()?.toLowerCase() || 'png';
+    const safeExtension = extension.replace(/[^a-z0-9]/g, '') || 'png';
+    const fileName = `${crypto.randomUUID()}_${type}.${safeExtension}`;
+    const { error } = await supabase.storage
+      .from('product-images')
+      .upload(fileName, file, {
+        cacheControl: '31536000',
+        contentType: file.type || `image/${safeExtension}`,
+        upsert: false,
+      });
+
+    if (error) throw error;
+
+    const { data } = supabase.storage
+      .from('product-images')
+      .getPublicUrl(fileName);
+
+    return data.publicUrl;
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, isMain: boolean = true) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -784,17 +806,20 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
       return;
     }
     setUploading(true);
-    const reader = new FileReader();
-    reader.onloadend = () => {
+    try {
+      const imageUrl = await uploadProductImage(file, isMain ? 'main' : 'gallery');
       if (isMain) {
-        setFormData({ ...formData, image: reader.result as string });
+        setFormData(prev => ({ ...prev, image: imageUrl }));
       } else {
-        const newImages = [...formData.images, reader.result as string].slice(0, 3);
-        setFormData({ ...formData, images: newImages });
+        setFormData(prev => ({ ...prev, images: [...prev.images, imageUrl].slice(0, 3) }));
       }
+    } catch (err: any) {
+      console.error("Lỗi upload ảnh sản phẩm:", err);
+      onError(err.message || "Không thể upload ảnh sản phẩm lên Supabase Storage. Kiểm tra bucket 'product-images' và quyền public upload.");
+    } finally {
       setUploading(false);
-    };
-    reader.readAsDataURL(file);
+      e.target.value = '';
+    }
   };
 
   const handleBrandFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
