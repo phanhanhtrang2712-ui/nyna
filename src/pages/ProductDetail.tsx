@@ -153,7 +153,7 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
-            className="space-y-4 md:space-y-6 sticky top-24"
+            className="space-y-4 md:space-y-6 lg:sticky lg:top-24"
           >
             <div className="aspect-[4/3] md:aspect-square bg-gray-50 rounded-[32px] md:rounded-[48px] overflow-hidden border border-gray-100 group relative">
                <AnimatePresence mode="wait">
@@ -221,9 +221,9 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
               <div className="mb-8">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl">
                   {featureLabels.map((label, i) => (
-                    <div key={i} className="flex items-center gap-2.5 bg-emerald-50 text-emerald-700 px-4 py-3 rounded-xl text-[11px] font-black uppercase tracking-tight shadow-sm border border-emerald-100">
+                    <div key={i} className="flex min-w-0 items-center gap-2.5 bg-emerald-50 text-emerald-700 px-4 py-3 rounded-xl text-[11px] font-black uppercase tracking-tight shadow-sm border border-emerald-100">
                       <CheckCircle2 size={15} className="shrink-0 text-emerald-500" />
-                      <span className="min-w-0 leading-snug break-words">{label}</span>
+                      <span className="min-w-0 leading-snug break-words [overflow-wrap:anywhere]">{label}</span>
                     </div>
                   ))}
                 </div>
