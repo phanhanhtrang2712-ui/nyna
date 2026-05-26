@@ -1,54 +1,69 @@
-﻿import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef, useCallback } from "react";
 import { dataService } from "../services/dataService";
 import { queryCache } from "../services/queryCache";
 
 export function useDataList<T>(table: string, orderField: string = "created_at") {
   const cacheKey = `nyna_cache_${table}`;
   const mountedRef = useRef(true);
+  const fetchedRef = useRef(false);
 
-  const [data, setData] = useState<T[]>(() => {
-    return queryCache.getAny<T[]>(cacheKey) ?? [];
-  });
+  // Khoi tao tu cache neu co
+  const [data, setData] = useState<T[]>(() => queryCache.getAny<T[]>(cacheKey) ?? []);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const [loading, setLoading] = useState<boolean>(() => {
-    const cached = queryCache.getAny<T[]>(cacheKey);
-    return !cached || cached.length === 0;
-  });
+  const load = useCallback(async (forceRefresh = false) => {
+    if (!mountedRef.current) return;
+
+    // Cache con tuoi va khong force refresh -> dung luon
+    if (!forceRefresh && queryCache.isFresh(cacheKey)) {
+      const fresh = queryCache.get<T[]>(cacheKey)!;
+      if (fresh && fresh.length > 0) {
+        setData(fresh);
+        setLoading(false);
+        fetchedRef.current = true;
+        return;
+      }
+    }
+
+    // Co stale cache -> hien thi truoc, fetch moi ngam
+    const stale = queryCache.getAny<T[]>(cacheKey);
+    if (stale && stale.length > 0 && !forceRefresh) {
+      setData(stale);
+      setLoading(false);
+    }
+
+    try {
+      const res = await dataService.list<T>(table, orderField);
+      if (!mountedRef.current) return;
+
+      // Chi update neu co data that su
+      if (res && res.length > 0) {
+        setData(res);
+        queryCache.set(cacheKey, res);
+      } else if (!stale || stale.length === 0) {
+        // Khong co cache va fetch ve rong -> van set loading false
+        setData([]);
+      }
+      setLoading(false);
+      fetchedRef.current = true;
+    } catch (err) {
+      console.error(`useDataList error [${table}]:`, err);
+      if (mountedRef.current) setLoading(false);
+    }
+  }, [table, orderField, cacheKey]);
 
   useEffect(() => {
     mountedRef.current = true;
-
-    const load = async () => {
-      // Cache con tuoi -> dung luon
-      if (queryCache.isFresh(cacheKey)) {
-        const fresh = queryCache.get<T[]>(cacheKey)!;
-        if (mountedRef.current) {
-          setData(fresh);
-          setLoading(false);
-        }
-        return;
-      }
-
-      // Fetch Supabase
-      try {
-        const res = await dataService.list<T>(table, orderField);
-        if (mountedRef.current) {
-          setData(res);
-          setLoading(false);
-          queryCache.set(cacheKey, res);
-        }
-      } catch (err) {
-        console.error(`useDataList error [${table}]:`, err);
-        if (mountedRef.current) setLoading(false);
-      }
-    };
-
+    fetchedRef.current = false;
     load();
+    return () => { mountedRef.current = false; };
+  }, [load]);
 
-    return () => {
-      mountedRef.current = false;
-    };
-  }, [table, orderField, cacheKey]);
+  // Expose refetch de force reload khi can
+  const refetch = useCallback(() => {
+    queryCache.delete(cacheKey);
+    load(true);
+  }, [cacheKey, load]);
 
-  return { data, loading };
+  return { data, loading, refetch };
 }
