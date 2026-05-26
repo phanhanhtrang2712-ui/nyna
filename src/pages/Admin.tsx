@@ -798,6 +798,23 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
     return data.publicUrl;
   };
 
+  const isBase64Image = (value: string) => value.startsWith('data:image/');
+
+  const dataUrlToFile = async (dataUrl: string, fileName: string) => {
+    const response = await fetch(dataUrl);
+    const blob = await response.blob();
+    return new File([blob], fileName, { type: blob.type || 'image/png' });
+  };
+
+  const ensureProductImageUrl = async (value: string, type: 'main' | 'gallery') => {
+    if (!value || !isBase64Image(value)) return value;
+
+    const mimeMatch = value.match(/^data:image\/([a-zA-Z0-9.+-]+);base64,/);
+    const extension = mimeMatch?.[1]?.replace('jpeg', 'jpg') || 'png';
+    const file = await dataUrlToFile(value, `${crypto.randomUUID()}_${type}.${extension}`);
+    return uploadProductImage(file, type);
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, isMain: boolean = true) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -845,9 +862,18 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
       if (!formData.brand && brands.length > 0) {
         formData.brand = brands[0].name;
       }
+
+      const imageUrl = await ensureProductImageUrl(formData.image, 'main');
+      const galleryUrls = await Promise.all(
+        (formData.images || [])
+          .slice(0, 3)
+          .map(image => ensureProductImageUrl(image, 'gallery'))
+      );
       
       const payload = { 
         ...formData, 
+        image: imageUrl,
+        images: galleryUrls,
         price: Number(formData.price),
         original_price: formData.original_price ? Number(formData.original_price) : null,
         category: formData.category || 'Chưa phân loại',
