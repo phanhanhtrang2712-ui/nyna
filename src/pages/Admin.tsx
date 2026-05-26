@@ -1032,7 +1032,7 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
               </div>
               <div className="md:col-span-2">
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Mô tả & Công dụng sản phẩm</label>
-                <textarea rows={4} className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none transition-all resize-none" value={formData.description} onChange={e=>setFormData({...formData, description: e.target.value})} placeholder="Nhập chi tiết về ưu điểm, công dụng, đặc tính của sản phẩm..." />
+                <textarea rows={10} className="w-full min-h-64 p-4 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none transition-all resize-y leading-relaxed" value={formData.description} onChange={e=>setFormData({...formData, description: e.target.value})} placeholder="Nhập chi tiết về ưu điểm, công dụng, đặc tính của sản phẩm..." />
               </div>
               <div className="md:col-span-2">
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Tính năng chính của sản phẩm (tối đa 4)</label>
