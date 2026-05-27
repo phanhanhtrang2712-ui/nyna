@@ -12,10 +12,6 @@ interface ProductCardProps {
 
 const ProductCard = ({ item, onAddToCart }: ProductCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
-  const featureLabels = (item.features || [])
-    .map((feature: any) => typeof feature === 'string' ? feature : feature?.label)
-    .filter((label: any) => typeof label === 'string' && label.trim() && label.trim().toLowerCase() !== 'nổi bật')
-    .slice(0, 2);
 
   return (
     <motion.div 
@@ -49,11 +45,10 @@ const ProductCard = ({ item, onAddToCart }: ProductCardProps) => {
           </h3>
         </Link>
         
-        <div className="grid grid-cols-1 gap-1 md:flex md:flex-wrap md:gap-2 mb-4 md:mb-6 min-w-0">
-          {featureLabels.map((label, i) => (
-            <div key={i} className="flex min-w-0 w-full md:w-auto items-start gap-1 bg-emerald-50 text-emerald-600 px-2 py-1 md:px-3 md:py-1 rounded-lg text-[8px] md:text-[9px] font-black uppercase tracking-tighter">
-              <CheckCircle2 size={10} className="shrink-0 mt-0.5" />
-              <span className="min-w-0 leading-snug break-words [overflow-wrap:anywhere] md:truncate">{label}</span>
+        <div className="flex flex-wrap gap-1 md:gap-2 mb-4 md:mb-6">
+          {item.features?.slice(0, 2).map((f, i) => (
+            <div key={i} className="flex items-center gap-1 bg-emerald-50 text-emerald-600 px-2 py-0.5 md:px-3 md:py-1 rounded-lg text-[8px] md:text-[9px] font-black uppercase tracking-tighter">
+              <CheckCircle2 size={10} className="shrink-0" /> <span className="truncate">{f.label}</span>
             </div>
           ))}
         </div>

@@ -3,7 +3,7 @@ import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ShoppingCart, ArrowLeft, CheckCircle2, ShieldCheck, 
-  Info, ListChecks, ChevronRight, Heart
+  Zap, Info, ListChecks, ChevronRight, Heart
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { dataService } from '../services/dataService';
@@ -14,11 +14,6 @@ import { ProductItem } from '../types';
 interface ProductDetailProps {
   onAddToCart?: (product: any) => void;
 }
-
-const hasProductDetailFields = (item: ProductItem) => (
-  Object.prototype.hasOwnProperty.call(item, 'description') &&
-  Object.prototype.hasOwnProperty.call(item, 'features')
-);
 
 const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) => {
   const { id } = useParams();
@@ -32,14 +27,14 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
     // 1. Try single item cache in queryCache
     const itemCacheKey = `nyna_cache_products_${id}`;
     const cachedItem = queryCache.getAny<ProductItem>(itemCacheKey);
-    if (cachedItem && hasProductDetailFields(cachedItem)) return cachedItem;
+    if (cachedItem) return cachedItem;
 
     // 2. Try general list cache in queryCache
     const listCacheKey = `nyna_cache_products`;
     const cachedList = queryCache.getAny<ProductItem[]>(listCacheKey);
     if (cachedList) {
       const found = cachedList.find(p => p.id === id);
-      if (found && hasProductDetailFields(found)) return found;
+      if (found) return found;
     }
 
     // 3. Try fallback static backup database
@@ -53,11 +48,10 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
   const [loading, setLoading] = useState(() => {
     if (!id) return true;
     const freshItem = queryCache.get<ProductItem>(`nyna_cache_products_${id}`);
-    if (freshItem && hasProductDetailFields(freshItem)) return false;
+    if (freshItem) return false;
     
     const freshList = queryCache.get<ProductItem[]>(`nyna_cache_products`);
-    const freshListItem = freshList?.find(p => p.id === id);
-    if (freshListItem && hasProductDetailFields(freshListItem)) return false;
+    if (freshList && freshList.some(p => p.id === id)) return false;
 
     return !product;
   });
@@ -78,7 +72,7 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
       const fetchItem = async () => {
         // Try fresh item cache first
         const freshItem = queryCache.get<ProductItem>(`nyna_cache_products_${id}`);
-        if (freshItem && hasProductDetailFields(freshItem)) {
+        if (freshItem) {
           if (isMounted) {
             setProduct(freshItem);
             setActiveImage(prev => prev || freshItem.image);
@@ -131,11 +125,6 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
     );
   }
 
-  const featureLabels = (product.features || [])
-    .map((feature: any) => typeof feature === 'string' ? feature : feature?.label)
-    .filter((label: any) => typeof label === 'string' && label.trim() && label.trim().toLowerCase() !== 'nổi bật')
-    .slice(0, 4);
-
   return (
     <div className="bg-white">
       <div className="max-w-7xl mx-auto px-6 py-12 md:py-24">
@@ -153,7 +142,7 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
-            className="space-y-4 md:space-y-6 lg:sticky lg:top-24"
+            className="space-y-4 md:space-y-6 sticky top-24"
           >
             <div className="aspect-[4/3] md:aspect-square bg-gray-50 rounded-[32px] md:rounded-[48px] overflow-hidden border border-gray-100 group relative">
                <AnimatePresence mode="wait">
@@ -217,18 +206,15 @@ const ProductDetail = ({ onAddToCart: propsOnAddToCart }: ProductDetailProps) =>
               </div>
             </div>
 
-            {featureLabels.length > 0 && (
-              <div className="mb-8">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl">
-                  {featureLabels.map((label, i) => (
-                    <div key={i} className="flex min-w-0 items-center gap-2.5 bg-emerald-50 text-emerald-700 px-4 py-3 rounded-xl text-[11px] font-black uppercase tracking-tight shadow-sm border border-emerald-100">
-                      <CheckCircle2 size={15} className="shrink-0 text-emerald-500" />
-                      <span className="min-w-0 leading-snug break-words [overflow-wrap:anywhere]">{label}</span>
+            <div className="space-y-6 mb-8">
+               <div className="flex flex-wrap gap-3">
+                  {product.features?.map((f, i) => (
+                    <div key={i} className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-tight shadow-sm">
+                       <Zap size={14} /> {f.label}
                     </div>
                   ))}
-                </div>
-              </div>
-            )}
+               </div>
+            </div>
 
             {/* Product Variants / Options Selector */}
             {product.variants && product.variants.length > 0 && (

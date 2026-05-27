@@ -5,7 +5,7 @@ import {
   PlayCircle, Settings, Download, Upload, Database, CreditCard,
   Calendar, TrendingUp, BarChart3, Filter, Mail, MessageSquare, Menu
 } from 'lucide-react';
-import { getSupabase } from '../lib/supabase';
+import { getSupabase, uploadFileToStorage } from '../lib/supabase';
 import { dataService } from '../services/dataService';
 import { VideoItem, OrderItem, ProductItem, BrandItem, CmsUser } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
@@ -451,12 +451,14 @@ const NewsManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void, o
     }
 
     setUploading(true);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setFormData({ ...formData, image: reader.result as string });
+    try {
+      const publicUrl = await uploadFileToStorage(file, 'nyna');
+      setFormData({ ...formData, image: publicUrl });
+    } catch (err: any) {
+      alert(err.message || "Lỗi tải ảnh lên.");
+    } finally {
       setUploading(false);
-    };
-    reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -641,7 +643,6 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
     original_price: '',
     category: '', 
     description: '',
-    features: ['', '', '', ''],
     variants: [] as { name: string; price: number; original_price?: number }[]
   });
   const [newVariantName, setNewVariantName] = useState('');
@@ -738,13 +739,6 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
   };
 
   const handleEditProduct = (item: any) => {
-    const featureLabels = Array.isArray(item.features)
-      ? item.features
-          .map((feature: any) => typeof feature === 'string' ? feature : feature?.label)
-          .filter((label: any) => typeof label === 'string' && label.trim() && label.trim().toLowerCase() !== 'nổi bật')
-          .slice(0, 4)
-      : [];
-
     setFormData({
       title: item.title,
       brand: item.brand,
@@ -754,7 +748,6 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
       original_price: (item.original_price || '').toString(),
       category: item.category || '',
       description: item.description || '',
-      features: [...featureLabels, '', '', '', ''].slice(0, 4),
       variants: item.variants || []
     });
     setEditingId(item.id);
@@ -776,45 +769,6 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const uploadProductImage = async (file: File, type: 'main' | 'gallery') => {
-    const supabase = getSupabase();
-    const extension = file.name.split('.').pop()?.toLowerCase() || 'png';
-    const safeExtension = extension.replace(/[^a-z0-9]/g, '') || 'png';
-    const fileName = `${crypto.randomUUID()}_${type}.${safeExtension}`;
-    const { error } = await supabase.storage
-      .from('product-images')
-      .upload(fileName, file, {
-        cacheControl: '31536000',
-        contentType: file.type || `image/${safeExtension}`,
-        upsert: false,
-      });
-
-    if (error) throw error;
-
-    const { data } = supabase.storage
-      .from('product-images')
-      .getPublicUrl(fileName);
-
-    return data.publicUrl;
-  };
-
-  const isBase64Image = (value: string) => value.startsWith('data:image/');
-
-  const dataUrlToFile = async (dataUrl: string, fileName: string) => {
-    const response = await fetch(dataUrl);
-    const blob = await response.blob();
-    return new File([blob], fileName, { type: blob.type || 'image/png' });
-  };
-
-  const ensureProductImageUrl = async (value: string, type: 'main' | 'gallery') => {
-    if (!value || !isBase64Image(value)) return value;
-
-    const mimeMatch = value.match(/^data:image\/([a-zA-Z0-9.+-]+);base64,/);
-    const extension = mimeMatch?.[1]?.replace('jpeg', 'jpg') || 'png';
-    const file = await dataUrlToFile(value, `${crypto.randomUUID()}_${type}.${extension}`);
-    return uploadProductImage(file, type);
-  };
-
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, isMain: boolean = true) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -824,18 +778,17 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
     }
     setUploading(true);
     try {
-      const imageUrl = await uploadProductImage(file, isMain ? 'main' : 'gallery');
+      const publicUrl = await uploadFileToStorage(file, 'nyna');
       if (isMain) {
-        setFormData(prev => ({ ...prev, image: imageUrl }));
+        setFormData({ ...formData, image: publicUrl });
       } else {
-        setFormData(prev => ({ ...prev, images: [...prev.images, imageUrl].slice(0, 3) }));
+        const newImages = [...formData.images, publicUrl].slice(0, 3);
+        setFormData({ ...formData, images: newImages });
       }
     } catch (err: any) {
-      console.error("Lỗi upload ảnh sản phẩm:", err);
-      onError(err.message || "Không thể upload ảnh sản phẩm lên Supabase Storage. Kiểm tra bucket 'product-images' và quyền public upload.");
+      alert(err.message || "Lỗi tải ảnh lên.");
     } finally {
       setUploading(false);
-      e.target.value = '';
     }
   };
 
@@ -847,12 +800,14 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
       return;
     }
     setUploadingBrandImage(true);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setBrandFormData({ ...brandFormData, image: reader.result as string });
+    try {
+      const publicUrl = await uploadFileToStorage(file, 'nyna');
+      setBrandFormData({ ...brandFormData, image: publicUrl });
+    } catch (err: any) {
+      alert(err.message || "Lỗi tải ảnh lên.");
+    } finally {
       setUploadingBrandImage(false);
-    };
-    reader.readAsDataURL(file);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -862,27 +817,14 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
       if (!formData.brand && brands.length > 0) {
         formData.brand = brands[0].name;
       }
-
-      const imageUrl = await ensureProductImageUrl(formData.image, 'main');
-      const galleryUrls = await Promise.all(
-        (formData.images || [])
-          .slice(0, 3)
-          .map(image => ensureProductImageUrl(image, 'gallery'))
-      );
       
       const payload = { 
         ...formData, 
-        image: imageUrl,
-        images: galleryUrls,
         price: Number(formData.price),
         original_price: formData.original_price ? Number(formData.original_price) : null,
         category: formData.category || 'Chưa phân loại',
         description: formData.description || '',
-        features: formData.features
-          .map(label => label.trim())
-          .filter(Boolean)
-          .slice(0, 4)
-          .map(label => ({ label, icon: 'check' })),
+        features: [{label: 'Nổi bật', icon: 'zap'}],
         variants: formData.variants || []
       };
 
@@ -905,7 +847,6 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
         original_price: '',
         category: '', 
         description: '',
-        features: ['', '', '', ''],
         variants: []
       });
       await load();
@@ -1083,30 +1024,7 @@ const ProductManager = ({ onSuccess, onError }: { onSuccess: (m: string) => void
               </div>
               <div className="md:col-span-2">
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Mô tả & Công dụng sản phẩm</label>
-                <textarea rows={10} className="w-full min-h-64 p-4 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none transition-all resize-y leading-relaxed" value={formData.description} onChange={e=>setFormData({...formData, description: e.target.value})} placeholder="Nhập chi tiết về ưu điểm, công dụng, đặc tính của sản phẩm..." />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Tính năng chính của sản phẩm (tối đa 4)</label>
-                <div className="grid md:grid-cols-2 gap-3">
-                  {formData.features.map((feature, index) => (
-                    <input
-                      key={index}
-                      type="text"
-                      maxLength={40}
-                      className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none transition-all text-sm font-bold text-blue-900 placeholder:font-medium"
-                      value={feature}
-                      onChange={e => {
-                        const nextFeatures = [...formData.features];
-                        nextFeatures[index] = e.target.value;
-                        setFormData({ ...formData, features: nextFeatures });
-                      }}
-                      placeholder={`Tính năng ${index + 1}`}
-                    />
-                  ))}
-                </div>
-                <p className="mt-2 text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                  Các tính năng này sẽ hiển thị thay vị trí nhãn Nổi bật trên trang chi tiết sản phẩm.
-                </p>
+                <textarea rows={4} className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-blue-900 focus:bg-white rounded-xl outline-none transition-all resize-none" value={formData.description} onChange={e=>setFormData({...formData, description: e.target.value})} placeholder="Nhập chi tiết về ưu điểm, công dụng, đặc tính của sản phẩm..." />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1 flex justify-between items-center">

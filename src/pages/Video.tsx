@@ -20,38 +20,49 @@ const Video = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16">
-          {videos.map((vid, i) => (
-            <motion.div 
-              key={vid.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="group cursor-pointer flex flex-col"
-              onClick={() => setSelectedVideo(vid)}
-            >
-              <div className="aspect-[4/3] rounded-[48px] overflow-hidden relative mb-8 bg-gray-100 shadow-sm transition-all group-hover:shadow-2xl">
-                <img 
-                  src={getYoutubeThumbnail(vid.youtube_url)} 
-                  alt={vid.title} 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                />
-                <div className="absolute inset-0 bg-blue-900/10 group-hover:bg-blue-900/30 transition-colors flex items-center justify-center">
-                  <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-blue-900 shadow-2xl scale-90 group-hover:scale-100 transition-transform">
-                    <Play size={32} fill="currentColor" />
+          {loading ? (
+            Array.from({ length: 3 }).map((_, idx) => (
+              <div key={idx} className="block animate-pulse">
+                <div className="aspect-[4/3] rounded-[48px] bg-gray-100 mb-8 border border-gray-50 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-full border-2 border-gray-200 border-t-blue-550 animate-spin"></div>
+                </div>
+                <div className="h-7 bg-gray-100 rounded-2xl w-3/4"></div>
+              </div>
+            ))
+          ) : (
+            videos.map((vid, i) => (
+              <motion.div 
+                key={vid.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="group cursor-pointer flex flex-col"
+                onClick={() => setSelectedVideo(vid)}
+              >
+                <div className="aspect-[4/3] rounded-[48px] overflow-hidden relative mb-8 bg-gray-100 shadow-sm transition-all group-hover:shadow-2xl">
+                  <img 
+                    src={getYoutubeThumbnail(vid.youtube_url)} 
+                    alt={vid.title} 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                  />
+                  <div className="absolute inset-0 bg-blue-900/10 group-hover:bg-blue-900/30 transition-colors flex items-center justify-center">
+                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-blue-900 shadow-2xl scale-90 group-hover:scale-100 transition-transform">
+                      <Play size={32} fill="currentColor" />
+                    </div>
+                  </div>
+                  <div className="absolute top-8 left-8 bg-pink-500 text-white px-6 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg">
+                    {vid.tag}
                   </div>
                 </div>
-                <div className="absolute top-8 left-8 bg-pink-500 text-white px-6 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg">
-                  {vid.tag}
-                </div>
-              </div>
-              <h3 className="text-xl md:text-2xl font-black text-blue-900 uppercase tracking-tighter group-hover:text-pink-500 transition-colors leading-none">
-                {vid.title}
-              </h3>
-            </motion.div>
-          ))}
+                <h3 className="text-xl md:text-2xl font-black text-blue-900 uppercase tracking-tighter group-hover:text-pink-500 transition-colors leading-none">
+                  {vid.title}
+                </h3>
+              </motion.div>
+            ))
+          )}
           
-          {videos.length === 0 && (
+          {!loading && videos.length === 0 && (
             <div className="col-span-full py-32 text-center text-gray-300 font-black uppercase tracking-[0.4em]">Đang cập nhật video...</div>
           )}
         </div>

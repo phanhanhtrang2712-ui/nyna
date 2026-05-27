@@ -25,9 +25,13 @@ export const prefetchDistributors = () => prefetchTable('distributors');
 export const prefetchPages = () => prefetchTable('pages');
 export const prefetchJobs = () => prefetchTable('jobs');
 
-// Warm cache with crucial home-page dependencies immediately on startup
+// Warm cache with crucial home-page and other sub-page dependencies immediately on startup
 export const prefetchAppCore = () => {
   prefetchProducts();
   prefetchBrands();
+  prefetchNews();
+  prefetchVideos();
+  prefetchDistributors();
   prefetchPages();
+  prefetchJobs();
 };

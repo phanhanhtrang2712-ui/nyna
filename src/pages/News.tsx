@@ -20,25 +20,41 @@ const News = () => {
         </div>
 
         <div className="grid md:grid-cols-3 gap-12">
-          {news.map((item, idx) => (
-            <motion.div 
-              key={item.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              onClick={() => setActiveNews(item)}
-              className="group cursor-pointer"
-            >
-              <div className="h-72 rounded-[48px] overflow-hidden mb-10 shadow-xl border border-white relative">
-                 <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s]" />
-                 <div className="absolute top-6 left-6 bg-white/90 backdrop-blur px-4 py-2 rounded-2xl font-black text-[10px] uppercase text-blue-900">{item.date}</div>
+          {loading ? (
+            Array.from({ length: 3 }).map((_, idx) => (
+              <div key={idx} className="block animate-pulse">
+                <div className="h-72 bg-gray-100 rounded-[48px] mb-10 border border-gray-50 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-full border-2 border-gray-200 border-t-pink-500 animate-spin"></div>
+                </div>
+                <div className="h-7 bg-gray-100 rounded-2xl w-3/4 mb-4"></div>
+                <div className="space-y-2.5 mb-8">
+                  <div className="h-4 bg-gray-100 rounded-xl w-full"></div>
+                  <div className="h-4 bg-gray-100 rounded-xl w-5/6"></div>
+                </div>
+                <div className="h-4 bg-gray-100 rounded-xl w-1/3"></div>
               </div>
-              <h3 className="text-2xl font-black text-blue-900 mb-4 group-hover:text-pink-500 transition-colors leading-tight uppercase tracking-tight line-clamp-2">{item.title}</h3>
-              <p className="text-gray-500 text-sm leading-relaxed mb-8 line-clamp-3 font-medium">{item.excerpt}</p>
-              <button className="text-blue-900 font-black text-xs flex items-center gap-3 hover:gap-5 transition-all uppercase tracking-[0.2em]">Đọc bài viết <ArrowRight size={18} /></button>
-            </motion.div>
-          ))}
-          {news.length === 0 && <p className="col-span-full text-center text-gray-400 py-20 uppercase font-black italic">Chưa có bài viết mới.</p>}
+            ))
+          ) : (
+            news.map((item, idx) => (
+              <motion.div 
+                key={item.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                onClick={() => setActiveNews(item)}
+                className="group cursor-pointer"
+              >
+                <div className="h-72 rounded-[48px] overflow-hidden mb-10 shadow-xl border border-white relative">
+                   <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s]" />
+                   <div className="absolute top-6 left-6 bg-white/90 backdrop-blur px-4 py-2 rounded-2xl font-black text-[10px] uppercase text-blue-900">{item.date}</div>
+                </div>
+                <h3 className="text-2xl font-black text-blue-900 mb-4 group-hover:text-pink-500 transition-colors leading-tight uppercase tracking-tight line-clamp-2">{item.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed mb-8 line-clamp-3 font-medium">{item.excerpt}</p>
+                <button className="text-blue-900 font-black text-xs flex items-center gap-3 hover:gap-5 transition-all uppercase tracking-[0.2em]">Đọc bài viết <ArrowRight size={18} /></button>
+              </motion.div>
+            ))
+          )}
+          {!loading && news.length === 0 && <p className="col-span-full text-center text-gray-400 py-20 uppercase font-black italic">Chưa có bài viết mới.</p>}
         </div>
       </div>
 
