@@ -3,63 +3,60 @@ import { dataService } from "../services/dataService";
 import { queryCache } from "../services/queryCache";
 
 export function useDataList<T>(table: string, orderField: string = "created_at") {
-  const cacheKey = `nyna_cache_${table}`;
+  const cacheKey = "nyna_cache_" + table;
   const mountedRef = useRef(true);
-  const fetchedRef = useRef(false);
 
-  // Khoi tao tu cache neu co
+  // Lay cache ngay lap tuc de hien thi
   const [data, setData] = useState<T[]>(() => queryCache.getAny<T[]>(cacheKey) ?? []);
-  const [loading, setLoading] = useState<boolean>(true);
+  
+  // Chi show loading neu khong co cache gi ca
+  const [loading, setLoading] = useState<boolean>(() => {
+    const cached = queryCache.getAny<T[]>(cacheKey);
+    return !cached || (cached as any[]).length === 0;
+  });
 
   const load = useCallback(async (forceRefresh = false) => {
     if (!mountedRef.current) return;
 
-    // Cache con tuoi va khong force refresh -> dung luon
+    // Cache con tuoi -> hien thi ngay, khong fetch
     if (!forceRefresh && queryCache.isFresh(cacheKey)) {
       const fresh = queryCache.get<T[]>(cacheKey)!;
-      if (fresh && fresh.length > 0) {
+      if (fresh && (fresh as any[]).length > 0) {
         setData(fresh);
         setLoading(false);
-        fetchedRef.current = true;
         return;
       }
     }
 
-    // Co stale cache -> hien thi truoc, fetch moi ngam
+    // Co stale cache -> hien thi luon, fetch ngam
     const stale = queryCache.getAny<T[]>(cacheKey);
-    if (stale && stale.length > 0 && !forceRefresh) {
+    if (stale && (stale as any[]).length > 0 && !forceRefresh) {
       setData(stale);
       setLoading(false);
     }
 
+    // Fetch tu Supabase
     try {
       const res = await dataService.list<T>(table, orderField);
       if (!mountedRef.current) return;
-
-      // Chi update neu co data that su
-      if (res && res.length > 0) {
+      if (res && (res as any[]).length > 0) {
         setData(res);
-        queryCache.set(cacheKey, res);
-      } else if (!stale || stale.length === 0) {
-        // Khong co cache va fetch ve rong -> van set loading false
+      } else if (!stale || (stale as any[]).length === 0) {
         setData([]);
       }
       setLoading(false);
-      fetchedRef.current = true;
     } catch (err) {
-      console.error(`useDataList error [${table}]:`, err);
+      console.error("useDataList error [" + table + "]:", err);
       if (mountedRef.current) setLoading(false);
     }
   }, [table, orderField, cacheKey]);
 
   useEffect(() => {
     mountedRef.current = true;
-    fetchedRef.current = false;
     load();
     return () => { mountedRef.current = false; };
   }, [load]);
 
-  // Expose refetch de force reload khi can
   const refetch = useCallback(() => {
     queryCache.delete(cacheKey);
     load(true);

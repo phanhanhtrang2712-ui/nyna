@@ -4,16 +4,16 @@ import { FALLBACK_DATA } from "../data/fallbackData";
 
 export enum OperationType {
   CREATE = "create",
-  UPDATE = "update",
+  UPDATE = "update", 
   DELETE = "delete",
   LIST = "list",
   GET = "get",
   WRITE = "write",
 }
 
-// Anh da la URL nhe - an toan de include trong list query
+// Chi lay fields can thiet cho list view - giam data transfer
 const LIST_SELECT: Record<string, string> = {
-  products: "*",
+  products: "id,created_at,title,brand,price,original_price,category,image,images,features,variants",
   brands: "*",
   news: "id,created_at,title,date,excerpt,image",
   videos: "*",
@@ -36,9 +36,7 @@ export const dataService = {
       if (error) {
         if (error.message.includes("column \"created_at\" does not exist")) {
           const { data: retryData, error: retryError } = await supabase
-            .from(table)
-            .select(selectFields)
-            .order("createdAt", { ascending: false });
+            .from(table).select(selectFields).order("createdAt", { ascending: false });
           if (retryError) throw retryError;
           if ((!retryData || retryData.length === 0) && FALLBACK_DATA[table]) {
             return FALLBACK_DATA[table] as T[];
@@ -52,10 +50,11 @@ export const dataService = {
       if (listData.length === 0 && FALLBACK_DATA[table]) {
         return FALLBACK_DATA[table] as T[];
       }
-      queryCache.set(`nyna_cache_${table}`, listData);
+      // Cache ngay trong dataService
+      queryCache.set("nyna_cache_" + table, listData);
       return listData as T[];
     } catch (error) {
-      console.error(`Supabase List Error [${table}]: `, error);
+      console.error("Supabase List Error [" + table + "]: ", error);
       if (FALLBACK_DATA[table]) return FALLBACK_DATA[table] as T[];
       return [];
     }
@@ -64,10 +63,8 @@ export const dataService = {
   async create<T>(table: string, data: T): Promise<string> {
     const supabase = getSupabase();
     const { data: inserted, error } = await supabase
-      .from(table)
-      .insert([data] as any)
-      .select();
-    if (error) { console.error(`Supabase Create Error [${table}]: `, error); throw error; }
+      .from(table).insert([data] as any).select();
+    if (error) { console.error("Supabase Create Error [" + table + "]: ", error); throw error; }
     queryCache.clearTable(table);
     return inserted?.[0]?.id || "";
   },
@@ -75,9 +72,9 @@ export const dataService = {
   async update<T>(table: string, id: string, data: Partial<T>): Promise<void> {
     const supabase = getSupabase();
     const { error } = await supabase.from(table).update(data as any).eq("id", id);
-    if (error) { console.error(`Supabase Update Error [${table}/${id}]: `, error); throw error; }
+    if (error) { console.error("Supabase Update Error [" + table + "/" + id + "]: ", error); throw error; }
     queryCache.clearTable(table);
-    queryCache.delete(`nyna_cache_${table}_${id}`);
+    queryCache.delete("nyna_cache_" + table + "_" + id);
   },
 
   async delete(table: string, id: string): Promise<void> {
@@ -86,14 +83,14 @@ export const dataService = {
       const { error } = await supabase.from(table).delete().eq("id", id);
       if (error) throw error;
       queryCache.clearTable(table);
-      queryCache.delete(`nyna_cache_${table}_${id}`);
+      queryCache.delete("nyna_cache_" + table + "_" + id);
     } catch (error) {
-      console.error(`Supabase Delete Error [${table}/${id}]: `, error);
+      console.error("Supabase Delete Error [" + table + "/" + id + "]: ", error);
     }
   },
 
   async get<T>(table: string, id: string): Promise<T> {
-    const cacheKey = `nyna_cache_${table}_${id}`;
+    const cacheKey = "nyna_cache_" + table + "_" + id;
     const cachedItem = queryCache.get<T>(cacheKey);
     if (cachedItem) return cachedItem;
 
