@@ -1,69 +1,66 @@
 import React from 'react';
-import { ShieldAlert, Clock, Globe } from 'lucide-react';
 import { motion } from 'motion/react';
+import { Sparkles } from 'lucide-react';
 
 export default function App() {
   return (
-    <div className="min-h-screen w-full bg-[#0a0f1d] text-gray-100 flex items-center justify-center p-6 font-sans relative overflow-hidden selection:bg-pink-500 selection:text-white">
-      {/* Background radial soft ambient glow effects */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-blue-600/10 blur-[120px] pointer-events-none"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full bg-pink-600/10 blur-[120px] pointer-events-none"></div>
+    <div className="min-h-screen w-full bg-[#030712] text-gray-100 flex items-center justify-center p-6 font-sans relative overflow-hidden select-none">
+      {/* Immersive background glow elements */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] rounded-full bg-gradient-to-tr from-pink-500/10 via-purple-600/10 to-indigo-500/10 blur-[130px] pointer-events-none animate-pulse duration-[8000s]"></div>
+      
+      {/* Decorative fine mesh style grid purely as visual backdrop */}
+      <div 
+        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage: `radial-gradient(#ffffff 1px, transparent 1px)`,
+          backgroundSize: '24px 24px',
+        }}
+      ></div>
 
-      <div className="max-w-2xl w-full relative z-10 text-center">
-        {/* Animated warning lock node */}
+      <div className="max-w-lg w-full relative z-10">
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="inline-flex items-center justify-center p-5 rounded-[32px] bg-red-500/10 border border-red-500/20 mb-8 shadow-inner relative"
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="backdrop-blur-xl bg-white/[0.02] border border-white/[0.08] rounded-[40px] p-8 md:p-12 shadow-2xl relative overflow-hidden text-center"
         >
-          <div className="absolute inset-0 rounded-[32px] bg-red-500/5 animate-ping opacity-75"></div>
-          <ShieldAlert className="w-12 h-12 text-red-500 relative z-10 animate-pulse" />
-        </motion.div>
+          {/* Subtle gold-pink top border glow */}
+          <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-pink-500/30 to-transparent"></div>
 
-        {/* Display Heading */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.8 }}
-        >
-          <h1 className="text-3xl md:text-5xl font-black text-white mb-6 uppercase tracking-tight leading-tight">
-            Website Tạm Dừng Hoạt Động
+          {/* Animated Glowing Icon Container */}
+          <div className="mb-8 inline-flex relative">
+            <motion.div
+              animate={{ 
+                scale: [1, 1.05, 1],
+                opacity: [0.8, 1, 0.8] 
+              }}
+              transition={{ 
+                duration: 3, 
+                repeat: Infinity, 
+                ease: "easeInOut" 
+              }}
+              className="absolute inset-0 bg-pink-500/20 rounded-full blur-xl"
+            ></motion.div>
+            <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500/10 to-purple-600/10 border border-pink-500/30 flex items-center justify-center">
+              <Sparkles className="w-8 h-8 text-pink-400" />
+            </div>
+          </div>
+
+          {/* Eye-catching Heading */}
+          <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white mb-4 uppercase leading-tight bg-gradient-to-r from-white via-gray-100 to-gray-400 bg-clip-text text-transparent">
+            Website đang tạm dừng hoạt động
           </h1>
-        </motion.div>
 
-        {/* Polished Notice Details */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.8 }}
-          className="space-y-6 text-gray-400 font-medium text-base md:text-lg leading-relaxed mb-10"
-        >
-          <p>
-            Hệ thống website đang thực hiện bảo trì định kỳ và tạm ngừng cung cấp dịch vụ trực tuyến. 
+          {/* Minimalist modern body copy */}
+          <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-sm mx-auto font-medium">
+            Hệ thống đang được nâng cấp để mang lại trải nghiệm tối ưu và nhanh chóng hơn. Rất mong quý khách thông cảm cho sự bất tiện này.
           </p>
-          <div className="inline-block bg-white/5 border border-white/10 px-6 py-3 rounded-2xl text-sm font-semibold text-pink-400">
-            Khóa truy cập: Toàn bộ phân hệ bao gồm module CMS & Admin
-          </div>
-          <p className="text-xs md:text-sm text-gray-500">
-            Xin chân thành cảm ơn sự thông cảm của quý khách. Mọi thắc mắc hoặc yêu cầu hỗ trợ, vui lòng liên hệ qua các kênh thông tin chính thức của chúng tôi.
-          </p>
-        </motion.div>
 
-        {/* Technical Status line purely for design discipline */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.8 }}
-          className="border-t border-white/5 pt-8 flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12"
-        >
-          <div className="flex items-center gap-3 text-xs uppercase tracking-widest text-gray-500 font-bold">
-            <Clock size={16} className="text-gray-400" />
-            <span>Trạng thái: Tạm dừng</span>
-          </div>
-          <div className="flex items-center gap-3 text-xs uppercase tracking-widest text-gray-500 font-bold">
-            <Globe size={16} className="text-gray-400" />
-            <span>Tất cả các module khóa</span>
+          {/* Minimal footer line */}
+          <div className="mt-8 pt-8 border-t border-white/[0.04] flex items-center justify-center">
+            <span className="text-[11px] font-mono tracking-[0.2em] text-pink-500/60 uppercase font-semibold">
+              Sẽ hoạt động trở lại sớm nhất
+            </span>
           </div>
         </motion.div>
       </div>
