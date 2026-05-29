@@ -11,8 +11,7 @@ export default function App() {
         className="text-center"
       >
         <h1 className="text-2xl md:text-4xl font-black tracking-tight text-white uppercase bg-gradient-to-r from-white via-gray-100 to-gray-400 bg-clip-text text-transparent">
-          website đang tạm dừng hoạt động
-        </h1>
+                  </h1>
       </motion.div>
     </div>
   );
