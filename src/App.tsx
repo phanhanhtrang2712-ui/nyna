@@ -20,6 +20,7 @@ import ScrollToTop from './components/ScrollToTop';
 
 // Prefetch
 import { prefetchAppCore } from './services/prefetch';
+import { initSupabaseConfigAtRuntime } from './lib/supabase';
 
 const WrappedRoute = () => (
   <MainLayout>
@@ -29,8 +30,10 @@ const WrappedRoute = () => (
 
 export default function App() {
   useEffect(() => {
-    // Warm application cache immediate on load
-    prefetchAppCore();
+    // Dynamically retrieve Supabase client configuration then prefetch data
+    initSupabaseConfigAtRuntime().finally(() => {
+      prefetchAppCore();
+    });
 
     // Initialize premium Flash-like silky-smooth inertial scroll engine (Lenis)
     const lenis = new Lenis({
